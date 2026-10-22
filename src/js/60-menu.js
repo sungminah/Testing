@@ -15,7 +15,7 @@ function monRow(m, extra) { return `<div class="item">${cvThumb(m.sp, m.form)}<d
 function* mainMenu() {
   for (; ;) {
     const pick_ = yield* modalRun(done => {
-      const items = [['journal', '📜 Nhật ký'], ['party', '🐾 Đội hình'], ['bag', '🎒 Túi đồ'], ['box', '📦 Hộp'], ['sea', '🧭 Hải đồ'], ['dex', '📖 Sổ Tideling'], ['prog', '📊 Tiến độ học'], ['save', '💾 Lưu'], ['opt', '⚙ Cài đặt']];
+      const items = [['journal', '📜 Nhật ký'], ['party', '🐾 Đội hình'], ['bag', '🎒 Túi đồ'], ['box', '📦 Hộp'], ['sea', '🧭 Hải đồ'], ['dex', '📖 Sổ Tideling'], ['prog', '📊 Tiến độ học'], ['review', '🔁 Ôn tập'], ['save', '💾 Lưu'], ['opt', '⚙ Cài đặt']];
       showModal(modalCard(`<h2>Menu</h2><div class="list">${items.map(([k, t]) => `<button class="btn g" data-k="${k}" style="text-align:left">${t}</button>`).join('')}</div><div class="foot"><button class="btn" data-k="close">Đóng (Esc)</button></div>`));
       $$('[data-k]', modalEl).forEach(b => b.addEventListener('click', () => done(b.dataset.k)));
     }, (e, done) => { if (e.key === 'Escape' || e.key === 'm' || e.key === 'x') { done('close'); return true; } return false; });
@@ -27,6 +27,7 @@ function* mainMenu() {
     else if (pick_ === 'sea') { const r = yield* scrSea(); if (r) { yield* afterSea(r); return; } }
     else if (pick_ === 'dex') yield* scrDex();
     else if (pick_ === 'prog') yield* scrProgress();
+    else if (pick_ === 'review') yield* scrReview();
     else if (pick_ === 'save') yield* scrSave();
     else if (pick_ === 'opt') { const r = yield* scrOpt(); if (r === 'reset') return; }
   }
@@ -115,6 +116,24 @@ function* scrProgress() {
     wireBack(done);
   }, escBack);
 }
+/* Ôn tập ngoài trận: câu hay sai (Leitner) hoặc tổng hợp các chương đã mở */
+function weakIds() { return Object.entries(S.leit).filter(([, r]) => r.wrong > 0 && r.b < 4).sort((a, b) => b[1].wrong - a[1].wrong || a[1].b - b[1].b).map(([id]) => id); }
+function* scrReview() {
+  const weak = weakIds();
+  const mode = yield* modalRun(done => {
+    showModal(modalCard(`<h2>🔁 Ôn tập</h2><div class="vi" style="margin-bottom:8px">Luyện lại không cần đánh nhau. Mỗi câu đúng được thưởng 3 💎 (tối đa 30 mỗi lượt).</div>
+      <div class="list"><button class="btn g" data-k="weak" style="text-align:left" ${weak.length ? '' : 'disabled'}>🎯 Ôn câu hay sai <span class="vi">(${weak.length} câu cần ôn)</span></button>
+      <button class="btn g" data-k="mix" style="text-align:left">🎲 Tổng hợp 10 câu <span class="vi">(các chương đã mở)</span></button>
+      <button class="btn g" data-k="cur" style="text-align:left">📚 10 câu của chương hiện tại <span class="vi">(${chLabel(S.cur)})</span></button></div>${backBtn}`));
+    wireBack(done); $$('[data-k]:not([data-k=back])', modalEl).forEach(b => b.addEventListener('click', () => done(b.dataset.k)));
+  }, escBack);
+  if (mode === 'back' || mode == null) return;
+  let ok = 0, n = 0;
+  if (mode === 'weak') { for (const id of weak.slice(0, 10)) { const q = Quiz.byId(id); if (!q) continue; const r = yield* Quiz.show(q, {}); n++; if (r.ok) ok++; } }
+  else for (let k = 0; k < 10; k++) { const r = yield* Quiz.ask({ area: 'drill', ch: mode === 'cur' ? S.cur : ri(S.maxCh + 1), noRepeat: false }); n++; if (r.ok) ok++; }
+  const gain = Math.min(30, ok * 3); S.pearls += gain; save();
+  yield* modalRun(done => { showModal(modalCard(`<h2>Kết quả ôn tập</h2><div class="box" style="font-size:20px;text-align:center"><b>${ok}/${n}</b> câu đúng · +${gain} 💎</div><div class="vi">${ok === n ? 'Hoàn hảo! 🎉' : 'Những câu sai sẽ được hỏi lại sau trong trận đấu và lần ôn tập tới.'}</div>${backBtn}`)); wireBack(done); }, escBack);
+}
 function* scrSave() {
   const ok = save();
   yield* modalRun(done => { showModal(modalCard(`<h2>💾 Lưu game</h2><p>${ok ? 'Đã lưu vào trình duyệt này.' : 'Không lưu được (trình duyệt chặn bộ nhớ).'}</p>${backBtn}`)); wireBack(done); }, escBack);
@@ -124,11 +143,13 @@ function* scrOpt() {
     const r = yield* modalRun(done => {
       showModal(modalCard(`<h2>⚙ Cài đặt</h2><div class="list">
         <button class="btn g" data-k="snd" style="text-align:left">🔊 Âm thanh: <b>${S.opt.sound ? 'Bật' : 'Tắt'}</b></button>
+        <button class="btn g" data-k="music" style="text-align:left">🎵 Nhạc nền: <b>${S.opt.music === 0 ? 'Tắt' : 'Bật'}</b></button>
         <button class="btn g" data-k="furi" style="text-align:left">ふ Furigana: <b>${S.opt.furi === 'all' ? 'Luôn hiện' : 'Tự động (giảm dần theo chương)'}</b></button>
         <button class="btn g" data-k="reset" style="text-align:left;color:#b33">🗑 Xoá dữ liệu & chơi lại từ đầu</button></div>${backBtn}`));
       wireBack(done); $$('[data-k]:not([data-k=back])', modalEl).forEach(b => b.addEventListener('click', () => done(b.dataset.k)));
     }, escBack);
-    if (r === 'snd') { S.opt.sound = S.opt.sound ? 0 : 1; applyOpts(); }
+    if (r === 'music') { S.opt.music = S.opt.music === 0 ? 1 : 0; applyOpts(); }
+    else if (r === 'snd') { S.opt.sound = S.opt.sound ? 0 : 1; applyOpts(); }
     else if (r === 'furi') { S.opt.furi = S.opt.furi === 'all' ? 'auto' : 'all'; applyOpts(); }
     else if (r === 'reset') {
       const c = yield* modalRun(done => { showModal(modalCard(`<h2>Xoá dữ liệu?</h2><p>Mọi tiến độ sẽ mất.</p><div class="foot"><button class="btn g" data-k="no">Huỷ</button><button class="btn" style="background:#c33" data-k="yes">Xoá</button></div>`)); $$('[data-k]', modalEl).forEach(b => b.addEventListener('click', () => done(b.dataset.k))); });

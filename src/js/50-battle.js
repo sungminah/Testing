@@ -124,7 +124,7 @@ function* battleIntro(o) {
   if (!wild) { Fx.vs = 'VS'; Fx.vsName = o.name; Fx.vsT = FRAME; Snd.tone(330, .2, 'square', .05); yield 40; Fx.vs = ''; } else yield 6;
 }
 function* battle(o) {
-  yield* battleIntro(o);
+  yield* battleIntro(o); Snd.music('battle');
   B.on = true; B.slide = 0; B.appear = 1; B.sparks = []; B.fx = []; B.floats = []; B.rings = []; B.lvlFx = 0; B.kind = o.kind; B.area = o.area; B.foes = o.foes.slice(); B.fi = 0; B.foe = B.foes[0]; B.ball = null;
   B.me = S.party.find(m => m.hp > 0); B.hp.foe = B.foe.hp; B.hp.me = B.me.hp; B.sink = { me: 0, foe: 0 }; B.shake = { me: 0, foe: 0 }; B.flash = { me: 0, foe: 0 };
   S.seen[B.foe.sp] = 1; Wd.mode = 'battle'; B.hudKey = '';
@@ -223,7 +223,7 @@ function* battle(o) {
       B.me = cand[r]; B.hp.me = B.me.hp; B.hudKey = ''; yield* note(`Đi nào, ${spName(B.me.sp, B.me.form)}!`, 26);
     }
   }
-  yield* fade(1, 14);
+  yield* fade(1, 14); Snd.music('world');
   B.on = false; B.foe = B.me = null; B.ball = null; B.slide = 1; Wd.mode = 'world'; clear2(); $('#hud').innerHTML = '';
   $('#dlg').hidden = true; $('#bmenu').hidden = true; save();
   yield 4; yield* fade(0, 14);

@@ -13,7 +13,7 @@ function newState() {
 }
 function save() { try { localStorage.setItem(SAVE_KEY, JSON.stringify(S)); return true; } catch (e) { return false; } }
 function loadSave() { try { const j = localStorage.getItem(SAVE_KEY); if (!j) return null; const s = JSON.parse(j); return s && s.v === 1 ? Object.assign(newState(), s) : null; } catch (e) { return null; } }
-function applyOpts() { Snd.on = !!S.opt.sound; FURI_MODE = S.opt.furi === 'all' ? 'all' : 'auto'; }
+function applyOpts() { Snd.on = !!S.opt.sound; Snd.musicOn = S.opt.music !== 0; Snd.music(); FURI_MODE = S.opt.furi === 'all' ? 'all' : 'auto'; }
 
 /* ---- modal DOM ---- */
 const modalEl = $('#modal');

@@ -94,3 +94,36 @@ const Snd = {
   lvl() { [523, 659, 784, 1046].forEach((f, i) => this.tone(f, .12, 'square', .04, i * .09)); },
   tap() { this.tone(440, .03, 'square', .02); }
 };
+
+/* ---- nhạc nền chiptune tạo bằng WebAudio (vòng lặp ngắn; tắt được trong Cài đặt) ---- */
+const MUS = {
+  world: { bpm: 92, mel: [0, 2, 4, 2, 5, 4, 2, 0, 2, 4, 5, 7, 5, 4, 2, -1], bass: [0, 0, 3, 3, 4, 4, 3, 3], scale: [262, 294, 330, 392, 440, 523, 587, 659, 784, 880], wave: 'triangle' },
+  battle: { bpm: 150, mel: [0, 3, 5, 3, 0, 3, 6, 3, 0, 3, 5, 7, 6, 5, 3, -1], bass: [0, 0, 0, 0, 2, 2, 3, 3], scale: [220, 262, 294, 330, 392, 440, 523, 587, 659, 784], wave: 'square' }
+};
+Snd.musicOn = true; Snd.want = 'world'; Snd.unlocked = false; Snd._m = { step: 0, next: 0, timer: null, mode: null };
+Snd.stopMusic = function () { if (this._m.timer) { clearInterval(this._m.timer); this._m.timer = null; } this._m.mode = null; };
+Snd.music = function (mode) {
+  if (mode) this.want = mode;
+  if (!this.unlocked || !this.on || !this.musicOn) { this.stopMusic(); return; }
+  try {
+    if (!this.ac) this.ac = new (window.AudioContext || window.webkitAudioContext)();
+    if (this.ac.state === 'suspended') this.ac.resume();
+    if (this._m.mode === this.want && this._m.timer) return;
+    this._m.mode = this.want; this._m.step = 0; this._m.next = this.ac.currentTime + .1;
+    if (!this._m.timer) this._m.timer = setInterval(() => this._tick(), 100);
+  } catch (e) { /* không có audio */ }
+};
+Snd._note = function (f, t, d, type, v) {
+  try { const ac = this.ac, o = ac.createOscillator(), g = ac.createGain(); o.type = type; o.frequency.value = f; g.gain.setValueAtTime(v, t); g.gain.exponentialRampToValueAtTime(.0001, t + d); o.connect(g); g.connect(ac.destination); o.start(t); o.stop(t + d + .02); } catch (e) { /* bỏ qua */ }
+};
+Snd._tick = function () {
+  const m = this._m, P = MUS[m.mode]; if (!P || !this.ac) return;
+  const dt = 60 / P.bpm / 2;
+  while (m.next < this.ac.currentTime + .35) {
+    const s = m.step % 16, note = P.mel[s];
+    if (note >= 0) this._note(P.scale[note], m.next, dt * .9, P.wave, .02);
+    if (s % 2 === 0) this._note(P.scale[P.bass[(m.step >> 1) % P.bass.length]] / 2, m.next, dt * 1.8, 'square', .01);
+    m.next += dt; m.step++;
+  }
+};
+['pointerdown', 'keydown'].forEach(ev => document.addEventListener(ev, () => { if (!Snd.unlocked) { Snd.unlocked = true; Snd.music(); } }, { passive: true }));

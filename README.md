@@ -41,13 +41,15 @@ Giao diện tiếng Việt, giáo trình **Minna no Nihongo I (bài 1–25)**, �
 | 7 · Đảo Trăng | 20–22 | thể thường, ～と思います, ～と言いました, mệnh đề bổ nghĩa |
 | 8 · Đảo Sao | 23–25 | ～とき, ～と, くれる/あげる/もらう, ～たら |
 
-- **Câu hỏi tĩnh** (`src/js/11-questions.js` + `13-questions2.js`): 242 câu cho cả 25 bài (mỗi bài ≥ 6 câu), loại `g` ngữ pháp · `p` trợ từ · `h` chọn dạng đúng · `r` đọc hiểu · `o` sắp xếp. Độ khó d1–d3.
+- **Câu hỏi tĩnh** (`src/js/11-questions.js` + `13`, `14`, `15`): 313 câu cho cả 25 bài + chương mở đầu (mỗi bài ≥ 8 câu), loại `g` ngữ pháp · `p` trợ từ · `h` chọn dạng đúng · `r` đọc hiểu · `o` sắp xếp. Độ khó d1–d3.
 - **Câu hỏi sinh động** (`src/js/12-dyn.js`, mỗi câu có khoá xác định để Leitner hỏi lại đúng câu đó): `m` chữ cái (hiragana ⇄ katakana ⇄ romaji, có nhóm chữ dễ nhầm さ/ち, シ/ツ…) · `k` đọc / viết kanji từ 359 từ vựng · `v` nhóm từ (cái nào thuộc / không thuộc "のみもの", "のりもの"…) · `n` đọc **tiền** (300 さんびゃく, 8000 はっせん, 35,000…) và **giờ** (4 よじ, 7 しちじ, 9 くじ, 10 じゅっぷん…).
 - **Độ khó theo vùng** (`AREA_DL`): thị trấn/luyện tập dễ → đường mòn → phòng trainer → boss khó nhất; chương sau dịch dần sang khó hơn. **Chương 1: d3 chỉ xuất hiện ở boss.** Trọng số chọn câu: câu chưa hỏi ×3, câu sai nhiều được ưu tiên, bài của chương hiện tại ×3, không lặp câu vừa hỏi.
 - **Furigana tự động** từ bảng từ vựng (`10-vocab.js`): chương 1–3 hiện cho mọi chữ Hán; từ chương 4 trở đi những từ học đã lâu dần được ẩn (có thể ép "Luôn hiện" trong Cài đặt). Ghi rõ cách đọc bằng `{漢字|よみ}` khi cần.
 - **Tideling: 150 loài = 3 hệ × 50** (Hệ Thú 🐾, Hệ Năng lực 🔮, Hệ Nguyên tố 🔥; 50 loại trái cây), mỗi loài **2 dạng** (tiến hoá ở cấp 12 + 3×chương), vẽ bằng thủ tục. Mỗi chương mở một nhóm 16–17 loài mới; loài chưa gặp hiện bóng đen trong **Sổ Tideling**. Khắc chế: Thú > Năng lực > Nguyên tố > Thú. Mỗi hệ có hiệu ứng chiêu riêng (vuốt cào / sóng tâm / quả cầu lửa-nước-lá-sét), số sát thương bay lên và gợi ý khắc chế ngay trong menu trận.
 - **Hải đồ** (MENU → Hải đồ, SVG hình vương miện, 9 đảo): mở khoá tuyến tính (xong đảo n−1 mới mở đảo n), chỉ đi được sang đảo liền kề **hoặc qua lối tắt**. 5 lối tắt (🌳 đấu lính canh · 🛟 tìm "Dây phao" ở Đảo San Hô · 🪢 đủ 25 loài trong sổ · 🌊 cấp trung bình ≥ 30) chỉ dùng được khi **cả hai đảo đã mở** và đủ điều kiện.
-- Menu: Nhật ký, Đội hình, Túi đồ, Hộp, Hải đồ, Sổ Tideling, **Tiến độ học** (hộp Leitner, tỉ lệ đúng theo loại, câu hay sai), Lưu, Cài đặt.
+- Menu: Nhật ký, Đội hình, Túi đồ, Hộp, Hải đồ, Sổ Tideling, **Tiến độ học** (hộp Leitner, tỉ lệ đúng theo loại, câu hay sai), **Ôn tập** (luyện lại câu hay sai hoặc 10 câu tổng hợp, không cần đánh nhau; mỗi câu đúng +3 💎), Lưu, Cài đặt (âm thanh, nhạc nền, furigana).
+- **Kết thúc game:** thắng boss cuối (Đảo Sao) → màn hình chúc mừng kèm thống kê hành trình; sau đó vẫn chơi tiếp để bắt đủ Tideling, mở hết lối tắt.
+- **Nhạc nền** chiptune tạo bằng WebAudio (khác nhau khi đi dạo / vào trận), tắt được trong Cài đặt.
 
 ## Cấu trúc & build
 
@@ -62,6 +64,7 @@ src/js/11-questions.js    kho câu hỏi tĩnh
 src/js/12-dyn.js          câu hỏi sinh động
 src/js/13-questions2.js   câu hỏi bổ sung bài 10–25
 src/js/14-questions0.js   câu hỏi quy tắc romaji (chương mở đầu)
+src/js/15-questions3.js   câu hỏi bổ sung bài 12–25 + câu sắp xếp
 src/js/39-islands.js      bản đồ riêng cho cả 9 đảo (đảo 3–8 dựng bởi tools/gen_islands.py, có tự kiểm tra đường đi)
 src/js/20-state.js        trạng thái, lưu/tải, Tideling của người chơi
 src/js/21-quiz.js         chọn câu (độ khó + Leitner), giao diện hỏi, bảng giải thích
@@ -91,10 +94,10 @@ Sau khi sửa `src/`, nhớ chạy `./build.sh` và commit cả `docs/index.html
 2. **Bot tự chơi** (BFS trên bản đồ thật, bấm đúng nút DOM, **cố tình trả lời sai ~35%**): chơi từ đầu, nhận Tideling, học với thầy, bắt Tideling, đánh trainer + boss, ra khơi bằng Hải đồ; `--full` chơi tiếp qua **cả 9 chương**. Kiểm tra không lỗi JS, không kẹt, có câu được hỏi lại sau khi sai.
 3. Hải đồ & lối tắt (điều kiện), lưu/tải, trạm y tế, cửa hàng, nhặt vật phẩm, tiến hoá, whiteout, và giao diện điện thoại (có D-pad, không cuộn ngang). Ảnh chụp màn hình lưu ở `test/out/`.
 
-## Hạn chế hiện tại / việc tiếp theo
+## Hạn chế còn lại
 
-- Kho câu hỏi tĩnh có 250 câu (đã vượt mục tiêu ~200), nhưng các bài 20–25 vẫn mỏng hơn bài đầu về số loại câu (chưa có nhiều câu sắp xếp `o`). Thêm câu: dùng `Q(...)` trong `11-questions.js` hoặc `13-questions2.js` (đáp án đúng viết đầu tiên, game tự xáo trộn) — bài kiểm thử dữ liệu sẽ báo nếu thiếu furigana/giải thích.
-- Bảng từ vựng là từ vựng Minna I (359 từ) nên số chữ Hán (~350) vượt "~100 chữ N5" — chưa lọc riêng danh sách kanji N5 chính thức; bảng Hán Việt mới có 163 chữ.
-- Cả 9 đảo đã có bản đồ riêng (thị trấn, đường mòn, phòng boss) với chủ đề khác nhau: bến cảng, rừng sáng sớm, làng kênh rạch, đồng hoa, vách đá & hải đăng, cao nguyên & cầu, bãi biển, đền & hồ, thành phố. Riêng 3 căn nhà (y tế, cửa hàng, nhà dân) vẫn dùng chung bố cục; các bản đồ đảo 3–8 mới ở mức "khung chủ đề" (ít chi tiết hơn 3 đảo đầu) và chưa chơi thử bằng tay.
-- Âm thanh mới có hiệu ứng (WebAudio), chưa có nhạc nền.
-- Trên điện thoại dọc, khung game giữ tỉ lệ 3:2 nên khá nhỏ (xoay ngang sẽ lớn hơn).
+- Câu hỏi do mình tự soạn, chưa có người bản ngữ rà soát; nếu thấy câu nào có hai đáp án đúng hoặc đáp án sai, hãy sửa trong `src/js/1x-questions*.js`.
+- Bảng từ vựng là từ vựng Minna I (359 từ) nên số chữ Hán (~350) vượt "~100 chữ N5"; chưa lọc riêng danh sách kanji N5 chính thức. Bảng Hán Việt đã phủ đủ các chữ này.
+- Các đảo 3–8 có bản đồ riêng nhưng ở mức "khung chủ đề" (ít chi tiết trang trí hơn 3 đảo đầu); 3 căn nhà (y tế, cửa hàng, nhà dân) dùng chung bố cục ở mọi đảo.
+- Chưa có phần nghe (audio tiếng Nhật) trong câu hỏi.
+- Trên điện thoại dọc, khung game giữ tỉ lệ 3:2 nên khá nhỏ (có gợi ý xoay ngang).

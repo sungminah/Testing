@@ -191,8 +191,25 @@ function* fightTrainer(n) {
     yield* say(n.name, `Bạn thắng rồi! Nhận ${gain} 💎 và Huy hiệu ${c.vi}.`, 'おめでとう！');
     yield* say('', i < CH.length - 1 ? `Hoàn thành ${chLabel(i)}! Đảo ${CH[next].vi} đã mở khoá — mở Hải đồ (MENU) để ra khơi.` : 'Bạn đã chinh phục cả Quần đảo San Hô! Chúc mừng thuyền trưởng!');
     Snd.lvl();
+    if (i === CH.length - 1) yield* ending();
   } else yield* say(n.name, `Bạn mạnh thật! Nhận ${gain} 💎.`, 'つよいですね！');
   save();
+}
+function* ending() {
+  S.flags.ending = 1; Snd.lvl(); save();
+  yield* fade(1, 24);
+  const st = S.stats, acc = st.n ? Math.round(st.ok / st.n * 100) : 0, hero = HEROES[S.hero || 0];
+  const kn = new Set(); VOC.forEach(v => [...v.w].forEach(c => { if (isKanji(c)) kn.add(c); }));
+  yield* modalRun(done => {
+    showModal(modalCard(`<h2 style="text-align:center;font-size:24px">🏆 Hoàn thành Coral Crown N5!</h2>
+      <div class="box" style="text-align:center">Chúc mừng <b>${hero.name}</b>! Bạn đã chinh phục cả 9 đảo của Quần đảo San Hô và học xong chương trình Minna no Nihongo I (bài 1–25).<br><span style="font-size:22px">おめでとうございます！</span></div>
+      <h3>Hành trình của bạn</h3>
+      <div class="kv"><div>Câu hỏi đã trả lời</div><b>${st.n}</b><div>Tỉ lệ đúng</div><b>${acc}%</b><div>Tideling trong Sổ</div><b>${caughtCount()}/150</b><div>Huy hiệu</div><b>${S.badges.length}/${CH.length}</b><div>Chữ Hán trong bảng từ vựng</div><b>${kn.size}</b><div>Câu đang chờ ôn lại</div><b>${S.pend.length}</b></div>
+      <div class="box vi" style="margin-top:10px">Vẫn còn nhiều việc để làm: bắt đủ 150 Tideling, mở hết lối tắt, và vào <b>MENU → Ôn tập</b> để luyện lại các câu hay sai. Học tiếp N4 nhé! 頑張って！</div>
+      <div class="foot"><button class="btn" data-k="back">Tiếp tục khám phá ⏎</button></div>`));
+    wireBack(done);
+  }, escBack);
+  yield* fade(0, 24);
 }
 function* trainerSpot(n, k) {
   n.alert = true; Snd.tap(); yield 24; n.alert = false;

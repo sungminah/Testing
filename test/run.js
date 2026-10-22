@@ -94,6 +94,21 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
   ok(evo.form === 2 && evo.out.some(t => /tiến hoá/.test(t)), 'tiến hoá ở cấp ' + evo.lv + ': ' + evo.out.join(' | '));
   await page.evaluate('(()=>{ G.S.party.forEach(m=>m.hp=0); G.run(()=>whiteout()); })()'); await drive('!G.busy()');
   ok(await page.evaluate('G.S.party.every(m=>m.hp>0) && G.S.map==="i2_town"'), 'whiteout: hồi phục và về thị trấn');
+  console.log('3e) Ôn tập, màn hình kết thúc, nhạc nền');
+  const until2 = async c => page.evaluate(`(()=>{ for(let i=0;i<4000;i++){ if(${c}) return true; G.step(1);} return false; })()`);
+  await page.evaluate('(()=>{ loadMap("i1_town", 9, 6, "d"); G.S.pearls=0; G.run(()=>scrReview()); })()'); await until2(`!!document.querySelector('[data-k="mix"]')`);
+  await page.click('[data-k="mix"]');
+  for (let k = 0; k < 10; k++) { await until2(`G.ui()==='quiz'`); await page.evaluate(`document.querySelector('.ch[data-i="'+G.Quiz.cur.cidx+'"]').click()`); await until2(`G.ui()==='explain'`); await page.click('#qnext'); }
+  await until2(`/Kết quả ôn tập/.test(document.getElementById('modal').textContent)`);
+  ok(await page.evaluate('G.S.pearls===30'), 'ôn tập: 10 câu đúng → +30 ngọc trai');
+  await page.click('[data-k="back"]'); await until2('!G.busy()');
+  await page.evaluate('G.run(()=>ending())'); await until2(`/Hoàn thành Coral Crown N5/.test(document.getElementById('modal').textContent)`);
+  await page.screenshot({ path: path.join(OUT, '60-ending.png') });
+  await page.click('[data-k="back"]'); await until2('!G.busy()');
+  ok(await page.evaluate('!!G.S.flags.ending'), 'màn hình kết thúc hiện và đóng được');
+  const mus = await page.evaluate('(()=>{ Snd.unlocked=true; Snd.musicOn=true; Snd.on=true; Snd.music("battle"); const a=!!Snd._m.timer && Snd._m.mode==="battle"; Snd.music("world"); const b=Snd._m.mode==="world"; Snd.stopMusic(); return a&&b&&!Snd._m.timer; })()');
+  ok(mus, 'nhạc nền bật/đổi bản/tắt không lỗi');
+  ok(await page.evaluate('G.errors.length===0'), 'không lỗi JS sau các thao tác trên');
   if (FULL) {
     console.log('4) Bot chơi tiếp qua cả 9 chương');
     await page.evaluate(`window.__bot=(${botFactory.toString()})({wrongRate:0.35})`);

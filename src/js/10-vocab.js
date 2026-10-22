@@ -395,8 +395,45 @@ const KANJI_RAW = `
 動|động|chuyển động|仕|sĩ|làm việc|歌|ca|hát|音|âm|âm thanh|楽|nhạc|nhạc, vui|映|ánh|chiếu|画|họa|tranh
 旅|lữ|chuyến đi|試|thí|thử|験|nghiệm|kiểm nghiệm|薬|dược|thuốc|熱|nhiệt|nóng, sốt|思|tư|nghĩ|言|ngôn|lời nói
 `;
+const KANJI_RAW2 = `
+研|nghiên|nghiên cứu|究|cứu|nghiên cứu|方|phương|hướng, vị|願|nguyện|xin, mong|村|thôn|làng|元|nguyên|gốc, khoẻ
+帳|trướng|sổ|刺|thích|đâm|鍵|kiện|chìa khóa|計|kế|đo, tính|傘|tản|cái ô|鞄|bào|cái cặp
+靴|ngoa|giày|机|kỷ|cái bàn|椅|ỷ|cái ghế|産|sản|sinh ra|議|nghị|bàn bạc|受|thụ|nhận
+付|phó|gắn vào|玄|huyền|huyền|関|quan|cửa ải|売|mại|bán|場|trường|nơi chốn|洗|tẩy|rửa
+働|động|làm việc|勉|miễn|cố gắng|強|cường|mạnh|終|chung|kết thúc|郵|bưu|thư từ|便|tiện|tiện lợi
+局|cục|cục, sở|図|đồ|bản đồ, hình|館|quán|tòa nhà|美|mỹ|đẹp|術|thuật|kỹ thuật|飛|phi|bay
+機|cơ|máy|船|thuyền|tàu thuyền|鉄|thiết|sắt|幹|cán|thân, trục|線|tuyến|đường, tuyến|自|tự|tự mình
+転|chuyển|xoay, lăn|歩|bộ|đi bộ|彼|bỉ|anh ấy|誕|đản|sinh ra|飯|phạn|cơm|卵|noãn|trứng
+野|dã|cánh đồng|菜|thái|rau|果|quả|quả, kết quả|物|vật|đồ vật|牛|ngưu|bò|乳|nhũ|sữa
+紙|chỉ|giấy|公|công|công cộng|園|viên|vườn|吸|hấp|hít, hút|撮|toát|chụp|切|thiết|cắt
+送|tống|gửi|貸|thải|cho mượn|借|tá|mượn|習|tập|học tập|箸|trứ|đũa|荷|hà|hành lý
+符|phù|vé, dấu hiệu|悪|ác|xấu|暑|thử|nóng|寒|hàn|lạnh|冷|lãnh|lạnh|難|nan|khó
+易|dị|dễ|低|đê|thấp|面|diện|mặt, bề mặt|味|vị|vị|忙|mang|bận|桜|anh|hoa anh đào
+町|đinh|phố, thị trấn|寮|liêu|ký túc xá|活|hoạt|sống động|綺|ỷ|đẹp|麗|lệ|đẹp|静|tĩnh|yên tĩnh
+賑|chẩn|náo nhiệt|有|hữu|có|親|thân|thân thiết|暇|hạ|rảnh rỗi|利|lợi|lợi ích|素|tố|giản dị
+敵|địch|kẻ địch|寺|tự|chùa|好|hiếu|thích|嫌|hiềm|ghét|料|liệu|nguyên liệu|理|lý|lý lẽ
+絵|hội|tranh|字|tự|chữ|漢|hán|Hán|約|ước|hẹn|束|thúc|bó|用|dụng|dùng
+隣|lân|bên cạnh|近|cận|gần|間|gian|giữa, khoảng|鳥|điểu|chim|馬|mã|ngựa|箱|tương|cái hộp
+庭|đình|vườn|供|cung|cung cấp|封|phong|phong bì|筒|đồng|ống|東|đông|phía đông|京|kinh|kinh đô
+枚|mai|tờ (vật mỏng)|台|đài|bệ, chiếc|簡|giản|đơn giản|単|đơn|đơn|遠|viễn|xa|速|tốc|nhanh
+遅|trì|chậm, muộn|雪|tuyết|tuyết|祭|tế|lễ hội|欲|dục|muốn|遊|du|chơi|泳|vịnh|bơi
+迎|nghênh|đón|疲|bì|mệt|結|kết|kết, nối|婚|hôn|kết hôn|喫|khiết|ăn uống|消|tiêu|tắt, xoá
+開|khai|mở|閉|bế|đóng|急|cấp|gấp, vội|待|đãi|đợi|持|trì|cầm, mang|取|thủ|lấy
+伝|truyền|truyền đạt|呼|hô|gọi|窓|song|cửa sổ|早|tảo|sớm|立|lập|đứng|座|tọa|ngồi
+使|sử|dùng|置|trí|đặt|作|tác|làm, chế tạo|知|tri|biết|住|trú|ở, sống|乗|thừa|đi (xe), lên
+浴|dục|tắm|押|áp|ấn, đẩy|若|nhược|trẻ|広|quảng|rộng|短|đoản|ngắn|暗|ám|tối
+髪|phát|tóc|顔|nhan|khuôn mặt|歯|xỉ|răng|覚|giác|nhớ, thức|忘|vong|quên|払|phất|trả (tiền)
+返|phản|trả lại|心|tâm|tim, tâm|配|phối|phân phối, lo|風|phong|gió|邪|tà|tà|弾|đàn|đàn, búng
+集|tập|tập hợp|捨|xả|vứt|運|vận|vận chuyển|予|dự|trước, dự|趣|thú|thú vị, vẻ|登|đăng|leo
+泊|bạc|trọ lại|掃|tảo|quét|除|trừ|trừ bỏ|濯|trạc|giặt|練|luyện|luyện tập|眠|miên|ngủ
+弱|nhược|yếu|富|phú|giàu|士|sĩ|sĩ, người|去|khứ|đi qua|降|giáng|rơi, xuống|価|giá|giá cả
+意|ý|ý kiến|着|trước|mặc, đến|履|lý|mang (giày)|被|bị|mặc, đội|掛|quải|treo, đeo|帽|mạo|mũ
+定|định|định|信|tín|tin|号|hiệu|ký hiệu|橋|kiều|cây cầu|渡|độ|qua, băng|曲|khúc|cong, rẽ
+連|liên|dẫn, nối|案|án|đề án|内|nội|trong|説|thuyết|giải thích|考|khảo|suy nghĩ|通|thông|thông qua
+訳|dịch|dịch|止|chỉ|dừng|留|lưu|lưu lại
+`;
 const KANJI = {};
-KANJI_RAW.trim().replace(/\n/g, '|').split('|').reduce((acc, x, i, arr) => { if (i % 3 === 0 && arr[i + 2] !== undefined) KANJI[x] = { hv: arr[i + 1], m: arr[i + 2] }; return acc; }, 0);
+[KANJI_RAW, KANJI_RAW2].forEach(R => R.trim().replace(/\n/g, '|').split('|').reduce((acc, x, i, arr) => { if (i % 3 === 0 && arr[i + 2] !== undefined && !KANJI[x]) KANJI[x] = { hv: arr[i + 1], m: arr[i + 2] }; return acc; }, 0));
 
 const isKanji = c => /[一-鿿々]/.test(c);
 const isKana = c => /[ぁ-ゖァ-ヺー]/.test(c);

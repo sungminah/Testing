@@ -226,6 +226,39 @@ const Snd = {
   tap() { this.tone(440, .03, 'square', .02); }
 };
 
+/* ---- nhạc nền chiptune tạo bằng WebAudio (vòng lặp ngắn; tắt được trong Cài đặt) ---- */
+const MUS = {
+  world: { bpm: 92, mel: [0, 2, 4, 2, 5, 4, 2, 0, 2, 4, 5, 7, 5, 4, 2, -1], bass: [0, 0, 3, 3, 4, 4, 3, 3], scale: [262, 294, 330, 392, 440, 523, 587, 659, 784, 880], wave: 'triangle' },
+  battle: { bpm: 150, mel: [0, 3, 5, 3, 0, 3, 6, 3, 0, 3, 5, 7, 6, 5, 3, -1], bass: [0, 0, 0, 0, 2, 2, 3, 3], scale: [220, 262, 294, 330, 392, 440, 523, 587, 659, 784], wave: 'square' }
+};
+Snd.musicOn = true; Snd.want = 'world'; Snd.unlocked = false; Snd._m = { step: 0, next: 0, timer: null, mode: null };
+Snd.stopMusic = function () { if (this._m.timer) { clearInterval(this._m.timer); this._m.timer = null; } this._m.mode = null; };
+Snd.music = function (mode) {
+  if (mode) this.want = mode;
+  if (!this.unlocked || !this.on || !this.musicOn) { this.stopMusic(); return; }
+  try {
+    if (!this.ac) this.ac = new (window.AudioContext || window.webkitAudioContext)();
+    if (this.ac.state === 'suspended') this.ac.resume();
+    if (this._m.mode === this.want && this._m.timer) return;
+    this._m.mode = this.want; this._m.step = 0; this._m.next = this.ac.currentTime + .1;
+    if (!this._m.timer) this._m.timer = setInterval(() => this._tick(), 100);
+  } catch (e) { /* không có audio */ }
+};
+Snd._note = function (f, t, d, type, v) {
+  try { const ac = this.ac, o = ac.createOscillator(), g = ac.createGain(); o.type = type; o.frequency.value = f; g.gain.setValueAtTime(v, t); g.gain.exponentialRampToValueAtTime(.0001, t + d); o.connect(g); g.connect(ac.destination); o.start(t); o.stop(t + d + .02); } catch (e) { /* bỏ qua */ }
+};
+Snd._tick = function () {
+  const m = this._m, P = MUS[m.mode]; if (!P || !this.ac) return;
+  const dt = 60 / P.bpm / 2;
+  while (m.next < this.ac.currentTime + .35) {
+    const s = m.step % 16, note = P.mel[s];
+    if (note >= 0) this._note(P.scale[note], m.next, dt * .9, P.wave, .02);
+    if (s % 2 === 0) this._note(P.scale[P.bass[(m.step >> 1) % P.bass.length]] / 2, m.next, dt * 1.8, 'square', .01);
+    m.next += dt; m.step++;
+  }
+};
+['pointerdown', 'keydown'].forEach(ev => document.addEventListener(ev, () => { if (!Snd.unlocked) { Snd.unlocked = true; Snd.music(); } }, { passive: true }));
+
 /* ---- 05-chapters.js ---- */
 'use strict';
 /* ===== 8 chương = 8 đảo của quần đảo "Coral Crown" (Vương Miện San Hô) ===== */
@@ -731,8 +764,45 @@ const KANJI_RAW = `
 動|động|chuyển động|仕|sĩ|làm việc|歌|ca|hát|音|âm|âm thanh|楽|nhạc|nhạc, vui|映|ánh|chiếu|画|họa|tranh
 旅|lữ|chuyến đi|試|thí|thử|験|nghiệm|kiểm nghiệm|薬|dược|thuốc|熱|nhiệt|nóng, sốt|思|tư|nghĩ|言|ngôn|lời nói
 `;
+const KANJI_RAW2 = `
+研|nghiên|nghiên cứu|究|cứu|nghiên cứu|方|phương|hướng, vị|願|nguyện|xin, mong|村|thôn|làng|元|nguyên|gốc, khoẻ
+帳|trướng|sổ|刺|thích|đâm|鍵|kiện|chìa khóa|計|kế|đo, tính|傘|tản|cái ô|鞄|bào|cái cặp
+靴|ngoa|giày|机|kỷ|cái bàn|椅|ỷ|cái ghế|産|sản|sinh ra|議|nghị|bàn bạc|受|thụ|nhận
+付|phó|gắn vào|玄|huyền|huyền|関|quan|cửa ải|売|mại|bán|場|trường|nơi chốn|洗|tẩy|rửa
+働|động|làm việc|勉|miễn|cố gắng|強|cường|mạnh|終|chung|kết thúc|郵|bưu|thư từ|便|tiện|tiện lợi
+局|cục|cục, sở|図|đồ|bản đồ, hình|館|quán|tòa nhà|美|mỹ|đẹp|術|thuật|kỹ thuật|飛|phi|bay
+機|cơ|máy|船|thuyền|tàu thuyền|鉄|thiết|sắt|幹|cán|thân, trục|線|tuyến|đường, tuyến|自|tự|tự mình
+転|chuyển|xoay, lăn|歩|bộ|đi bộ|彼|bỉ|anh ấy|誕|đản|sinh ra|飯|phạn|cơm|卵|noãn|trứng
+野|dã|cánh đồng|菜|thái|rau|果|quả|quả, kết quả|物|vật|đồ vật|牛|ngưu|bò|乳|nhũ|sữa
+紙|chỉ|giấy|公|công|công cộng|園|viên|vườn|吸|hấp|hít, hút|撮|toát|chụp|切|thiết|cắt
+送|tống|gửi|貸|thải|cho mượn|借|tá|mượn|習|tập|học tập|箸|trứ|đũa|荷|hà|hành lý
+符|phù|vé, dấu hiệu|悪|ác|xấu|暑|thử|nóng|寒|hàn|lạnh|冷|lãnh|lạnh|難|nan|khó
+易|dị|dễ|低|đê|thấp|面|diện|mặt, bề mặt|味|vị|vị|忙|mang|bận|桜|anh|hoa anh đào
+町|đinh|phố, thị trấn|寮|liêu|ký túc xá|活|hoạt|sống động|綺|ỷ|đẹp|麗|lệ|đẹp|静|tĩnh|yên tĩnh
+賑|chẩn|náo nhiệt|有|hữu|có|親|thân|thân thiết|暇|hạ|rảnh rỗi|利|lợi|lợi ích|素|tố|giản dị
+敵|địch|kẻ địch|寺|tự|chùa|好|hiếu|thích|嫌|hiềm|ghét|料|liệu|nguyên liệu|理|lý|lý lẽ
+絵|hội|tranh|字|tự|chữ|漢|hán|Hán|約|ước|hẹn|束|thúc|bó|用|dụng|dùng
+隣|lân|bên cạnh|近|cận|gần|間|gian|giữa, khoảng|鳥|điểu|chim|馬|mã|ngựa|箱|tương|cái hộp
+庭|đình|vườn|供|cung|cung cấp|封|phong|phong bì|筒|đồng|ống|東|đông|phía đông|京|kinh|kinh đô
+枚|mai|tờ (vật mỏng)|台|đài|bệ, chiếc|簡|giản|đơn giản|単|đơn|đơn|遠|viễn|xa|速|tốc|nhanh
+遅|trì|chậm, muộn|雪|tuyết|tuyết|祭|tế|lễ hội|欲|dục|muốn|遊|du|chơi|泳|vịnh|bơi
+迎|nghênh|đón|疲|bì|mệt|結|kết|kết, nối|婚|hôn|kết hôn|喫|khiết|ăn uống|消|tiêu|tắt, xoá
+開|khai|mở|閉|bế|đóng|急|cấp|gấp, vội|待|đãi|đợi|持|trì|cầm, mang|取|thủ|lấy
+伝|truyền|truyền đạt|呼|hô|gọi|窓|song|cửa sổ|早|tảo|sớm|立|lập|đứng|座|tọa|ngồi
+使|sử|dùng|置|trí|đặt|作|tác|làm, chế tạo|知|tri|biết|住|trú|ở, sống|乗|thừa|đi (xe), lên
+浴|dục|tắm|押|áp|ấn, đẩy|若|nhược|trẻ|広|quảng|rộng|短|đoản|ngắn|暗|ám|tối
+髪|phát|tóc|顔|nhan|khuôn mặt|歯|xỉ|răng|覚|giác|nhớ, thức|忘|vong|quên|払|phất|trả (tiền)
+返|phản|trả lại|心|tâm|tim, tâm|配|phối|phân phối, lo|風|phong|gió|邪|tà|tà|弾|đàn|đàn, búng
+集|tập|tập hợp|捨|xả|vứt|運|vận|vận chuyển|予|dự|trước, dự|趣|thú|thú vị, vẻ|登|đăng|leo
+泊|bạc|trọ lại|掃|tảo|quét|除|trừ|trừ bỏ|濯|trạc|giặt|練|luyện|luyện tập|眠|miên|ngủ
+弱|nhược|yếu|富|phú|giàu|士|sĩ|sĩ, người|去|khứ|đi qua|降|giáng|rơi, xuống|価|giá|giá cả
+意|ý|ý kiến|着|trước|mặc, đến|履|lý|mang (giày)|被|bị|mặc, đội|掛|quải|treo, đeo|帽|mạo|mũ
+定|định|định|信|tín|tin|号|hiệu|ký hiệu|橋|kiều|cây cầu|渡|độ|qua, băng|曲|khúc|cong, rẽ
+連|liên|dẫn, nối|案|án|đề án|内|nội|trong|説|thuyết|giải thích|考|khảo|suy nghĩ|通|thông|thông qua
+訳|dịch|dịch|止|chỉ|dừng|留|lưu|lưu lại
+`;
 const KANJI = {};
-KANJI_RAW.trim().replace(/\n/g, '|').split('|').reduce((acc, x, i, arr) => { if (i % 3 === 0 && arr[i + 2] !== undefined) KANJI[x] = { hv: arr[i + 1], m: arr[i + 2] }; return acc; }, 0);
+[KANJI_RAW, KANJI_RAW2].forEach(R => R.trim().replace(/\n/g, '|').split('|').reduce((acc, x, i, arr) => { if (i % 3 === 0 && arr[i + 2] !== undefined && !KANJI[x]) KANJI[x] = { hv: arr[i + 1], m: arr[i + 2] }; return acc; }, 0));
 
 const isKanji = c => /[一-鿿々]/.test(c);
 const isKana = c => /[ぁ-ゖァ-ヺー]/.test(c);
@@ -1425,6 +1495,55 @@ Q('m', 1, 0, '「ん」は ローマ字で なんと かきますか。', 'Chữ
 Q('m', 3, 0, '「しゅくだい」を ローマ字で かくと どれですか。', 'Viết 「しゅくだい」 (bài tập) bằng romaji.', ['shukudai', 'sukudai', 'shikudai', 'shyukudai'], 'しゅ = shu (し + ゅ nhỏ). Không viết "shyu".', 'しゅくだい|shukudai|bài tập', 'shukudai|sukudai|shikudai|shyukudai');
 Q('m', 3, 0, '「ちょっと」を ローマ字で かくと どれですか。', 'Viết 「ちょっと」 (một chút) bằng romaji.', ['chotto', 'choto', 'chyotto', 'tyotto'], 'ちょ = cho; っと nhân đôi t → "chotto".', 'ちょっと|chotto|một chút', 'chotto|choto|chyotto|tyotto');
 
+/* ---- 15-questions3.js ---- */
+'use strict';
+/* ===== Câu hỏi bổ sung bài 12–25 (thể thường, と思います, mệnh đề bổ nghĩa, ～と, くれる, ～たら) + câu sắp xếp ===== */
+Q('g', 1, 20, '{今日|きょう}は ひまだった？— うん、ひま＿＿。', 'Hôm nay cậu rảnh không? — Ừ, rảnh.', ['だった', 'です', 'だ', 'でした'], 'Thể thường quá khứ của な-adj/danh từ: 「～だった」.', '暇|ひま|rảnh', 'đã (thường)|lịch sự|hiện tại (thường)|đã (lịch sự)');
+Q('g', 2, 20, 'A：{何|なに}を {飲|の}む？　B：{水|みず}を {飲|の}＿＿。', 'A: Cậu uống gì? B: Tớ uống nước.', ['む', 'みます', 'んだ', 'んで'], 'Thể từ điển của 飲みます là 「飲む」 (dùng với bạn bè).', '飲みます|のみます|uống', 'uống (thường)|lịch sự|đã uống|thể て');
+Q('h', 2, 20, '（{友達|ともだち}に）「{今|いま}、どこに ＿＿？」', '(Hỏi bạn) "Bây giờ cậu ở đâu?"', ['いる', 'います', 'いた', 'いて'], 'Thể thường của います là 「いる」.', '', 'ở (thường)|lịch sự|đã ở|thể て');
+Q('g', 3, 20, '（{友達|ともだち}に）きのうの {試験|しけん}は {難|むずか}しく＿＿。', 'Bài thi hôm qua không khó.', ['なかった', 'ないです', 'ありません', 'なくて'], 'Phủ định quá khứ thể thường của tính từ い: 「くなかった」.', '試験|しけん|kỳ thi', 'đã không (thường)|không (lịch sự)|không có|nối câu');
+Q('o', 2, 20, '「{行|い}く / {明日|あした} / {学校|がっこう}へ」を ならべて ただしい ぶんを つくって ください。', 'Sắp xếp: "Ngày mai cậu đến trường không?"', ['{明日|あした} {学校|がっこう}へ {行|い}く？', '{行|い}く {明日|あした} {学校|がっこう}へ？', '{学校|がっこう}へ {行|い}く {明日|あした}？', '{明日|あした} {行|い}く {学校|がっこう}へ？'], 'Thứ tự tự nhiên: [thời gian] [nơi chốn]へ [động từ].', '', 'đúng|(sai thứ tự)|(sai thứ tự)|(sai thứ tự)');
+R(2, 20, 'ミラー：{昨日|きのう} {何|なに}を した？　サントス：{友達|ともだち}と {映画|えいが}を {見|み}た。おもしろかった。　ミラー：いいね。わたしは {家|うち}で {寝|ね}て いた。', 'Miller: Hôm qua cậu làm gì? Santos: Tớ xem phim với bạn, hay lắm. Miller: Hay nhỉ. Tớ thì ngủ ở nhà.', 'ミラーさんは {昨日|きのう} {何|なに}を しましたか。', 'Hôm qua Miller đã làm gì?', ['{家|うち}で {寝|ね}て いました', '{映画|えいが}を {見|み}ました', '{友達|ともだち}と {会|あ}いました', '{仕事|しごと}を しました'], '「わたしは 家で 寝て いた」.', '', 'ngủ ở nhà|xem phim|gặp bạn|làm việc');
+
+Q('g', 1, 21, '{田中|たなか}さんは「{元気|げんき}です」＿＿ {言|い}いました。', 'Anh Tanaka nói "Tôi khoẻ".', ['と', 'を', 'が', 'に'], '「「～」と 言いました」.', '元気|げんき|khoẻ', 'rằng (trích dẫn)|tân ngữ|chủ ngữ|chỉ đích');
+Q('g', 2, 21, '{私|わたし}は {日本|にほん}の {生活|せいかつ}は {楽|たの}しい＿＿ {思|おも}います。', 'Tôi nghĩ cuộc sống ở Nhật vui.', ['と', 'が', 'を', 'に'], '「～と 思います」.', '生活|せいかつ|cuộc sống', 'rằng|chủ ngữ|tân ngữ|chỉ đích');
+Q('h', 2, 21, 'A：「ありがとう」は {英語|えいご}で {何|なん}と {言|い}いますか。　B：「Thank you」＿＿ {言|い}います。', 'A: 「ありがとう」 tiếng Anh nói thế nào? B: Nói là "Thank you".', ['と', 'を', 'が', 'に'], '「～と 言います」 = nói là ～.', '英語|えいご|tiếng Anh', 'là (trích dẫn)|tân ngữ|chủ ngữ|chỉ đích');
+Q('g', 3, 21, 'A：{木村|きむら}さんは {来|く}ると {思|おも}いますか。　B：いいえ、{来|こ}ない＿＿ {思|おも}います。', 'A: Cậu nghĩ Kimura sẽ đến không? B: Không, tớ nghĩ anh ấy sẽ không đến.', ['と', 'か', 'を', 'に'], '「ない と 思います」 = nghĩ là không.', '', 'rằng|... không?|tân ngữ|chỉ đích');
+R(2, 21, '{友達|ともだち}は「{日本語|にほんご}は {難|むずか}しいです」と {言|い}いました。でも、{私|わたし}は {面白|おもしろ}いと {思|おも}います。{漢字|かんじ}が {好|す}きですから。', 'Bạn nói "Tiếng Nhật khó". Nhưng tôi nghĩ nó thú vị. Vì tôi thích chữ Hán.', '{私|わたし}は {日本語|にほんご}を どう {思|おも}いますか。', 'Tôi nghĩ tiếng Nhật thế nào?', ['{面白|おもしろ}い', '{難|むずか}しい', '{高|たか}い', 'つまらない'], '「面白いと 思います」.', '', 'thú vị|khó|đắt|chán');
+
+Q('g', 1, 22, 'これは {私|わたし}が {作|つく}った ＿＿ です。', 'Đây là món ăn tôi nấu.', ['{料理|りょうり}', '{料理|りょうり}を', '{料理|りょうり}が', '{料理|りょうり}に'], 'Mệnh đề bổ nghĩa + danh từ, không chen trợ từ.', '料理|りょうり|món ăn', 'món ăn|(sai)|(sai)|(sai)');
+Q('g', 2, 22, 'ミラーさんが {住|す}んで いる ＿＿ は {大阪|おおさか}です。', 'Nơi anh Miller đang sống là Osaka.', ['{町|まち}', '{町|まち}を', '{町|まち}が', '{町|まち}に'], 'Mệnh đề + danh từ + は.', '町|まち|thị trấn', 'thị trấn|(sai)|(sai)|(sai)');
+Q('g', 2, 22, '{私|わたし}が {毎日|まいにち} {読|よ}む ＿＿ は {新聞|しんぶん}です。', 'Thứ tôi đọc mỗi ngày là báo.', ['{物|もの}', '{物|もの}を', '{物|もの}が', '{物|もの}に'], '「Vる + もの」 = thứ mà ...', '新聞|しんぶん|báo', 'thứ|(sai)|(sai)|(sai)');
+Q('h', 2, 22, 'A：あの {赤|あか}い {傘|かさ}を {持|も}って いる {人|ひと}は だれですか。　B：＿＿', 'A: Người cầm cái ô đỏ kia là ai? B: ...', ['{木村|きむら}さんです。', '{木村|きむら}さんを います。', '{木村|きむら}さんが あります。', '{木村|きむら}さんに です。'], 'Trả lời câu hỏi だれ bằng 「～さんです」.', '傘|かさ|cái ô', 'Là anh Kimura.|(sai)|(sai)|(sai)');
+Q('o', 3, 22, '「これは / {母|はは}が / {作|つく}った / ケーキです」を ならべて ただしい ぶんを つくって ください。', 'Sắp xếp: "Đây là bánh do mẹ làm."', ['これは {母|はは}が {作|つく}った ケーキです。', 'これは {作|つく}った {母|はは}が ケーキです。', '{母|はは}が これは {作|つく}った ケーキです。', 'これは ケーキです {母|はは}が {作|つく}った。'], 'Mệnh đề bổ nghĩa 「母が 作った」 đứng ngay trước danh từ 「ケーキ」.', '', 'đúng|(sai)|(sai)|(sai)');
+R(2, 22, 'これは わたしが {毎日|まいにち} {使|つか}う かばんです。{去年|きょねん} {父|ちち}が {買|か}って くれました。{大|おお}きくて {便利|べんり}です。', 'Đây là cái cặp tôi dùng mỗi ngày. Năm ngoái bố mua cho tôi. Nó to và tiện.', 'かばんは だれが {買|か}いましたか。', 'Ai đã mua cái cặp?', ['{父|ちち}', '{母|はは}', 'わたし', '{友達|ともだち}'], '「父が 買って くれました」.', '便利|べんり|tiện lợi', 'bố|mẹ|tôi|bạn');
+
+Q('g', 1, 23, '{日本|にほん}へ {来|く}る ＿＿、{飛行機|ひこうき}に {乗|の}りました。', 'Khi đến Nhật tôi đã đi máy bay.', ['とき', 'と', 'から', 'ので'], '「Vる とき」 = khi.', '飛行機|ひこうき|máy bay', 'khi|hễ ... thì|từ|vì');
+Q('g', 2, 23, 'ドアを {開|あ}ける＿＿、{犬|いぬ}が いました。', 'Mở cửa ra thì có một con chó.', ['と', 'から', 'ので', 'です'], '「Vる と、～」 diễn tả sự việc xảy ra sau động tác.', '犬|いぬ|con chó', 'khi ... thì|từ|vì|là');
+Q('g', 2, 23, 'この ボタンを {押|お}す＿＿、{切符|きっぷ}が {出|で}ます。', 'Ấn nút này thì vé ra.', ['と', 'から', 'が', 'を'], '「Vる と」 = hễ làm ... thì ...', '切符|きっぷ|vé', 'hễ ... thì|từ|nhưng|tân ngữ');
+Q('h', 2, 23, '{信号|しんごう}が {赤|あか}い とき、＿＿ ください。', 'Khi đèn đỏ, xin hãy đợi.', ['{待|ま}って', '{渡|わた}って', '{歩|ある}いて', '{曲|ま}がって'], 'Đèn đỏ thì đợi: 「待って ください」.', '信号|しんごう|đèn giao thông', 'đợi|băng qua|đi bộ|rẽ');
+Q('g', 3, 23, '{駅|えき}へ {行|い}く {道|みち}を {教|おし}えて ＿＿ ませんか。', 'Bạn chỉ giúp tôi đường đến ga được không?', ['くれ', 'ください', 'あげ', 'もらい'], '「Vて くれませんか」 = anh/chị làm giúp tôi được không?', '道|みち|con đường', 'くれ (ませんか)|(sai)|(sai)|(sai)');
+R(2, 23, '{駅|えき}を {出|で}て、まっすぐ {行|い}くと、{大|おお}きい {橋|はし}が あります。{橋|はし}を {渡|わた}って、{右|みぎ}に {曲|ま}がると、{病院|びょういん}が あります。', 'Ra khỏi ga, đi thẳng thì có cây cầu lớn. Qua cầu rồi rẽ phải thì có bệnh viện.', '{病院|びょういん}に {行|い}く とき、どこで {右|みぎ}に {曲|ま}がりますか。', 'Khi đến bệnh viện, rẽ phải ở đâu?', ['{橋|はし}を {渡|わた}った あと', '{駅|えき}を {出|で}た あと', '{病院|びょういん}の {前|まえ}', '{信号|しんごう}の {前|まえ}'], '「橋を 渡って、右に 曲がる」.', '', 'sau khi qua cầu|sau khi ra ga|trước bệnh viện|trước đèn giao thông');
+
+Q('g', 1, 24, '{友達|ともだち}は わたしに ちずを {書|か}いて ＿＿。', 'Bạn đã vẽ bản đồ cho tôi.', ['くれました', 'あげました', 'もらいました', 'くださいました'], '「Vて くれます」: người khác làm giúp MÌNH.', '', 'đã làm cho tôi|(tôi làm cho người khác)|được làm giúp|(kính ngữ)');
+Q('g', 2, 24, 'わたしは {弟|おとうと}に {自転車|じてんしゃ}を {貸|か}して ＿＿。', 'Tôi đã cho em trai mượn xe đạp.', ['あげました', 'くれました', 'もらいました', 'くださいました'], 'Mình làm cho người khác: 「Vて あげます」.', '弟|おとうと|em trai;自転車|じてんしゃ|xe đạp', 'đã làm cho (người khác)|(người khác làm cho tôi)|được làm giúp|(kính ngữ)');
+Q('g', 2, 24, '{先生|せんせい}に {漢字|かんじ}を {教|おし}えて ＿＿。', 'Tôi được thầy dạy chữ Hán.', ['もらいました', 'くれました', 'あげました', 'ください'], '「(人)に Vて もらいます」: 先生に ... もらいました.', '漢字|かんじ|chữ Hán', 'được (thầy) dạy|(thầy là chủ ngữ)|đã dạy người khác|xin hãy');
+Q('h', 2, 24, '（{駅|えき}で）「すみません、{荷物|にもつ}を {持|も}って ＿＿ ませんか。」', '(Ở ga) "Xin lỗi, anh giúp tôi cầm hành lý được không?"', ['くれ', 'あげ', 'もらい', 'ください'], '「Vて くれませんか」 = nhờ làm giúp một cách lịch sự.', '荷物|にもつ|hành lý', 'くれ|(sai)|(sai)|(sai)');
+Q('g', 3, 24, '{私|わたし}は {友達|ともだち}＿＿ {手伝|てつだ}って もらいました。', 'Tôi được bạn giúp.', ['に', 'が', 'を', 'と'], '「(人)に Vて もらいます」.', '手伝います|てつだいます|giúp đỡ', 'bởi (người làm giúp)|chủ ngữ|tân ngữ|cùng với');
+R(2, 24, '{先週|せんしゅう}、{友達|ともだち}の {家|うち}で パーティーを しました。{友達|ともだち}が ケーキを {作|つく}って くれました。{兄|あに}は {車|くるま}で わたしを {連|つ}れて {行|い}って くれました。', 'Tuần trước tôi dự tiệc ở nhà bạn. Bạn làm bánh cho tôi. Anh trai chở tôi đi bằng xe hơi.', 'ケーキを {作|つく}った {人|ひと}は だれですか。', 'Ai đã làm bánh?', ['{友達|ともだち}', '{兄|あに}', 'わたし', '{母|はは}'], '「友達が ケーキを 作って くれました」.', '連れて行きます|つれていきます|dẫn đi', 'bạn|anh trai|tôi|mẹ');
+
+Q('g', 1, 25, '{天気|てんき}が よかった＿＿、{公園|こうえん}へ {行|い}きます。', 'Nếu thời tiết đẹp thì tôi sẽ đi công viên.', ['ら', 'て', 'と', 'に'], '「Vた + ら」 = nếu: よかった → よかったら.', '天気|てんき|thời tiết;公園|こうえん|công viên', 'ら (たら)|て|と|に');
+Q('g', 2, 25, '{安|やす}かったら、{買|か}います。{高|たか}かったら、＿＿。', 'Nếu rẻ thì tôi mua. Nếu đắt thì tôi không mua.', ['{買|か}いません', '{買|か}います', '{買|か}いたい', '{買|か}いました'], 'Vế sau trái nghĩa với vế đầu: 「買いません」.', '', 'không mua|mua|muốn mua|đã mua');
+Q('g', 2, 25, 'もし {分|わ}からなかったら、{聞|き}いて ＿＿。', 'Nếu không hiểu thì hãy hỏi.', ['ください', 'います', 'ありません', 'ました'], '「Vたら、Vて ください」.', '聞きます|ききます|hỏi, nghe', 'xin hãy|đang|không có|đã');
+Q('g', 3, 25, '{大学|だいがく}を {出|で}た＿＿、{働|はたら}きます。', 'Tốt nghiệp đại học rồi tôi sẽ đi làm.', ['ら', 'が', 'を', 'に'], '「Vた + ら」 = sau khi / nếu.', '', 'ら|nhưng|tân ngữ|chỉ đích');
+Q('h', 2, 25, 'A：{明日|あした}、{雨|あめ}が {降|ふ}ったら、どう しますか。　B：＿＿', 'A: Ngày mai nếu mưa thì bạn làm gì? B: Tôi sẽ ở nhà đọc sách.', ['{家|うち}で {本|ほん}を {読|よ}みます。', '{家|うち}で {本|ほん}を {読|よ}みました。', '{家|うち}で {本|ほん}を {読|よ}みましたか。', '{家|うち}で {本|ほん}を {読|よ}みませんでした。'], 'Kế hoạch tương lai: 「～ます」.', '', 'sẽ đọc sách|đã đọc|đã đọc chưa?|đã không đọc');
+R(2, 25, '{春|はる}に なったら、{桜|さくら}を {見|み}に {行|い}きます。{天気|てんき}が {悪|わる}かったら、{家|うち}で {映画|えいが}を {見|み}ます。', 'Khi sang xuân tôi sẽ đi ngắm hoa anh đào. Nếu thời tiết xấu tôi sẽ xem phim ở nhà.', '{春|はる}に {天気|てんき}が {悪|わる}かったら、{何|なに}を しますか。', 'Nếu mùa xuân thời tiết xấu thì làm gì?', ['{家|うち}で {映画|えいが}を {見|み}ます', '{桜|さくら}を {見|み}に {行|い}きます', '{友達|ともだち}に {会|あ}います', '{旅行|りょこう}します'], '「天気が 悪かったら、家で 映画を 見ます」.', '春|はる|mùa xuân', 'xem phim ở nhà|đi ngắm hoa|gặp bạn|đi du lịch');
+
+/* câu sắp xếp bổ sung */
+Q('o', 2, 12, '「{夏|なつ}より / {冬|ふゆ}の {方|ほう}が / {好|す}きです」を ならべて ただしい ぶんを つくって ください。', 'Sắp xếp: "Tôi thích mùa đông hơn mùa hè."', ['{夏|なつ}より {冬|ふゆ}の {方|ほう}が {好|す}きです。', '{夏|なつ}より {好|す}きです {冬|ふゆ}の {方|ほう}が。', '{好|す}きです {夏|なつ}より {冬|ふゆ}の {方|ほう}が。', '{冬|ふゆ}の {夏|なつ}より {方|ほう}が {好|す}きです。'], 'Mẫu so sánh: 「A より B の 方が ～」.', '', 'đúng|(sai)|(sai)|(sai)');
+Q('o', 2, 15, '「ここで / {写真|しゃしん}を / {撮|と}っては / いけません」を ならべて ただしい ぶんを つくって ください。', 'Sắp xếp: "Không được chụp ảnh ở đây."', ['ここで {写真|しゃしん}を {撮|と}っては いけません。', '{写真|しゃしん}を ここで いけません {撮|と}っては。', 'ここで {撮|と}っては {写真|しゃしん}を いけません。', 'いけません ここで {写真|しゃしん}を {撮|と}っては。'], '「Vては いけません」 đứng cuối câu.', '', 'đúng|(sai)|(sai)|(sai)');
+Q('o', 3, 18, '「{私|わたし}は / {日本語|にほんご}を / {話|はな}す / ことが / できます」を ならべて ただしい ぶんを つくって ください。', 'Sắp xếp: "Tôi nói được tiếng Nhật."', ['{私|わたし}は {日本語|にほんご}を {話|はな}す ことが できます。', '{私|わたし}は {日本語|にほんご}を ことが {話|はな}す できます。', '{私|わたし}は {話|はな}す {日本語|にほんご}を ことが できます。', '{私|わたし}は できます {日本語|にほんご}を {話|はな}す ことが。'], '「Vる ことが できます」: động từ đứng ngay trước 「こと」.', '', 'đúng|(sai)|(sai)|(sai)');
+
 /* ---- 20-state.js ---- */
 'use strict';
 /* ===== trạng thái game, lưu/tải, modal DOM ===== */
@@ -1441,7 +1560,7 @@ function newState() {
 }
 function save() { try { localStorage.setItem(SAVE_KEY, JSON.stringify(S)); return true; } catch (e) { return false; } }
 function loadSave() { try { const j = localStorage.getItem(SAVE_KEY); if (!j) return null; const s = JSON.parse(j); return s && s.v === 1 ? Object.assign(newState(), s) : null; } catch (e) { return null; } }
-function applyOpts() { Snd.on = !!S.opt.sound; FURI_MODE = S.opt.furi === 'all' ? 'all' : 'auto'; }
+function applyOpts() { Snd.on = !!S.opt.sound; Snd.musicOn = S.opt.music !== 0; Snd.music(); FURI_MODE = S.opt.furi === 'all' ? 'all' : 'auto'; }
 
 /* ---- modal DOM ---- */
 const modalEl = $('#modal');
@@ -2969,8 +3088,25 @@ function* fightTrainer(n) {
     yield* say(n.name, `Bạn thắng rồi! Nhận ${gain} 💎 và Huy hiệu ${c.vi}.`, 'おめでとう！');
     yield* say('', i < CH.length - 1 ? `Hoàn thành ${chLabel(i)}! Đảo ${CH[next].vi} đã mở khoá — mở Hải đồ (MENU) để ra khơi.` : 'Bạn đã chinh phục cả Quần đảo San Hô! Chúc mừng thuyền trưởng!');
     Snd.lvl();
+    if (i === CH.length - 1) yield* ending();
   } else yield* say(n.name, `Bạn mạnh thật! Nhận ${gain} 💎.`, 'つよいですね！');
   save();
+}
+function* ending() {
+  S.flags.ending = 1; Snd.lvl(); save();
+  yield* fade(1, 24);
+  const st = S.stats, acc = st.n ? Math.round(st.ok / st.n * 100) : 0, hero = HEROES[S.hero || 0];
+  const kn = new Set(); VOC.forEach(v => [...v.w].forEach(c => { if (isKanji(c)) kn.add(c); }));
+  yield* modalRun(done => {
+    showModal(modalCard(`<h2 style="text-align:center;font-size:24px">🏆 Hoàn thành Coral Crown N5!</h2>
+      <div class="box" style="text-align:center">Chúc mừng <b>${hero.name}</b>! Bạn đã chinh phục cả 9 đảo của Quần đảo San Hô và học xong chương trình Minna no Nihongo I (bài 1–25).<br><span style="font-size:22px">おめでとうございます！</span></div>
+      <h3>Hành trình của bạn</h3>
+      <div class="kv"><div>Câu hỏi đã trả lời</div><b>${st.n}</b><div>Tỉ lệ đúng</div><b>${acc}%</b><div>Tideling trong Sổ</div><b>${caughtCount()}/150</b><div>Huy hiệu</div><b>${S.badges.length}/${CH.length}</b><div>Chữ Hán trong bảng từ vựng</div><b>${kn.size}</b><div>Câu đang chờ ôn lại</div><b>${S.pend.length}</b></div>
+      <div class="box vi" style="margin-top:10px">Vẫn còn nhiều việc để làm: bắt đủ 150 Tideling, mở hết lối tắt, và vào <b>MENU → Ôn tập</b> để luyện lại các câu hay sai. Học tiếp N4 nhé! 頑張って！</div>
+      <div class="foot"><button class="btn" data-k="back">Tiếp tục khám phá ⏎</button></div>`));
+    wireBack(done);
+  }, escBack);
+  yield* fade(0, 24);
 }
 function* trainerSpot(n, k) {
   n.alert = true; Snd.tap(); yield 24; n.alert = false;
@@ -3120,7 +3256,7 @@ function* battleIntro(o) {
   if (!wild) { Fx.vs = 'VS'; Fx.vsName = o.name; Fx.vsT = FRAME; Snd.tone(330, .2, 'square', .05); yield 40; Fx.vs = ''; } else yield 6;
 }
 function* battle(o) {
-  yield* battleIntro(o);
+  yield* battleIntro(o); Snd.music('battle');
   B.on = true; B.slide = 0; B.appear = 1; B.sparks = []; B.fx = []; B.floats = []; B.rings = []; B.lvlFx = 0; B.kind = o.kind; B.area = o.area; B.foes = o.foes.slice(); B.fi = 0; B.foe = B.foes[0]; B.ball = null;
   B.me = S.party.find(m => m.hp > 0); B.hp.foe = B.foe.hp; B.hp.me = B.me.hp; B.sink = { me: 0, foe: 0 }; B.shake = { me: 0, foe: 0 }; B.flash = { me: 0, foe: 0 };
   S.seen[B.foe.sp] = 1; Wd.mode = 'battle'; B.hudKey = '';
@@ -3219,7 +3355,7 @@ function* battle(o) {
       B.me = cand[r]; B.hp.me = B.me.hp; B.hudKey = ''; yield* note(`Đi nào, ${spName(B.me.sp, B.me.form)}!`, 26);
     }
   }
-  yield* fade(1, 14);
+  yield* fade(1, 14); Snd.music('world');
   B.on = false; B.foe = B.me = null; B.ball = null; B.slide = 1; Wd.mode = 'world'; clear2(); $('#hud').innerHTML = '';
   $('#dlg').hidden = true; $('#bmenu').hidden = true; save();
   yield 4; yield* fade(0, 14);
@@ -3244,7 +3380,7 @@ function monRow(m, extra) { return `<div class="item">${cvThumb(m.sp, m.form)}<d
 function* mainMenu() {
   for (; ;) {
     const pick_ = yield* modalRun(done => {
-      const items = [['journal', '📜 Nhật ký'], ['party', '🐾 Đội hình'], ['bag', '🎒 Túi đồ'], ['box', '📦 Hộp'], ['sea', '🧭 Hải đồ'], ['dex', '📖 Sổ Tideling'], ['prog', '📊 Tiến độ học'], ['save', '💾 Lưu'], ['opt', '⚙ Cài đặt']];
+      const items = [['journal', '📜 Nhật ký'], ['party', '🐾 Đội hình'], ['bag', '🎒 Túi đồ'], ['box', '📦 Hộp'], ['sea', '🧭 Hải đồ'], ['dex', '📖 Sổ Tideling'], ['prog', '📊 Tiến độ học'], ['review', '🔁 Ôn tập'], ['save', '💾 Lưu'], ['opt', '⚙ Cài đặt']];
       showModal(modalCard(`<h2>Menu</h2><div class="list">${items.map(([k, t]) => `<button class="btn g" data-k="${k}" style="text-align:left">${t}</button>`).join('')}</div><div class="foot"><button class="btn" data-k="close">Đóng (Esc)</button></div>`));
       $$('[data-k]', modalEl).forEach(b => b.addEventListener('click', () => done(b.dataset.k)));
     }, (e, done) => { if (e.key === 'Escape' || e.key === 'm' || e.key === 'x') { done('close'); return true; } return false; });
@@ -3256,6 +3392,7 @@ function* mainMenu() {
     else if (pick_ === 'sea') { const r = yield* scrSea(); if (r) { yield* afterSea(r); return; } }
     else if (pick_ === 'dex') yield* scrDex();
     else if (pick_ === 'prog') yield* scrProgress();
+    else if (pick_ === 'review') yield* scrReview();
     else if (pick_ === 'save') yield* scrSave();
     else if (pick_ === 'opt') { const r = yield* scrOpt(); if (r === 'reset') return; }
   }
@@ -3344,6 +3481,24 @@ function* scrProgress() {
     wireBack(done);
   }, escBack);
 }
+/* Ôn tập ngoài trận: câu hay sai (Leitner) hoặc tổng hợp các chương đã mở */
+function weakIds() { return Object.entries(S.leit).filter(([, r]) => r.wrong > 0 && r.b < 4).sort((a, b) => b[1].wrong - a[1].wrong || a[1].b - b[1].b).map(([id]) => id); }
+function* scrReview() {
+  const weak = weakIds();
+  const mode = yield* modalRun(done => {
+    showModal(modalCard(`<h2>🔁 Ôn tập</h2><div class="vi" style="margin-bottom:8px">Luyện lại không cần đánh nhau. Mỗi câu đúng được thưởng 3 💎 (tối đa 30 mỗi lượt).</div>
+      <div class="list"><button class="btn g" data-k="weak" style="text-align:left" ${weak.length ? '' : 'disabled'}>🎯 Ôn câu hay sai <span class="vi">(${weak.length} câu cần ôn)</span></button>
+      <button class="btn g" data-k="mix" style="text-align:left">🎲 Tổng hợp 10 câu <span class="vi">(các chương đã mở)</span></button>
+      <button class="btn g" data-k="cur" style="text-align:left">📚 10 câu của chương hiện tại <span class="vi">(${chLabel(S.cur)})</span></button></div>${backBtn}`));
+    wireBack(done); $$('[data-k]:not([data-k=back])', modalEl).forEach(b => b.addEventListener('click', () => done(b.dataset.k)));
+  }, escBack);
+  if (mode === 'back' || mode == null) return;
+  let ok = 0, n = 0;
+  if (mode === 'weak') { for (const id of weak.slice(0, 10)) { const q = Quiz.byId(id); if (!q) continue; const r = yield* Quiz.show(q, {}); n++; if (r.ok) ok++; } }
+  else for (let k = 0; k < 10; k++) { const r = yield* Quiz.ask({ area: 'drill', ch: mode === 'cur' ? S.cur : ri(S.maxCh + 1), noRepeat: false }); n++; if (r.ok) ok++; }
+  const gain = Math.min(30, ok * 3); S.pearls += gain; save();
+  yield* modalRun(done => { showModal(modalCard(`<h2>Kết quả ôn tập</h2><div class="box" style="font-size:20px;text-align:center"><b>${ok}/${n}</b> câu đúng · +${gain} 💎</div><div class="vi">${ok === n ? 'Hoàn hảo! 🎉' : 'Những câu sai sẽ được hỏi lại sau trong trận đấu và lần ôn tập tới.'}</div>${backBtn}`)); wireBack(done); }, escBack);
+}
 function* scrSave() {
   const ok = save();
   yield* modalRun(done => { showModal(modalCard(`<h2>💾 Lưu game</h2><p>${ok ? 'Đã lưu vào trình duyệt này.' : 'Không lưu được (trình duyệt chặn bộ nhớ).'}</p>${backBtn}`)); wireBack(done); }, escBack);
@@ -3353,11 +3508,13 @@ function* scrOpt() {
     const r = yield* modalRun(done => {
       showModal(modalCard(`<h2>⚙ Cài đặt</h2><div class="list">
         <button class="btn g" data-k="snd" style="text-align:left">🔊 Âm thanh: <b>${S.opt.sound ? 'Bật' : 'Tắt'}</b></button>
+        <button class="btn g" data-k="music" style="text-align:left">🎵 Nhạc nền: <b>${S.opt.music === 0 ? 'Tắt' : 'Bật'}</b></button>
         <button class="btn g" data-k="furi" style="text-align:left">ふ Furigana: <b>${S.opt.furi === 'all' ? 'Luôn hiện' : 'Tự động (giảm dần theo chương)'}</b></button>
         <button class="btn g" data-k="reset" style="text-align:left;color:#b33">🗑 Xoá dữ liệu & chơi lại từ đầu</button></div>${backBtn}`));
       wireBack(done); $$('[data-k]:not([data-k=back])', modalEl).forEach(b => b.addEventListener('click', () => done(b.dataset.k)));
     }, escBack);
-    if (r === 'snd') { S.opt.sound = S.opt.sound ? 0 : 1; applyOpts(); }
+    if (r === 'music') { S.opt.music = S.opt.music === 0 ? 1 : 0; applyOpts(); }
+    else if (r === 'snd') { S.opt.sound = S.opt.sound ? 0 : 1; applyOpts(); }
     else if (r === 'furi') { S.opt.furi = S.opt.furi === 'all' ? 'auto' : 'all'; applyOpts(); }
     else if (r === 'reset') {
       const c = yield* modalRun(done => { showModal(modalCard(`<h2>Xoá dữ liệu?</h2><p>Mọi tiến độ sẽ mất.</p><div class="foot"><button class="btn g" data-k="no">Huỷ</button><button class="btn" style="background:#c33" data-k="yes">Xoá</button></div>`)); $$('[data-k]', modalEl).forEach(b => b.addEventListener('click', () => done(b.dataset.k))); });
@@ -3460,6 +3617,7 @@ function showTitle() {
   const has = !!loadSave(); let t = $('.title'); if (t) t.remove();
   t = el('div', 'title', `<h1>Coral Crown</h1><p>Quần đảo San Hô · Học tiếng Nhật JLPT <b>N5</b></p>
     ${has ? '<button class="mb" id="bt-cont">▶ Tiếp tục</button>' : ''}<button class="mb" id="bt-new">${has ? '★ Chơi mới' : '★ Bắt đầu'}</button>
+    ${innerWidth < innerHeight && innerWidth < 700 ? '<p style="font-size:calc(var(--u)*5);color:#ffe9a8">📱 Xoay ngang điện thoại để chơi rộng và rõ hơn</p>' : ''}
     <p style="font-size:calc(var(--u)*4.5);opacity:.8">Mũi tên/WASD = di chuyển & chọn · Enter/Z = A · Esc/X = B · M = Menu · 1–4 = đáp án</p>`);
   t.style.cssText = 'position:absolute;inset:0;z-index:5;padding-top:calc(var(--u)*10)'; $('#screen').appendChild(t);
   focusFirst($$('#screen .title button'));

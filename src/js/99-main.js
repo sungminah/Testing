@@ -21,6 +21,7 @@ function showTitle() {
   const has = !!loadSave(); let t = $('.title'); if (t) t.remove();
   t = el('div', 'title', `<h1>Coral Crown</h1><p>Quần đảo San Hô · Học tiếng Nhật JLPT <b>N5</b></p>
     ${has ? '<button class="mb" id="bt-cont">▶ Tiếp tục</button>' : ''}<button class="mb" id="bt-new">${has ? '★ Chơi mới' : '★ Bắt đầu'}</button>
+    ${innerWidth < innerHeight && innerWidth < 700 ? '<p style="font-size:calc(var(--u)*5);color:#ffe9a8">📱 Xoay ngang điện thoại để chơi rộng và rõ hơn</p>' : ''}
     <p style="font-size:calc(var(--u)*4.5);opacity:.8">Mũi tên/WASD = di chuyển & chọn · Enter/Z = A · Esc/X = B · M = Menu · 1–4 = đáp án</p>`);
   t.style.cssText = 'position:absolute;inset:0;z-index:5;padding-top:calc(var(--u)*10)'; $('#screen').appendChild(t);
   focusFirst($$('#screen .title button'));
