@@ -1,6 +1,6 @@
 'use strict';
 /* ===== Trận đấu: mỗi chiêu / lưới / bỏ chạy đều phải trả lời đúng một câu hỏi tiếng Nhật ===== */
-const B = { on: false, foe: null, me: null, kind: '', area: 'route', shake: { me: 0, foe: 0 }, flash: { me: 0, foe: 0 }, ball: null, hp: { me: 0, foe: 0 }, sink: { me: 0, foe: 0 }, hudKey: '', appear: 1, sparks: [], floats: [], lvlFx: 0, rings: [] };
+const B = { on: false, foe: null, me: null, kind: '', area: 'route', shake: { me: 0, foe: 0 }, flash: { me: 0, foe: 0 }, ball: null, hp: { me: 0, foe: 0 }, sink: { me: 0, foe: 0 }, hudKey: '', slide: 1, appear: 1, sparks: [], floats: [], lvlFx: 0, rings: [] };
 function* note(text, n = 46) {
   const d = $('#dlg'); let go = false; d.innerHTML = `<div class="vi" style="opacity:1">${esc(text)}</div>`; d.hidden = false; d.onclick = () => { go = true; };
   Inp.a = Inp.b = 0; let k = Math.round(n * 1.6) + 14; yield 6;
@@ -8,6 +8,7 @@ function* note(text, n = 46) {
 }
 const hpPct = (h, m) => Math.max(0, Math.min(100, h / m * 100));
 function battleHud() {
+  if (B.on && B.slide < .7) { $('#hud').innerHTML = ''; B.hudKey = ''; return; }
   if (!B.on) { $('#hud').innerHTML = ''; B.hudKey = ''; return; }
   const f = B.foe, m = B.me; if (!f || !m) return;
   B.hp.foe += (f.hp - B.hp.foe) * 0.15; B.hp.me += (m.hp - B.hp.me) * 0.15;
@@ -36,8 +37,9 @@ function renderBattle() {
     drawTideling(c2, mon.sp, mon.form, x + sx, y + B.sink[who] * .8, r, { t: FRAME, flip });
     c2.restore();
   };
-  if (B.foe && !(B.ball && B.ball.hide)) draw(B.foe, 'foe', 172, 44, (B.ball && B.ball.shrink ? 20 * B.ball.shrink : 20) * (.15 + .85 * Math.min(1, B.appear)), false);
-  draw(B.me, 'me', 62, 78, 24, true);
+  const so = (1 - (1 - Math.min(1, B.slide)) ** 3); const off = (1 - so) * 130;
+  if (B.foe && !(B.ball && B.ball.hide)) draw(B.foe, 'foe', 172 + off, 44, (B.ball && B.ball.shrink ? 20 * B.ball.shrink : 20) * (.15 + .85 * Math.min(1, B.appear)), false);
+  draw(B.me, 'me', 62 - off, 78, 24, true);
   if (B.ball) { const b = B.ball; c2.fillStyle = '#e53935'; c2.beginPath(); c2.arc(b.x, b.y, 4.6, Math.PI, 0); c2.fill(); c2.fillStyle = '#fff'; c2.beginPath(); c2.arc(b.x, b.y, 4.6, 0, Math.PI); c2.fill(); c2.strokeStyle = '#1d2433'; c2.lineWidth = 1; c2.beginPath(); c2.arc(b.x, b.y, 4.6, 0, 7); c2.moveTo(b.x - 4.6, b.y); c2.lineTo(b.x + 4.6, b.y); c2.stroke(); c2.fillStyle = '#fff'; c2.beginPath(); c2.arc(b.x, b.y, 1.4, 0, 7); c2.fill(); c2.stroke(); }
   if (B.appear < 1) B.appear += 1 / 26;
   // vòng sáng, tia sáng, chữ nổi
@@ -85,11 +87,21 @@ function* gainXpAnim(m, amt) {
   }
   if (m.lv >= 60) m.xp = 0;
 }
+/* hiệu ứng trước khi vào trận */
+function* battleIntro(o) {
+  const wild = o.kind === 'wild';
+  for (let k = 0; k < (wild ? 2 : 3); k++) { Snd.tone(900 - k * 150, .07, 'square', .05); Fx.flash = .85; yield 3; Fx.flash = 0; yield 3; }
+  Snd.tone(220, .35, 'sawtooth', .04);
+  for (let f = 1; f <= 26; f++) { Fx.wipe = f / 26; yield 1; }
+  if (!wild) { Fx.vs = 'VS'; Fx.vsName = o.name; Fx.vsT = FRAME; Snd.tone(330, .2, 'square', .05); yield 40; Fx.vs = ''; } else yield 6;
+}
 function* battle(o) {
-  B.on = true; B.appear = 1; B.sparks = []; B.floats = []; B.rings = []; B.lvlFx = 0; B.kind = o.kind; B.area = o.area; B.foes = o.foes.slice(); B.fi = 0; B.foe = B.foes[0]; B.ball = null;
+  yield* battleIntro(o);
+  B.on = true; B.slide = 0; B.appear = 1; B.sparks = []; B.floats = []; B.rings = []; B.lvlFx = 0; B.kind = o.kind; B.area = o.area; B.foes = o.foes.slice(); B.fi = 0; B.foe = B.foes[0]; B.ball = null;
   B.me = S.party.find(m => m.hp > 0); B.hp.foe = B.foe.hp; B.hp.me = B.me.hp; B.sink = { me: 0, foe: 0 }; B.shake = { me: 0, foe: 0 }; B.flash = { me: 0, foe: 0 };
   S.seen[B.foe.sp] = 1; Wd.mode = 'battle'; B.hudKey = '';
-  yield* fade(0, 1);
+  for (let f = 0; f <= 32; f++) { B.slide = f / 32; Fx.wipe = Math.max(0, 1 - f / 22); yield 1; }
+  Fx.wipe = 0; B.slide = 1;
   if (o.kind === 'wild') yield* note(`Một ${spName(B.foe.sp, B.foe.form)} hoang dã (Lv${B.foe.lv}) xuất hiện!`);
   else yield* note(`${o.name} đưa ra ${spName(B.foe.sp, B.foe.form)} (Lv${B.foe.lv})!`);
   yield* note(`Đi nào, ${spName(B.me.sp, B.me.form)}!`, 30);
@@ -103,10 +115,12 @@ function* battle(o) {
     if (a === 0) {
       const mvs = MOVES[grp(B.me.sp)];
       const opts = mvs.map((mv, i) => ({ t: mv.n, s: B.me.lv < MOVE_LV[i] ? `Mở ở Lv${MOVE_LV[i]}` : `Sức mạnh ${mv.p} · ${B.me.pp[i]}/${mv.pp}`, dis: B.me.lv < MOVE_LV[i] || B.me.pp[i] <= 0 }));
-      opts.push({ t: '← Quay lại' }); opts.cancel = 4;
+      const noPp = opts.every(op => op.dis); // hết PP: vẫn có đòn yếu để không bị kẹt
+      opts.push({ t: '💢 Gắng sức', s: noPp ? 'Sức mạnh 8 · không giới hạn' : 'Chỉ dùng khi hết PP', dis: !noPp });
+      opts.push({ t: '← Quay lại' }); opts.cancel = 5;
       const mi = yield* choose('Chọn chiêu — rồi trả lời câu hỏi để chiêu trúng!', opts);
-      if (mi < 4) {
-        const mv = mvs[mi]; B.me.pp[mi]--;
+      if (mi < 5) {
+        const mv = mi === 4 ? { n: 'Gắng sức', p: 8 } : mvs[mi]; if (mi < 4) B.me.pp[mi]--;
         const r = yield* Quiz.ask({ area: o.area });
         yield* note(`${spName(B.me.sp, B.me.form)} dùng ${mv.n}!`, 22);
         if (r.ok) {
@@ -175,7 +189,9 @@ function* battle(o) {
       B.me = cand[r]; B.hp.me = B.me.hp; B.hudKey = ''; yield* note(`Đi nào, ${spName(B.me.sp, B.me.form)}!`, 26);
     }
   }
-  B.on = false; B.foe = B.me = null; B.ball = null; Wd.mode = 'world'; clear2(); $('#hud').innerHTML = '';
+  yield* fade(1, 14);
+  B.on = false; B.foe = B.me = null; B.ball = null; B.slide = 1; Wd.mode = 'world'; clear2(); $('#hud').innerHTML = '';
   $('#dlg').hidden = true; $('#bmenu').hidden = true; save();
+  yield 4; yield* fade(0, 14);
   return result;
 }

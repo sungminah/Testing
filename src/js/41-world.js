@@ -5,7 +5,7 @@ let SC = 4; // số pixel thật trên 1 đơn vị logic (240×160)
 const DIRS = { u: [0, -1], d: [0, 1], l: [-1, 0], r: [1, 0] };
 const OPP = { u: 'd', d: 'u', l: 'r', r: 'l' };
 const Wd = { map: null, npcs: [], face: 'd', mv: 0, dx: 0, dy: 0, step: 0, banner: 0, mode: 'title', grassCd: 0, lastEnc: 0 };
-const Fx = { fade: 0 };
+const Fx = { fade: 0, flash: 0, wipe: 0, vs: '', vsName: '' };
 const _tiles = new Map();
 function resizeCanvas() {
   const w = $('#screen').clientWidth || 720, dpr = Math.min(window.devicePixelRatio || 1, 3);

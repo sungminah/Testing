@@ -50,6 +50,7 @@ function frame() {
     else if (Wd.mode === 'battle') { logicalT(); renderBattle(); battleHud(); }
     else { clear2(); renderWorld(); worldHud(); }
     if (Fx.fade > 0) { ctx.fillStyle = `rgba(8,16,28,${Fx.fade})`; ctx.fillRect(0, 0, W, H); }
+    drawFx();
     Quiz.tick();
   } catch (e) { (window.__errors = window.__errors || []).push(String(e && e.stack || e)); console.error(e); }
 }
@@ -58,9 +59,26 @@ function sim(n) { for (let i = 0; i < n; i++) { FRAME++; if (Wd.mode !== 'title'
 function drawNow() {
   if (Wd.mode === 'title') renderTitle(); else if (Wd.mode === 'battle') { logicalT(); renderBattle(); B.hudKey = ''; battleHud(); } else { clear2(); renderWorld(); worldHud(); }
   if (Fx.fade > 0) { ctx.fillStyle = `rgba(8,16,28,${Fx.fade})`; ctx.fillRect(0, 0, W, H); }
+  drawFx();
+}
+/* hiệu ứng vào trận: chớp sáng + khép/mở màn theo các dải ngang + chữ VS */
+function drawFx() {
+  if (Fx.flash > 0) { ctx.fillStyle = `rgba(255,255,255,${Fx.flash})`; ctx.fillRect(0, 0, W, H); }
+  if (Fx.wipe > 0) {
+    const n = 8, bh = H / n; ctx.fillStyle = '#0b1b2b';
+    for (let i = 0; i < n; i++) { const w = Math.min(1, Fx.wipe * 1.25) * W; if (i & 1) ctx.fillRect(0, i * bh, w, bh + .6); else ctx.fillRect(W - w, i * bh, w, bh + .6); }
+    if (Fx.vs && Fx.wipe >= .99) {
+      ctx.save(); ctx.textAlign = 'center'; ctx.lineJoin = 'round';
+      const k = Math.min(1, (FRAME - (Fx.vsT || FRAME)) / 10), s = .6 + .5 * Math.min(1, k * 1.2);
+      ctx.translate(W / 2, H / 2 - 2); ctx.scale(s, s); ctx.font = '900 34px system-ui, sans-serif'; ctx.lineWidth = 5; ctx.strokeStyle = '#7a1f12'; ctx.strokeText(Fx.vs, 0, 8);
+      const g = ctx.createLinearGradient(0, -20, 0, 12); g.addColorStop(0, '#fff7b0'); g.addColorStop(1, '#ff8a3a'); ctx.fillStyle = g; ctx.fillText(Fx.vs, 0, 8);
+      ctx.font = '700 9px system-ui, sans-serif'; ctx.lineWidth = 2.6; ctx.strokeStyle = '#0b1b2b'; ctx.strokeText(Fx.vsName, 0, 24); ctx.fillStyle = '#fff'; ctx.fillText(Fx.vsName, 0, 24); ctx.restore();
+    }
+  }
 }
 let _hudK = '';
 function worldHud() {
+  if (Fx.wipe > 0 || Fx.flash > 0) { $('#hud').innerHTML = ''; _hudK = ''; return; }
   const k = [Wd.banner > 0 ? Wd.bannerText : '', S.pearls, S.party[0] ? S.party[0].lv : 0].join('|');
   if (Wd.banner > 0) Wd.banner--;
   if (k === _hudK) return; _hudK = k;
