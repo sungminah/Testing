@@ -114,7 +114,7 @@ function buildIsland(i) {
   // ---- nối các bản đồ bằng cách quét ký tự ----
   link(town, 'U', route, 'V'); link(route, 'V', town, 'U'); link(route, 'G', gym, 'V'); link(gym, 'V', route, 'G');
   [['1', clinic], ['2', shop], ['3', home]].forEach(([d, rm]) => { link(town, d, rm, 'V'); link(rm, 'V', town, d); });
-  town.dock = { x: def.town.dock[0], y: def.town.dock[1], dir: 'u' }; town.heal = arrivalNear(town, '1');
+  town.dock = { x: def.town.dock[0], y: def.town.dock[1], dir: def.town.dock[2] || 'u' }; town.heal = arrivalNear(town, '1');
   // ---- đường cát ----
   const dk = def.town.dock, ex = findTiles(town, 'U')[0];
   markPath(town, dk, ex); ['1', '2', '3'].forEach(d => { const a = arrivalNear(town, d); markPath(town, dk, [a.x, a.y]); town.path.add(a.x + ',' + a.y); });

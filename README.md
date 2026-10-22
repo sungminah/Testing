@@ -65,7 +65,7 @@ src/js/12-dyn.js          câu hỏi sinh động
 src/js/13-questions2.js   câu hỏi bổ sung bài 10–25
 src/js/14-questions0.js   câu hỏi quy tắc romaji (chương mở đầu)
 src/js/15-questions3.js   câu hỏi bổ sung bài 12–25 + câu sắp xếp
-src/js/39-islands.js      bản đồ riêng cho cả 9 đảo (đảo 3–8 dựng bởi tools/gen_islands.py, có tự kiểm tra đường đi)
+src/js/39-islands.js      bản đồ riêng cho cả 9 đảo, mỗi đảo một bố cục khác (đảo 3–8 dựng bởi tools/gen_islands.py: bến tàu, sông + cầu, đảo nổi, bãi biển, hồ + đền, đại lộ; có tự kiểm tra đường đi)
 src/js/20-state.js        trạng thái, lưu/tải, Tideling của người chơi
 src/js/21-quiz.js         chọn câu (độ khó + Leitner), giao diện hỏi, bảng giải thích
 src/js/30-tideling.js     150 loài, vẽ vector
@@ -98,6 +98,6 @@ Sau khi sửa `src/`, nhớ chạy `./build.sh` và commit cả `docs/index.html
 
 - Câu hỏi do mình tự soạn, chưa có người bản ngữ rà soát; nếu thấy câu nào có hai đáp án đúng hoặc đáp án sai, hãy sửa trong `src/js/1x-questions*.js`.
 - Bảng từ vựng là từ vựng Minna I (359 từ) nên số chữ Hán (~350) vượt "~100 chữ N5"; chưa lọc riêng danh sách kanji N5 chính thức. Bảng Hán Việt đã phủ đủ các chữ này.
-- Các đảo 3–8 có bản đồ riêng nhưng ở mức "khung chủ đề" (ít chi tiết trang trí hơn 3 đảo đầu); 3 căn nhà (y tế, cửa hàng, nhà dân) dùng chung bố cục ở mọi đảo.
+- Mỗi đảo có bố cục và **màu cỏ riêng** (xanh tươi, vàng chanh, ngọc, rừng sẫm, xám lam, bạc hà, vàng cát, xanh tím, hồng); các đảo 3–8 ở mức "khung chủ đề" (ít chi tiết trang trí hơn 3 đảo đầu); 3 căn nhà (y tế, cửa hàng, nhà dân) dùng chung bố cục ở mọi đảo.
 - Chưa có phần nghe (audio tiếng Nhật) trong câu hỏi.
 - Trên điện thoại dọc, khung game giữ tỉ lệ 3:2 nên khá nhỏ (có gợi ý xoay ngang).

@@ -111,6 +111,11 @@ function paintTile(g, ch, p, fr, path, v, room) {
       g.strokeStyle = '#5a3a28'; g.lineWidth = .4; for (let y = 0; y <= 16; y += 4) { g.beginPath(); g.moveTo(1.5, y); g.lineTo(14.5, y); g.stroke(); }
       g.strokeStyle = 'rgba(255,255,255,.22)'; g.lineWidth = .3; for (let y = 1; y < 16; y += 4) { g.beginPath(); g.moveTo(2.5, y); g.lineTo(13.5, y); g.stroke(); }
       g.fillStyle = '#6a4a30'; g.fillRect(0, 0, 1.6, 16); g.fillRect(14.4, 0, 1.6, 16); g.fillStyle = '#8d6a48'; for (let y = 1; y < 16; y += 8) { g.fillRect(-.2, y, 2.2, 2.4); g.fillRect(14, y, 2.2, 2.4); } break; }
+    case 'B': { g.fillStyle = lin(g, 0, 16, shade(p.water[1], 1.1), shade(p.water[0], .85)); g.fillRect(0, 0, 16, 16);
+      g.fillStyle = 'rgba(0,0,0,.22)'; g.fillRect(0, 2, 16, 12.6); g.fillStyle = lin(g, 0, 0, '#b8875a', '#8d6340', 0, 16); g.fillRect(0, 1.5, 16, 13);
+      g.strokeStyle = '#5a3a28'; g.lineWidth = .4; for (let x = 0; x <= 16; x += 4) { g.beginPath(); g.moveTo(x, 1.5); g.lineTo(x, 14.5); g.stroke(); }
+      g.strokeStyle = 'rgba(255,255,255,.22)'; g.lineWidth = .3; for (let x = 1; x < 16; x += 4) { g.beginPath(); g.moveTo(x, 2.5); g.lineTo(x, 13.5); g.stroke(); }
+      g.fillStyle = '#6a4a30'; g.fillRect(0, 0, 16, 1.6); g.fillRect(0, 14.4, 16, 1.6); g.fillStyle = '#8d6a48'; for (let x = 1; x < 16; x += 8) { g.fillRect(x, -.2, 2.4, 2.2); g.fillRect(x, 14, 2.4, 2.2); } break; }
     case 'o': if (room) { floor(g, p, v, R); g.fillStyle = 'rgba(0,0,0,.25)'; ell(g, 8, 14.6, 6, 1.8); g.fill(); g.fillStyle = lin(g, 0, 0, '#a9a39a', '#d9d3c8', 3, 13); g.fillRect(3.5, 2, 9, 12.5); g.fillStyle = 'rgba(0,0,0,.18)'; g.fillRect(10.8, 2, 1.7, 12.5); g.fillStyle = '#e6e0d4'; rr(g, 2.4, 0, 11.2, 3, .8); g.fill(); rr(g, 2.4, 13, 11.2, 3, .8); g.fill(); g.strokeStyle = 'rgba(0,0,0,.2)'; g.lineWidth = .3; for (const x of [6.2, 8.4]) { g.beginPath(); g.moveTo(x, 3); g.lineTo(x, 13); g.stroke(); } }
       else { grass(p.g1); g.fillStyle = 'rgba(0,0,0,.22)'; ell(g, 8, 13.4, 6.4, 2); g.fill();
         g.fillStyle = lin(g, 3, 14, '#9a9aa0', '#6e6e76'); g.beginPath(); g.moveTo(2, 13); g.quadraticCurveTo(1.5, 7, 6, 4.5); g.quadraticCurveTo(10, 2.5, 13, 6.5); g.quadraticCurveTo(15, 10, 14, 13); g.closePath(); g.fill();
