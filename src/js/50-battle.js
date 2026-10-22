@@ -1,9 +1,9 @@
 'use strict';
 /* ===== Trận đấu: mỗi chiêu / lưới / bỏ chạy đều phải trả lời đúng một câu hỏi tiếng Nhật ===== */
-const B = { on: false, foe: null, me: null, kind: '', area: 'route', shake: { me: 0, foe: 0 }, flash: { me: 0, foe: 0 }, ball: null, hp: { me: 0, foe: 0 }, sink: { me: 0, foe: 0 }, hudKey: '' };
+const B = { on: false, foe: null, me: null, kind: '', area: 'route', shake: { me: 0, foe: 0 }, flash: { me: 0, foe: 0 }, ball: null, hp: { me: 0, foe: 0 }, sink: { me: 0, foe: 0 }, hudKey: '', appear: 1, sparks: [], floats: [], lvlFx: 0, rings: [] };
 function* note(text, n = 46) {
   const d = $('#dlg'); let go = false; d.innerHTML = `<div class="vi" style="opacity:1">${esc(text)}</div>`; d.hidden = false; d.onclick = () => { go = true; };
-  Inp.a = Inp.b = 0; let k = n;
+  Inp.a = Inp.b = 0; let k = Math.round(n * 1.6) + 14; yield 6;
   yield () => { if (Inp.a || Inp.b || go) { Inp.a = Inp.b = 0; return true; } return --k <= 0; };
 }
 const hpPct = (h, m) => Math.max(0, Math.min(100, h / m * 100));
@@ -13,11 +13,11 @@ function battleHud() {
   B.hp.foe += (f.hp - B.hp.foe) * 0.15; B.hp.me += (m.hp - B.hp.me) * 0.15;
   if (Math.abs(B.hp.foe - f.hp) < .5) B.hp.foe = f.hp; if (Math.abs(B.hp.me - m.hp) < .5) B.hp.me = m.hp;
   const bar = (h, mx, xp) => { const p = hpPct(h, mx); return `<div class="bar ${p < 25 ? 'cr' : p < 50 ? 'lo' : ''}"><i style="width:${p}%"></i></div>`; };
-  const key = [f.sp, f.lv, Math.round(B.hp.foe), m.sp, m.lv, Math.round(B.hp.me), m.xp, m.hp, f.hp, S.party.length].join();
+  const key = [f.sp, f.lv, Math.round(B.hp.foe), m.sp, m.lv, Math.round(B.hp.me), Math.round(m.xp * 4), m.hp, f.hp, S.party.length].join();
   if (key === B.hudKey) return; B.hudKey = key;
   $('#hud').innerHTML =
     `<div class="hb" style="left:calc(var(--u)*5);top:calc(var(--u)*5)"><b>${spName(f.sp, f.form)}</b><span class="lv">Lv${f.lv}</span><br><small>${GROUP_ICON[grp(f.sp)]} ${GROUP_NAME[grp(f.sp)]}</small>${bar(B.hp.foe, mhp(f))}</div>` +
-    `<div class="hb" style="right:calc(var(--u)*5);top:calc(var(--u)*66)"><b>${spName(m.sp, m.form)}</b><span class="lv">Lv${m.lv}</span>${bar(B.hp.me, mhp(m))}<small>HP ${Math.max(0, Math.ceil(B.hp.me))}/${mhp(m)}</small><div class="bar xp"><i style="width:${m.xp / needXp(m) * 100}%"></i></div></div>`;
+    `<div class="hb" style="right:calc(var(--u)*5);top:calc(var(--u)*66)"><b>${spName(m.sp, m.form)}</b><span class="lv">Lv${m.lv}</span>${bar(B.hp.me, mhp(m))}<small>HP ${Math.max(0, Math.ceil(B.hp.me))}/${mhp(m)}</small><div class="bar xp"><i style="width:${m.xp / needXp(m) * 100}%"></i></div><small style="opacity:.75">EXP ${Math.floor(m.xp)}/${needXp(m)}</small></div>`;
 }
 function renderBattle() {
   const gym = B.area === 'gym' || B.area === 'boss', p = CH[S.cur].pal;
@@ -36,9 +36,18 @@ function renderBattle() {
     drawTideling(c2, mon.sp, mon.form, x + sx, y + B.sink[who] * .8, r, { t: FRAME, flip });
     c2.restore();
   };
-  if (B.foe && !(B.ball && B.ball.hide)) draw(B.foe, 'foe', 172, 44, B.ball && B.ball.shrink ? 20 * B.ball.shrink : 20, false);
+  if (B.foe && !(B.ball && B.ball.hide)) draw(B.foe, 'foe', 172, 44, (B.ball && B.ball.shrink ? 20 * B.ball.shrink : 20) * (.15 + .85 * Math.min(1, B.appear)), false);
   draw(B.me, 'me', 62, 78, 24, true);
   if (B.ball) { const b = B.ball; c2.fillStyle = '#e53935'; c2.beginPath(); c2.arc(b.x, b.y, 4.6, Math.PI, 0); c2.fill(); c2.fillStyle = '#fff'; c2.beginPath(); c2.arc(b.x, b.y, 4.6, 0, Math.PI); c2.fill(); c2.strokeStyle = '#1d2433'; c2.lineWidth = 1; c2.beginPath(); c2.arc(b.x, b.y, 4.6, 0, 7); c2.moveTo(b.x - 4.6, b.y); c2.lineTo(b.x + 4.6, b.y); c2.stroke(); c2.fillStyle = '#fff'; c2.beginPath(); c2.arc(b.x, b.y, 1.4, 0, 7); c2.fill(); c2.stroke(); }
+  if (B.appear < 1) B.appear += 1 / 26;
+  // vòng sáng, tia sáng, chữ nổi
+  for (const r of B.rings) { r.t++; if (r.t < 0) continue; const k = r.t / 40; c2.strokeStyle = `rgba(255,240,150,${1 - k})`; c2.lineWidth = 1.6 * (1 - k) + .3; c2.beginPath(); c2.arc(r.x, r.y, 6 + k * 34, 0, 7); c2.stroke(); }
+  B.rings = B.rings.filter(r => r.t < 40);
+  for (const p of B.sparks) { p.t++; p.x += p.vx; p.y += p.vy; p.vy += .02; const a = 1 - p.t / p.life; c2.fillStyle = p.c; c2.globalAlpha = Math.max(0, a); c2.beginPath(); for (let i = 0; i < 8; i++) { const an = i * Math.PI / 4, rad = i & 1 ? p.s * .35 : p.s; c2.lineTo(p.x + Math.cos(an) * rad, p.y + Math.sin(an) * rad); } c2.fill(); c2.globalAlpha = 1; }
+  B.sparks = B.sparks.filter(p => p.t < p.life);
+  if (B.lvlFx > 0) { const k = 1 - B.lvlFx / 90, pop = k < .15 ? k / .15 : 1; c2.save(); c2.translate(62, 40 - k * 10); c2.scale(.6 + .5 * pop, .6 + .5 * pop); c2.globalAlpha = k > .8 ? (1 - k) / .2 : 1; c2.font = '800 13px system-ui, sans-serif'; c2.textAlign = 'center'; c2.lineWidth = 3; c2.strokeStyle = '#7a3b00'; c2.strokeText('LEVEL UP!', 0, 0); const g = c2.createLinearGradient(0, -10, 0, 3); g.addColorStop(0, '#fff7b0'); g.addColorStop(1, '#ffb300'); c2.fillStyle = g; c2.fillText('LEVEL UP!', 0, 0); c2.restore(); B.lvlFx--; }
+  for (const f of B.floats) { f.t++; const k = f.t / 70; c2.save(); c2.globalAlpha = k > .7 ? (1 - k) / .3 : 1; c2.font = '700 8px system-ui, sans-serif'; c2.textAlign = 'center'; c2.lineWidth = 2.4; c2.strokeStyle = '#0b2a44'; c2.strokeText(f.text, f.x, f.y - k * 12); c2.fillStyle = f.col; c2.fillText(f.text, f.x, f.y - k * 12); c2.restore(); }
+  B.floats = B.floats.filter(f => f.t < 70);
   for (const w of ['me', 'foe']) { if (B.shake[w] > 0) B.shake[w]--; if (B.flash[w] > 0) B.flash[w]--; }
 }
 function gainXp(m, amt, out) {
@@ -50,8 +59,34 @@ function gainXp(m, amt, out) {
     MOVE_LV.forEach((l, i) => { if (m.lv === l && i > 0) out.push(`${spName(m.sp, m.form)} học được chiêu ${MOVES[grp(m.sp)][i].n}!`); });
   }
 }
+function burst(x, y, n, cols) { for (let i = 0; i < n; i++) { const a = rand() * 6.283, sp = .4 + rand() * 1.5; B.sparks.push({ x, y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp - .6, s: 1.2 + rand() * 2, life: 45 + ri(40), t: 0, c: pick(cols || ['#fff7b0', '#ffd54f', '#ffb300', '#ffffff']) }); } if (B.sparks.length > 160) B.sparks.splice(0, B.sparks.length - 160); }
+function* gainXpAnim(m, amt) {
+  const nm = () => spName(m.sp, m.form);
+  B.floats.push({ t: 0, text: `+${amt} EXP`, x: 62, y: 56, col: '#7fd6ff' });
+  yield* note(`${nm()} nhận ${amt} điểm kinh nghiệm!`, 36);
+  let left = amt;
+  while (left > 0 && m.lv < 60) {
+    const need = needXp(m), take = Math.min(left, need - m.xp), start = m.xp, fr = Math.max(18, Math.min(60, Math.round(take / need * 90)));
+    for (let f = 1; f <= fr; f++) { m.xp = start + take * (f / fr); if (f % 6 === 0) Snd.tone(500 + f * 8, .04, 'triangle', .02); yield 1; }
+    m.xp = start + take; left -= take;
+    if (m.xp >= need) {
+      yield 12; m.xp = 0; m.lv++; m.hp = Math.min(mhp(m), m.hp + 4); B.hudKey = '';
+      B.lvlFx = 90; B.rings.push({ x: 62, y: 78, t: 0 }, { x: 62, y: 78, t: -12 }); burst(62, 78, 34); Snd.lvl();
+      yield* note(`${nm()} lên cấp ${m.lv}!`, 56);
+      for (let i = 1; i < 4; i++) if (m.lv === MOVE_LV[i]) yield* note(`${nm()} học được chiêu ${MOVES[grp(m.sp)][i].n}!`, 56);
+      if (m.form === 1 && m.lv >= evoLv(m.sp)) {
+        yield* note(`Ồ? ${nm()} đang phát sáng...`, 40);
+        for (let f = 0; f < 80; f++) { B.flash.me = 3; if (f % 10 === 0) { burst(62, 78, 8, ['#ffffff', '#cfefff']); B.rings.push({ x: 62, y: 78, t: 0 }); } yield 1; }
+        const old = nm(); syncForm(m); B.flash.me = 0; burst(62, 78, 44); B.rings.push({ x: 62, y: 78, t: 0 }); Snd.lvl(); B.hudKey = '';
+        yield* note(`✨ ${old} tiến hoá thành ${nm()}!`, 70);
+      }
+      yield 10;
+    }
+  }
+  if (m.lv >= 60) m.xp = 0;
+}
 function* battle(o) {
-  B.on = true; B.kind = o.kind; B.area = o.area; B.foes = o.foes.slice(); B.fi = 0; B.foe = B.foes[0]; B.ball = null;
+  B.on = true; B.appear = 1; B.sparks = []; B.floats = []; B.rings = []; B.lvlFx = 0; B.kind = o.kind; B.area = o.area; B.foes = o.foes.slice(); B.fi = 0; B.foe = B.foes[0]; B.ball = null;
   B.me = S.party.find(m => m.hp > 0); B.hp.foe = B.foe.hp; B.hp.me = B.me.hp; B.sink = { me: 0, foe: 0 }; B.shake = { me: 0, foe: 0 }; B.flash = { me: 0, foe: 0 };
   S.seen[B.foe.sp] = 1; Wd.mode = 'battle'; B.hudKey = '';
   yield* fade(0, 1);
@@ -110,16 +145,19 @@ function* battle(o) {
     if (!acted) continue;
     // ---- hạ gục đối thủ? ----
     if (B.foe.hp <= 0) {
-      for (let f = 0; f < 24; f++) { B.sink.foe = f * 30 / 24; yield 1; }
-      const out = [], base = o.kind === 'wild' ? 6 : o.kind === 'trainer' ? 9 : 12, amt = B.foe.lv * base;
-      yield* note(`${spName(B.foe.sp, B.foe.form)} đã gục! Nhận ${amt} XP.`, 34);
-      S.party.forEach(m => { if (m.hp > 0) gainXp(m, m === B.me ? amt : Math.ceil(amt / 2), out); });
-      if (o.kind === 'wild') S.pearls += B.foe.lv * 3;
-      for (const t of out) { Snd.lvl(); yield* note(t, 50); }
+      for (let f = 0; f < 30; f++) { B.sink.foe = f; yield 1; }
+      burst(172, 50, 14, ['#ffffff', '#cfefff']);
+      const base = o.kind === 'wild' ? 6 : o.kind === 'trainer' ? 9 : 12, amt = B.foe.lv * base;
+      yield* note(`${spName(B.foe.sp, B.foe.form)} đã gục!`, 40);
+      yield 16;
+      yield* gainXpAnim(B.me, amt);
+      for (const m of S.party) if (m !== B.me && m.hp > 0) { const out = []; gainXp(m, Math.ceil(amt / 2), out); for (const t of out) { Snd.lvl(); yield* note(t, 50); } }
+      if (o.kind === 'wild') { S.pearls += B.foe.lv * 3; yield* note(`Nhặt được ${B.foe.lv * 3} 💎`, 30); }
       B.sink.foe = 0; B.fi++;
       if (B.fi >= B.foes.length) { result = 'win'; break; }
-      B.foe = B.foes[B.fi]; B.hp.foe = B.foe.hp; S.seen[B.foe.sp] = 1; B.hudKey = '';
-      yield* note(`${o.name} đưa ra ${spName(B.foe.sp, B.foe.form)} (Lv${B.foe.lv})!`, 40); continue;
+      yield 20;
+      B.foe = B.foes[B.fi]; B.hp.foe = B.foe.hp; S.seen[B.foe.sp] = 1; B.hudKey = ''; B.appear = 0; Snd.tap();
+      yield* note(`${o.name} đưa ra ${spName(B.foe.sp, B.foe.form)} (Lv${B.foe.lv})!`, 50); continue;
     }
     // ---- đối thủ phản công ----
     if (rand() < 0.9) {

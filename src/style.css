@@ -13,7 +13,7 @@ html,body{margin:0;height:100%;background:#0b1b2b;color:#fff;overscroll-behavior
 .bar{height:calc(var(--u)*3);background:#cfd6df;border-radius:calc(var(--u)*2);overflow:hidden;margin-top:calc(var(--u)*1.5)}
 .bar i{display:block;height:100%;background:var(--ok);transition:width .25s}
 .bar.lo i{background:var(--gold)}.bar.cr i{background:var(--bad)}
-.bar.xp{height:calc(var(--u)*1.6)}.bar.xp i{background:var(--acc)}
+.bar.xp{height:calc(var(--u)*2.4)}.bar.xp i{background:linear-gradient(90deg,#2f9bd6,#7fd6ff);transition:none}
 .hb small{font-size:calc(var(--u)*5)}
 #dlg,#bmenu{position:absolute;left:calc(var(--u)*4);right:calc(var(--u)*4);bottom:calc(var(--u)*4);background:var(--paper);color:var(--ink);border:calc(var(--u)*1.2) solid var(--ink);border-radius:calc(var(--u)*4);padding:calc(var(--u)*3.5) calc(var(--u)*5);font-size:max(12.5px,calc(var(--u)*7));line-height:1.35;min-height:calc(var(--u)*32);cursor:pointer;box-shadow:0 calc(var(--u)*1.5) 0 rgba(0,0,0,.35)}
 #dlg[hidden],#bmenu[hidden],#modal[hidden]{display:none}

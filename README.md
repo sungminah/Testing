@@ -39,7 +39,7 @@ Giao diện tiếng Việt, giáo trình **Minna no Nihongo I (bài 1–25)**, �
 | 7 · Đảo Trăng | 20–22 | thể thường, ～と思います, ～と言いました, mệnh đề bổ nghĩa |
 | 8 · Đảo Sao | 23–25 | ～とき, ～と, くれる/あげる/もらう, ～たら |
 
-- **Câu hỏi tĩnh** (`src/js/11-questions.js`): 146 câu cho cả 25 bài, loại `g` ngữ pháp · `p` trợ từ · `h` chọn dạng đúng · `r` đọc hiểu · `o` sắp xếp. Độ khó d1–d3.
+- **Câu hỏi tĩnh** (`src/js/11-questions.js` + `13-questions2.js`): 242 câu cho cả 25 bài (mỗi bài ≥ 6 câu), loại `g` ngữ pháp · `p` trợ từ · `h` chọn dạng đúng · `r` đọc hiểu · `o` sắp xếp. Độ khó d1–d3.
 - **Câu hỏi sinh động** (`src/js/12-dyn.js`, mỗi câu có khoá xác định để Leitner hỏi lại đúng câu đó): `m` chữ cái (hiragana ⇄ katakana ⇄ romaji, có nhóm chữ dễ nhầm さ/ち, シ/ツ…) · `k` đọc / viết kanji từ 359 từ vựng · `v` nhóm từ (cái nào thuộc / không thuộc "のみもの", "のりもの"…) · `n` đọc **tiền** (300 さんびゃく, 8000 はっせん, 35,000…) và **giờ** (4 よじ, 7 しちじ, 9 くじ, 10 じゅっぷん…).
 - **Độ khó theo vùng** (`AREA_DL`): thị trấn/luyện tập dễ → đường mòn → phòng trainer → boss khó nhất; chương sau dịch dần sang khó hơn. **Chương 1: d3 chỉ xuất hiện ở boss.** Trọng số chọn câu: câu chưa hỏi ×3, câu sai nhiều được ưu tiên, bài của chương hiện tại ×3, không lặp câu vừa hỏi.
 - **Furigana tự động** từ bảng từ vựng (`10-vocab.js`): chương 1–3 hiện cho mọi chữ Hán; từ chương 4 trở đi những từ học đã lâu dần được ẩn (có thể ép "Luôn hiện" trong Cài đặt). Ghi rõ cách đọc bằng `{漢字|よみ}` khi cần.
@@ -58,6 +58,7 @@ src/js/06-notes.js        ghi chú ngữ pháp từng chương (giá sách, bà 
 src/js/10-vocab.js        từ vựng + Hán Việt + furigana tự động
 src/js/11-questions.js    kho câu hỏi tĩnh
 src/js/12-dyn.js          câu hỏi sinh động
+src/js/13-questions2.js   câu hỏi bổ sung bài 10–25
 src/js/20-state.js        trạng thái, lưu/tải, Tideling của người chơi
 src/js/21-quiz.js         chọn câu (độ khó + Leitner), giao diện hỏi, bảng giải thích
 src/js/30-tideling.js     150 loài, vẽ vector
@@ -88,7 +89,7 @@ Sau khi sửa `src/`, nhớ chạy `./build.sh` và commit cả `docs/index.html
 
 ## Hạn chế hiện tại / việc tiếp theo
 
-- Kho câu hỏi tĩnh mới có 146 câu (mục tiêu ~200). Các bài 13–25 mới có 3–6 câu mỗi bài; câu sinh động (kana, kanji, từ vựng, số, giờ) bù phần còn lại. Thêm câu: dùng `Q(...)` trong `11-questions.js` (đáp án đúng viết đầu tiên, game tự xáo trộn) — bài kiểm thử dữ liệu sẽ báo nếu thiếu furigana/giải thích.
+- Kho câu hỏi tĩnh có 242 câu (đã vượt mục tiêu ~200), nhưng các bài 20–25 vẫn mỏng hơn bài đầu về số loại câu (chưa có nhiều câu sắp xếp `o`). Thêm câu: dùng `Q(...)` trong `11-questions.js` hoặc `13-questions2.js` (đáp án đúng viết đầu tiên, game tự xáo trộn) — bài kiểm thử dữ liệu sẽ báo nếu thiếu furigana/giải thích.
 - Bảng từ vựng là từ vựng Minna I (359 từ) nên số chữ Hán (~350) vượt "~100 chữ N5" — chưa lọc riêng danh sách kanji N5 chính thức; bảng Hán Việt mới có 163 chữ.
 - 8 đảo dùng chung các bản đồ mẫu (thị trấn, đường mòn, phòng boss và 3 căn nhà; khác màu, NPC, trainer, boss, hội thoại); chưa có bản đồ riêng cho từng đảo.
 - Âm thanh mới có hiệu ứng (WebAudio), chưa có nhạc nền.
