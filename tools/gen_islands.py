@@ -96,7 +96,7 @@ def d3(g):
     for y in (6,7,8): g.put(2,y,'F')
     g.put(9,6,'F'); g.put(9,8,'F')
     g.text(15,8,'~~~~~~'); g.text(15,9,'~~~~~~'); g.text(15,10,'~~~~~~'); g.text(18,9,'bb') if False else None
-    g.text(3,10,'###'); g.text(3,11,'##'); g.put(7,4,'l'); g.put(12,4,'l'); g.put(22,4,'l'); g.put(12,10,'o'); g.put(21,10,'f'); g.put(22,9,'f')
+    g.text(12,5,'RRRR'); g.text(12,6,'WWWW'); g.text(14,9,'ff'); g.text(17,5,'ffff'); g.text(17,6,'ffff'); g.text(3,10,'###'); g.text(3,11,'##'); g.text(6,11,'ff'); g.text(19,11,'###'); g.put(7,4,'l'); g.put(12,4,'l'); g.put(22,4,'l'); g.put(12,10,'o'); g.put(21,10,'f'); g.put(22,9,'f')
 T3=town(9,[(3,'1'),(15,'2'),(19,'3')],11,d3)
 def r3f(g):
     g.rect(2,4,5,2,'g'); g.rect(15,4,5,2,'g'); g.text(3,8,'FFFF'); g.text(14,8,'FFFF')
@@ -203,7 +203,7 @@ G8=gym(16,13,7,g8)
 
 # NPC theo đảo: (tag,(kind,x,y,...))
 S={
- 3:(T3,(11,14),[('guide',('guide',11,6,'d')),('sensei',('sensei',7,10,'l')),('p0',('phrase',0,14,5,'l')),('p1',('phrase',1,20,7,'l')),('p2',('phrase',2,13,11,'l'))],
+ 3:(T3,(11,14),[('guide',('guide',11,6,'d')),('sensei',('sensei',7,10,'l')),('p0',('phrase',0,14,7,'l')),('p1',('phrase',1,21,8,'l')),('p2',('phrase',2,13,11,'l'))],
     R3,[('t0',('trainer',0,12,7,'l',6)),('t1',('trainer',1,16,17,'l',6)),('i',('item',20,3)),('f',('fruit',2,19))],
     G3,[('t2',('trainer',2,3,10,'r',6)),('t3',('trainer',3,12,6,'l',6)),('b',('boss',7,2,'d'))]),
  4:(T4,(9,14),[('guide',('guide',8,6,'r')),('sensei',('sensei',5,9,'r')),('p0',('phrase',0,17,5,'l')),('p1',('phrase',1,21,10,'l')),('p2',('phrase',2,13,11,'l'))],
