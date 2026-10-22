@@ -58,7 +58,11 @@ function* talk(n) {
     yield* say(n.name, 'Việc cần làm: ' + objective());
     return;
   }
-  if (n.kind === 'phrase') { const p = c.phrases[n.n % c.phrases.length]; return yield* say(n.name, p[1], p[0]); }
+  if (n.kind === 'phrase') { const p = c.phrases[n.n % c.phrases.length]; yield* say(n.name, p[1], p[0]); return yield* offerChallenge(n, 1, 10); }
+  if (n.kind === 'nurse') return yield* nurse(n);
+  if (n.kind === 'shop') return yield* shopMenu(n);
+  if (n.kind === 'lesson') return yield* lessonNpc(n);
+  if (n.kind === 'kid') return yield* kidNpc(n);
   if (n.kind === 'sensei') return yield* sensei(n);
   if (n.kind === 'item') return yield* pickup(n);
   if (n.kind === 'trainer' || n.kind === 'boss') {
@@ -107,30 +111,58 @@ function* sensei(n) {
   else yield* say(n.name, `${ok}/3 câu đúng. ${ok >= 2 ? 'Rất tốt!' : 'Đừng lo, câu sai sẽ được hỏi lại. Cứ luyện thêm nhé!'}`, ok >= 2 ? 'いいですね！' : 'もういちど！');
   save();
 }
-function* door(ch) {
-  const dy = 1; // sau khi vào cửa thì bước lùi ra
-  if (ch === '1') {
-    yield* say('Y tá Mimi', 'Chào mừng đến trạm y tế! Để cô chữa cho các Tideling của bạn nhé.', 'おだいじに。');
-    yield* fade(1, 8); healAll(); yield 20; Snd.lvl(); yield* fade(0, 8);
-    yield* say('Y tá Mimi', 'Xong rồi! Tideling của bạn đã khoẻ mạnh hoàn toàn. Chúc bạn may mắn!', 'いってらっしゃい！'); save();
-  } else if (ch === '2') {
-    yield* say('Chủ tiệm', 'Xin chào quý khách! Tiệm bán đồ cho thuyền viên đây.', 'いらっしゃいませ！');
-    for (; ;) {
-      const opts = [
-        { t: '🕸 Lưới Tideling', s: '20 💎', dis: S.pearls < 20 }, { t: '🍎 Tidefruit (hồi 40 HP)', s: '15 💎', dis: S.pearls < 15 },
-        { t: '🕸 Siêu lưới (+20% bắt)', s: '60 💎', dis: S.pearls < 60 }, { t: 'Thoát', s: `Bạn có ${S.pearls} 💎` }];
-      const r = yield* choose('Mua gì nào?', opts);
-      if (r === 0) { S.pearls -= 20; S.bag.net++; } else if (r === 1) { S.pearls -= 15; S.bag.fruit++; } else if (r === 2) { S.pearls -= 60; S.bag.snet++; } else break;
-      Snd.ok();
-    }
-    yield* say('Chủ tiệm', 'Cảm ơn quý khách!', 'ありがとうございました！');
-  } else {
-    const c = CH[S.cur], pool = VOC.filter(v => v.l >= c.lessons[0] && v.l <= c.lessons[1] && v.w !== v.r);
-    const v = pick(pool);
-    yield* say('Cư dân', 'Nhà này đang rộn ràng! Cậu thử nhớ từ này nhé: ' + `${v.m}.`, v.w);
-    yield* say('Cư dân', `Cách đọc: ${v.r}.`, v.r);
+function* nurse(n) {
+  yield* say(n.name, 'Chào mừng đến trạm y tế! Để cô chữa cho các Tideling của bạn nhé.', 'おだいじに。');
+  yield* fade(1, 8); healAll(); yield 20; Snd.lvl(); yield* fade(0, 8);
+  yield* say(n.name, 'Xong rồi! Tideling của bạn đã khoẻ mạnh hoàn toàn. Chúc bạn may mắn!', 'いってらっしゃい！'); save();
+}
+function* shopMenu(n) {
+  yield* say(n.name, 'Xin chào quý khách! Tiệm bán đồ cho thuyền viên đây.', 'いらっしゃいませ！');
+  for (; ;) {
+    const opts = [
+      { t: '🕸 Lưới Tideling', s: '20 💎', dis: S.pearls < 20 }, { t: '🍎 Tidefruit (hồi 40 HP)', s: '15 💎', dis: S.pearls < 15 },
+      { t: '🕸 Siêu lưới (+20% bắt)', s: '60 💎', dis: S.pearls < 60 }, { t: 'Thoát', s: `Bạn có ${S.pearls} 💎` }];
+    const r = yield* choose('Mua gì nào?', opts);
+    if (r === 0) { S.pearls -= 20; S.bag.net++; } else if (r === 1) { S.pearls -= 15; S.bag.fruit++; } else if (r === 2) { S.pearls -= 60; S.bag.snet++; } else break;
+    Snd.ok();
   }
-  const t = Wd.map; S.y += dy; Wd.face = 'd';
+  yield* say(n.name, 'Cảm ơn quý khách!', 'ありがとうございました！');
+}
+/* thẻ ghi chú ngữ pháp */
+function noteHtml(note) { return `<div class="box"><b>${furi(note.t)}</b><div style="margin:4px 0">${esc(note.b)}</div>${note.ex.map(e => `<div style="margin-top:4px"><span style="font-size:19px">${furi(e[0])}</span><div class="vi" style="font-size:13px">${esc(e[1])}</div></div>`).join('')}</div>`; }
+function* showNotes(notes, title) {
+  yield* modalRun(done => { showModal(modalCard(`<h2>${title}</h2>${notes.map(noteHtml).join('')}<div class="foot"><button class="btn" data-k="back">Đã hiểu ⏎</button></div>`)); wireBack(done); }, escBack);
+}
+function* bookshelf() {
+  yield* say('', 'Giá sách chất đầy sách ngữ pháp. Bạn mở ra đọc...');
+  yield* showNotes(NOTES[S.cur], `📚 Ngữ pháp ${CH[S.cur].vi} (bài ${CH[S.cur].lessons[0]}–${CH[S.cur].lessons[1]})`);
+}
+function* challenge(n, count, reward) {
+  const key = 'ch_' + n.id; let ok = 0;
+  for (let k = 0; k < count; k++) { const r = yield* Quiz.ask({ area: 'drill' }); if (r.ok) ok++; }
+  const need = Math.ceil(count * 2 / 3);
+  if (ok >= need && !S.flags[key]) { S.flags[key] = 1; S.pearls += reward; Snd.lvl(); yield* say(n.name, `Giỏi quá! ${ok}/${count} câu đúng. Thưởng ${reward} 💎!`, 'すごい！'); }
+  else yield* say(n.name, `${ok}/${count} câu đúng. ${ok >= need ? 'Rất tốt!' : 'Cố lên, lần sau sẽ tốt hơn!'}`, ok >= need ? 'いいですね！' : 'がんばって！');
+  save();
+}
+function* offerChallenge(n, count, reward, text) {
+  const first = !S.flags['ch_' + n.id];
+  const r = yield* choose('', [{ t: `Thử tài (${count} câu)`, s: first ? `Lần đầu thưởng ${reward} 💎` : 'Luyện tập thêm' }, { t: 'Để sau' }]);
+  if (r === 0) yield* challenge(n, count, reward);
+}
+function* lessonNpc(n) {
+  const note = NOTES[S.cur][n.n % NOTES[S.cur].length];
+  yield* say(n.name, 'Lại đây, bà giảng cho cháu một chút ngữ pháp nhé.', 'いらっしゃい。');
+  yield* showNotes([note], '📖 Bài học nhỏ');
+  yield* say(n.name, 'Giờ thử tài nào! Trả lời đúng sẽ có thưởng (lần đầu).', 'やってみましょう！');
+  yield* offerChallenge(n, 2, 30);
+}
+function* kidNpc(n) {
+  const v = pick(VOC.filter(x => x.l >= CH[S.cur].lessons[0] && x.l <= CH[S.cur].lessons[1] && x.w !== x.r));
+  yield* say(n.name, `Anh/chị ơi, từ này nghĩa là "${v.m}". Đọc là gì nhỉ?`, v.w);
+  yield* say(n.name, `Đọc là "${v.r}"!`, v.r);
+  yield* say(n.name, 'Em thi đố anh/chị nhé!', 'クイズを しましょう！');
+  yield* offerChallenge(n, 3, 45);
 }
 function* fightTrainer(n) {
   const i = S.cur, c = CH[i], boss = n.kind === 'boss';

@@ -28,17 +28,17 @@ function renderBattle() {
     ctx.fillStyle = p.g1; ctx.fillRect(0, 76, W, 84); ctx.fillStyle = p.g2; for (let x = 0; x < W; x += 16) ctx.fillRect(x, 90 + (x / 16 % 3) * 20, 6, 1);
   }
   ctx.fillStyle = gym ? '#6b5aa0' : shade(p.g2, 1.1); ctx.beginPath(); ctx.ellipse(172, 66, 36, 8, 0, 0, 7); ctx.fill(); ctx.beginPath(); ctx.ellipse(62, 102, 42, 9, 0, 0, 7); ctx.fill();
-  c2.clearRect(0, 0, 720, 480);
+  clear2();
   const draw = (mon, who, x, y, r, flip) => {
     if (!mon) return;
     const sx = B.shake[who] ? Math.sin(FRAME * 1.6) * 6 * B.shake[who] / 10 : 0;
     c2.save(); c2.globalAlpha = B.flash[who] && (FRAME & 2) ? .35 : 1 - B.sink[who] / 30;
-    drawTideling(c2, mon.sp, mon.form, (x + sx) * 3, (y + B.sink[who] * .8) * 3, r * 3, { t: FRAME, flip });
+    drawTideling(c2, mon.sp, mon.form, x + sx, y + B.sink[who] * .8, r, { t: FRAME, flip });
     c2.restore();
   };
   if (B.foe && !(B.ball && B.ball.hide)) draw(B.foe, 'foe', 172, 44, B.ball && B.ball.shrink ? 20 * B.ball.shrink : 20, false);
   draw(B.me, 'me', 62, 78, 24, true);
-  if (B.ball) { const b = B.ball; c2.fillStyle = '#e53935'; c2.beginPath(); c2.arc(b.x * 3, b.y * 3, 14, Math.PI, 0); c2.fill(); c2.fillStyle = '#fff'; c2.beginPath(); c2.arc(b.x * 3, b.y * 3, 14, 0, Math.PI); c2.fill(); c2.strokeStyle = '#1d2433'; c2.lineWidth = 3; c2.beginPath(); c2.arc(b.x * 3, b.y * 3, 14, 0, 7); c2.moveTo(b.x * 3 - 14, b.y * 3); c2.lineTo(b.x * 3 + 14, b.y * 3); c2.stroke(); }
+  if (B.ball) { const b = B.ball; c2.fillStyle = '#e53935'; c2.beginPath(); c2.arc(b.x, b.y, 4.6, Math.PI, 0); c2.fill(); c2.fillStyle = '#fff'; c2.beginPath(); c2.arc(b.x, b.y, 4.6, 0, Math.PI); c2.fill(); c2.strokeStyle = '#1d2433'; c2.lineWidth = 1; c2.beginPath(); c2.arc(b.x, b.y, 4.6, 0, 7); c2.moveTo(b.x - 4.6, b.y); c2.lineTo(b.x + 4.6, b.y); c2.stroke(); c2.fillStyle = '#fff'; c2.beginPath(); c2.arc(b.x, b.y, 1.4, 0, 7); c2.fill(); c2.stroke(); }
   for (const w of ['me', 'foe']) { if (B.shake[w] > 0) B.shake[w]--; if (B.flash[w] > 0) B.flash[w]--; }
 }
 function gainXp(m, amt, out) {
@@ -137,7 +137,7 @@ function* battle(o) {
       B.me = cand[r]; B.hp.me = B.me.hp; B.hudKey = ''; yield* note(`Đi nào, ${spName(B.me.sp, B.me.form)}!`, 26);
     }
   }
-  B.on = false; B.foe = B.me = null; B.ball = null; Wd.mode = 'world'; c2.clearRect(0, 0, 720, 480); $('#hud').innerHTML = '';
+  B.on = false; B.foe = B.me = null; B.ball = null; Wd.mode = 'world'; clear2(); $('#hud').innerHTML = '';
   $('#dlg').hidden = true; $('#bmenu').hidden = true; save();
   return result;
 }

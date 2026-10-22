@@ -17,7 +17,7 @@ function applyOpts() { Snd.on = !!S.opt.sound; FURI_MODE = S.opt.furi === 'all' 
 
 /* ---- modal DOM ---- */
 const modalEl = $('#modal');
-function showModal(html, onKey) { modalEl.innerHTML = html; modalEl.hidden = false; modalEl.scrollTop = 0; Modal.open = true; Modal.onKey = onKey || null; for (const k in Inp.held) Inp.held[k] = 0; }
+function showModal(html, onKey) { modalEl.innerHTML = html; modalEl.hidden = false; modalEl.scrollTop = 0; Modal.open = true; Modal.onKey = onKey || null; for (const k in Inp.held) Inp.held[k] = 0; focusFirst(modalItems()); }
 function closeModal() { modalEl.hidden = true; modalEl.innerHTML = ''; Modal.open = false; Modal.onKey = null; }
 function modalCard(inner) { return `<div class="card">${inner}</div>`; }
 

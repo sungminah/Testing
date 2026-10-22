@@ -27,6 +27,8 @@ module.exports = function validateInPage() {
   window.__missingFuri.clear();
   G.SQ.forEach(q => { G.furi(q.q); if (q.p) G.furi(q.p); q.c.forEach(c => G.furi(c)); });
   if (window.__missingFuri.size) err('Kanji chưa có furigana (thiếu trong VOC): ' + [...window.__missingFuri].join(''));
+  NOTES.forEach((c, i) => c.forEach(n => { G.furi(n.t); G.furi(n.b); n.ex.forEach(e => G.furi(e[0])); if (!n.ex.length || !n.b) err('note chương ' + (i + 1) + ' thiếu nội dung'); }));
+  if (window.__missingFuri.size) err('Ghi chú ngữ pháp: kanji thiếu furigana: ' + [...window.__missingFuri].join(''));
   // --- câu hỏi động ---
   const dynErr = {}; window.__missingFuri.clear(); let nd = 0;
   const types = ['kana', 'read', 'write', 'cat', 'num', 'time'];
@@ -66,9 +68,9 @@ module.exports = function validateInPage() {
   // --- bản đồ ---
   for (const id in G.MAPS) {
     const m = G.MAPS[id], lens = new Set(m.rows.map(r => r.length)); if (lens.size !== 1) err(id + ': hàng không đều');
-    const free = (x, y) => !'#RW~'.includes(m.rows[y][x]);
+    const free = (x, y) => !'#RW~KLTPE'.includes(m.rows[y][x]);
     m.npcs.forEach(n => { if (!free(n.x, n.y)) err(`${id}: NPC ${n.id} đứng trên ô cứng`); });
-    for (const k in m.warps) { const w = m.warps[k], t = G.MAPS[w.map]; if (!t || !'#RW~'.includes(t.rows[w.y][w.x]) === false) err(`${id}: warp ${k} đích sai`); }
+    for (const k in m.warps) { const w = m.warps[k], t = G.MAPS[w.map]; if (!t || !'#RW~KLTPE'.includes(t.rows[w.y][w.x]) === false) err(`${id}: warp ${k} đích sai`); }
     // tới được mọi NPC và lối ra từ ô đầu tiên của mỗi bản đồ?
     const start = m.warps ? Object.values(G.MAPS).flatMap(mm => Object.values(mm.warps)).filter(w => w.map === id)[0] || { x: 9, y: 11 } : null;
     const seenT = new Set([start.x + ',' + start.y]); const q = [[start.x, start.y]];

@@ -155,11 +155,11 @@ function seaSvg(sel) {
     const mx = (x1 + x2) / 2 + nx * sc.bend * 2, my = (y1 + y2) / 2 + ny * sc.bend * 2;
     const both = sc.b <= S.maxCh, open = !!S.sc[sc.id], col = open ? '#ffd54f' : both ? '#fff' : '#ffffff55';
     const qx = .25 * x1 + .5 * mx + .25 * x2, qy = .25 * y1 + .5 * my + .25 * y2;
-    s += `<g class="scg" data-sc="${sc.id}" style="cursor:pointer"><path d="M${x1} ${y1} Q${mx} ${my} ${x2} ${y2}" fill="none" stroke="${col}" stroke-width="${open ? 3 : 1.6}" stroke-dasharray="${open ? '' : '3 3'}" opacity="${both || open ? 1 : .5}"/><circle cx="${qx}" cy="${qy}" r="8.5" fill="${open ? '#ffd54f' : '#1d2433'}" stroke="${sel && sel.sc === sc.id ? '#fff' : col}" stroke-width="${sel && sel.sc === sc.id ? 2.5 : 1.2}" opacity="${both || open ? 1 : .55}"/><text x="${qx}" y="${qy + 3.6}" text-anchor="middle" font-size="10" opacity="${both || open ? 1 : .55}">${sc.icon}</text></g>`;
+    s += `<g class="scg" data-sc="${sc.id}" tabindex="0" style="cursor:pointer"><path d="M${x1} ${y1} Q${mx} ${my} ${x2} ${y2}" fill="none" stroke="${col}" stroke-width="${open ? 3 : 1.6}" stroke-dasharray="${open ? '' : '3 3'}" opacity="${both || open ? 1 : .5}"/><circle cx="${qx}" cy="${qy}" r="8.5" fill="${open ? '#ffd54f' : '#1d2433'}" stroke="${sel && sel.sc === sc.id ? '#fff' : col}" stroke-width="${sel && sel.sc === sc.id ? 2.5 : 1.2}" opacity="${both || open ? 1 : .55}"/><text x="${qx}" y="${qy + 3.6}" text-anchor="middle" font-size="10" opacity="${both || open ? 1 : .55}">${sc.icon}</text></g>`;
   });
   CH.forEach((c, i) => {
     const [x, y] = P[i], open = i <= S.maxCh, done = !!S.flags['boss' + i], selI = sel && sel.i === i;
-    s += `<g class="isl" data-i="${i}" opacity="${open ? 1 : .55}"><ellipse cx="${x}" cy="${y + 2}" rx="25" ry="15" fill="#0003"/><ellipse cx="${x}" cy="${y}" rx="24" ry="14.5" fill="#f1dca0" stroke="${selI ? '#fff' : '#d8c07a'}" stroke-width="${selI ? 3 : 1.2}"/><ellipse cx="${x}" cy="${y - 1.5}" rx="18" ry="10" fill="${open ? c.pal.g1 : '#8a9a98'}"/><circle cx="${x - 8}" cy="${y - 3}" r="3.6" fill="${open ? c.pal.tree : '#6c7a78'}"/><circle cx="${x + 7}" cy="${y + 1}" r="3" fill="${open ? c.pal.tree : '#6c7a78'}"/><circle cx="${x + 1}" cy="${y - 7}" r="2.4" fill="${open ? c.pal.tree : '#6c7a78'}"/>
+    s += `<g class="isl" data-i="${i}" tabindex="0" opacity="${open ? 1 : .55}"><ellipse cx="${x}" cy="${y + 2}" rx="25" ry="15" fill="#0003"/><ellipse cx="${x}" cy="${y}" rx="24" ry="14.5" fill="#f1dca0" stroke="${selI ? '#fff' : '#d8c07a'}" stroke-width="${selI ? 3 : 1.2}"/><ellipse cx="${x}" cy="${y - 1.5}" rx="18" ry="10" fill="${open ? c.pal.g1 : '#8a9a98'}"/><circle cx="${x - 8}" cy="${y - 3}" r="3.6" fill="${open ? c.pal.tree : '#6c7a78'}"/><circle cx="${x + 7}" cy="${y + 1}" r="3" fill="${open ? c.pal.tree : '#6c7a78'}"/><circle cx="${x + 1}" cy="${y - 7}" r="2.4" fill="${open ? c.pal.tree : '#6c7a78'}"/>
       <circle cx="${x - 20}" cy="${y - 13}" r="7" fill="#1d2433" stroke="#fff" stroke-width="1"/><text x="${x - 20}" y="${y - 10}" text-anchor="middle" font-size="9" fill="#fff" font-weight="800">${i + 1}</text>
       <text x="${x}" y="${y + 24}" text-anchor="middle" font-size="7.5" fill="#fff" stroke="#0b2a44" stroke-width="2" paint-order="stroke" font-weight="700">${esc(c.vi)}</text>
       ${!open ? `<text x="${x}" y="${y + 3}" text-anchor="middle" font-size="12">🔒</text>` : ''}${done ? `<text x="${x + 18}" y="${y - 10}" font-size="11">🏅</text>` : ''}
@@ -182,6 +182,7 @@ function* scrSea() {
         if (sel.i !== S.cur && open) act = canSail(sel.i) ? `<button class="btn" data-k="sail">⛵ Giương buồm</button>` : `<span class="vi">Chỉ đi được sang đảo liền kề, hoặc qua lối tắt đã mở.</span>`;
       }
       showModal(modalCard(`<h2>🧭 Hải đồ Coral Crown</h2>${seaSvg(sel)}<div class="box">${info}</div><div class="foot">${act}<button class="btn g" data-k="back">Đóng</button></div>`));
+      { const cf = sel.sc ? $(`.scg[data-sc="${sel.sc}"]`, modalEl) : $(`.isl[data-i="${sel.i}"]`, modalEl); if (cf) cf.focus({ preventScroll: true }); }
       $$('.isl', modalEl).forEach(g => g.addEventListener('click', () => done({ sel: { i: +g.dataset.i } })));
       $$('.scg', modalEl).forEach(g => g.addEventListener('click', () => done({ sel: { sc: g.dataset.sc } })));
       $$('[data-k]', modalEl).forEach(b => b.addEventListener('click', () => done({ k: b.dataset.k })));

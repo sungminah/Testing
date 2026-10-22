@@ -53,7 +53,10 @@ const GYM = [
   '#............#',
   '######VV######'
 ];
-const SOLID = new Set(['#', 'R', 'W', '~']);
+const CLINIC = ['##########', '#EE.....P#', '#...KKK..#', '#........#', '#.rr...rr#', '#........#', '#L......L#', '####VV####'];
+const SHOP = ['##########', '#LL....LP#', '#...KKK..#', '#........#', '#.rr...rr#', '#........#', '#L......L#', '####VV####'];
+const HOME = ['##########', '#E.LL..P.#', '#........#', '#..TT....#', '#........#', '#.rrrr...#', '#........#', '####VV####'];
+const SOLID = new Set(['#', 'R', 'W', '~', 'K', 'L', 'T', 'P', 'E']);
 const MAPS = {};
 const TRAINER_NAMES = ['Cậu bé Kai', 'Chị Yuna', 'Bác ngư dân Gen', 'Em Sora', 'Anh Riku', 'Cô Nao', 'Chú Taro', 'Bạn Mei', 'Anh Haru', 'Cô Rin', 'Cậu Ken', 'Bà Chiyo'];
 const LOOKS = [
@@ -84,6 +87,20 @@ function buildIsland(i) {
   const town = mk(`i${i}_town`, `${c.vi} · Thị trấn`, TOWN, 'town');
   const route = mk(`i${i}_route`, `${c.vi} · Đường mòn`, ROUTE, 'route');
   const gym = mk(`i${i}_gym`, `${c.vi} · Nhà ${c.boss.name.split(' ').slice(-1)[0]}`, GYM, 'gym');
+  const clinic = mk(`i${i}_clinic`, `${c.vi} · Trạm y tế`, CLINIC, 'room');
+  const shop = mk(`i${i}_shop`, `${c.vi} · Cửa hàng`, SHOP, 'room');
+  const home = mk(`i${i}_home`, `${c.vi} · Nhà dân`, HOME, 'room');
+  [[3, clinic], [8, shop], [13, home]].forEach(([dx, rm]) => {
+    town.warps[`${dx},3`] = { map: rm.id, x: 4, y: 6, dir: 'u' };
+    for (const x of [4, 5]) rm.warps[`${x},7`] = { map: town.id, x: dx, y: 4, dir: 'd' };
+  });
+  clinic.npcs.push({ id: `nurse${i}`, x: 5, y: 1, dir: 'd', kind: 'nurse', look: { hair: '#6a3a5a', body: '#f4f4f8' }, name: 'Y tá Mimi' });
+  shop.npcs.push({ id: `shop${i}`, x: 5, y: 1, dir: 'd', kind: 'shop', look: { hair: '#3a3a3a', body: '#e0a030' }, name: 'Chủ tiệm' });
+  home.npcs.push({ id: `grandma${i}`, x: 2, y: 4, dir: 'r', kind: 'lesson', n: i % 3, look: { hair: '#d8d8e0', body: '#9a6ab0' }, name: 'Bà Haru' });
+  home.npcs.push({ id: `kid${i}`, x: 7, y: 4, dir: 'l', kind: 'kid', look: { hair: '#1d1d28', body: '#3fa66a' }, name: 'Bé Hiro' });
+  home.npcs.push({ id: `homeitem${i}`, x: 8, y: 1, dir: 'd', kind: 'item', key: 'fruit', name: 'Tidefruit' });
+  clinic.npcs.push({ id: `patient${i}`, x: 7, y: 4, dir: 'l', kind: 'phrase', n: 1, look: { hair: '#7a4a2a', body: '#4c8fd6' }, name: 'Bệnh nhân' });
+  shop.npcs.push({ id: `buyer${i}`, x: 2, y: 4, dir: 'r', kind: 'phrase', n: 2, look: { hair: '#555', body: '#d8553f' }, name: 'Khách hàng' });
   for (const x of [8, 9]) town.warps[`${x},0`] = { map: route.id, x: 9, y: 18, dir: 'u' };
   for (const x of [8, 9]) route.warps[`${x},19`] = { map: town.id, x: 9, y: 1, dir: 'd' };
   route.warps['9,2'] = { map: gym.id, x: 6, y: 10, dir: 'u' };

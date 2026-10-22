@@ -47,9 +47,21 @@ function pressKey(k, down) {
   if (k === 'u' || k === 'd' || k === 'l' || k === 'r') Inp.held[k] = down ? 1 : 0;
   else if (down) { if (k === 'a') Inp.a = 1; else if (k === 'b') Inp.b = 1; else if (k === 'm') Inp.m = 1; }
 }
+/* điều hướng bằng phím trong menu/câu hỏi/tiêu đề: ↑← = trước, ↓→ = sau, Enter/Space/Z = chọn */
+function navKeys(items, e) {
+  if (!items.length) return false;
+  const i = items.indexOf(document.activeElement), k = e.key;
+  if (k === 'ArrowDown' || k === 'ArrowRight' || k === 's' || k === 'd') { items[(i + 1) % items.length].focus({ preventScroll: false }); return true; }
+  if (k === 'ArrowUp' || k === 'ArrowLeft' || k === 'w' || k === 'a') { items[(i <= 0 ? items.length : i) - 1].focus(); return true; }
+  if ((k === 'Enter' || k === ' ' || k === 'z') && i >= 0) { items[i].dispatchEvent(new MouseEvent('click', { bubbles: true })); return true; }
+  return false;
+}
+const modalItems = () => $$('#modal button:not(:disabled), #modal [tabindex="0"]');
+function focusFirst(items) { if (items[0]) items[0].focus({ preventScroll: true }); }
 document.addEventListener('keydown', e => {
   if (e.metaKey || e.ctrlKey || e.altKey) return;
-  if (Modal.open) { if (Modal.onKey && Modal.onKey(e)) e.preventDefault(); return; }
+  if (Modal.open) { if ((Modal.onKey && Modal.onKey(e)) || navKeys(modalItems(), e)) e.preventDefault(); return; }
+  if (typeof Wd !== 'undefined' && Wd.mode === 'title') { if (navKeys($$('#screen .title button'), e)) e.preventDefault(); return; }
   if (KEYMAP[e.key]) { pressKey(KEYMAP[e.key], 1); e.preventDefault(); return; }
   if (e.key === 'z' || e.key === 'Z' || e.key === 'Enter' || e.key === ' ') { pressKey('a', 1); e.preventDefault(); }
   else if (e.key === 'x' || e.key === 'X' || e.key === 'Escape' || e.key === 'Backspace') { pressKey('b', 1); e.preventDefault(); }

@@ -3,24 +3,27 @@
 function sizeUI() {
   const sc = $('#screen'), u = sc.clientWidth / 240; document.documentElement.style.setProperty('--u', u + 'px');
   const pad = $('#pad'); document.documentElement.style.setProperty('--padh', (getComputedStyle(pad).display === 'none' ? 0 : pad.offsetHeight + 12) + 'px');
+  resizeCanvas();
 }
 window.addEventListener('resize', sizeUI);
 
 function renderTitle() {
+  logicalT();
   const g = ctx.createLinearGradient(0, 0, 0, H); g.addColorStop(0, '#79c8ee'); g.addColorStop(.55, '#bfe8f7'); g.addColorStop(.56, '#2f86c4'); g.addColorStop(1, '#17517f');
   ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
   for (let i = 0; i < 9; i++) { ctx.fillStyle = 'rgba(255,255,255,.35)'; ctx.fillRect(((i * 37 + FRAME / 4) % (W + 20)) - 10, 92 + i * 7, 14 + (i % 3) * 6, 1); }
   [[40, 84, 22], [120, 80, 16], [190, 86, 26]].forEach(([x, y, r], i) => { ctx.fillStyle = '#f1dca0'; ctx.beginPath(); ctx.ellipse(x, y, r, r / 3, 0, 0, 7); ctx.fill(); ctx.fillStyle = CH[i].pal.g1; ctx.beginPath(); ctx.ellipse(x, y - 1, r * .75, r / 4, 0, 0, 7); ctx.fill(); });
-  c2.clearRect(0, 0, 720, 480);
-  drawTideling(c2, 0, 1, 130, 345, 52, { t: FRAME }); drawTideling(c2, 1, 1, 360, 330, 60, { t: FRAME + 10 }); drawTideling(c2, 5, 2, 590, 345, 52, { t: FRAME + 20, flip: true });
+  clear2();
+  drawTideling(c2, 0, 1, 43, 115, 17, { t: FRAME }); drawTideling(c2, 1, 1, 120, 110, 20, { t: FRAME + 10 }); drawTideling(c2, 5, 2, 197, 115, 17, { t: FRAME + 20, flip: true });
 }
 function showTitle() {
   Wd.mode = 'title'; $('#hud').innerHTML = ''; $('#dlg').hidden = true; $('#bmenu').hidden = true;
   const has = !!loadSave(); let t = $('.title'); if (t) t.remove();
   t = el('div', 'title', `<h1>Coral Crown</h1><p>Quần đảo San Hô · Học tiếng Nhật JLPT <b>N5</b></p>
     ${has ? '<button class="mb" id="bt-cont">▶ Tiếp tục</button>' : ''}<button class="mb" id="bt-new">${has ? '★ Chơi mới' : '★ Bắt đầu'}</button>
-    <p style="font-size:calc(var(--u)*4.5);opacity:.8">Phím mũi tên/WASD · Z/Enter = A · X/Esc = B · M = Menu</p>`);
+    <p style="font-size:calc(var(--u)*4.5);opacity:.8">Mũi tên/WASD = di chuyển & chọn · Enter/Z = A · Esc/X = B · M = Menu · 1–4 = đáp án</p>`);
   t.style.cssText = 'position:absolute;inset:0;z-index:5;padding-top:calc(var(--u)*10)'; $('#screen').appendChild(t);
+  focusFirst($$('#screen .title button'));
   if (has) $('#bt-cont').onclick = () => { t.remove(); continueGame(); };
   $('#bt-new').onclick = () => { if (has && !confirm('Chơi mới sẽ ghi đè bản lưu hiện tại. Tiếp tục?')) return; t.remove(); newGame(); };
 }
@@ -41,8 +44,8 @@ function frame() {
   try {
     if (Wd.mode !== 'title') worldUpdate();
     if (Wd.mode === 'title') renderTitle();
-    else if (Wd.mode === 'battle') { renderBattle(); battleHud(); }
-    else { renderWorld(); c2.clearRect(0, 0, 720, 480); worldHud(); }
+    else if (Wd.mode === 'battle') { logicalT(); renderBattle(); battleHud(); }
+    else { clear2(); renderWorld(); worldHud(); }
     if (Fx.fade > 0) { ctx.fillStyle = `rgba(8,16,28,${Fx.fade})`; ctx.fillRect(0, 0, W, H); }
     Quiz.tick();
   } catch (e) { (window.__errors = window.__errors || []).push(String(e && e.stack || e)); console.error(e); }
@@ -50,7 +53,7 @@ function frame() {
 /* mô phỏng không vẽ (nhanh gấp nhiều lần) — dùng cho bot kiểm thử */
 function sim(n) { for (let i = 0; i < n; i++) { FRAME++; if (Wd.mode !== 'title') worldUpdate(); } }
 function drawNow() {
-  if (Wd.mode === 'title') renderTitle(); else if (Wd.mode === 'battle') { renderBattle(); B.hudKey = ''; battleHud(); } else { renderWorld(); c2.clearRect(0, 0, 720, 480); worldHud(); }
+  if (Wd.mode === 'title') renderTitle(); else if (Wd.mode === 'battle') { logicalT(); renderBattle(); B.hudKey = ''; battleHud(); } else { clear2(); renderWorld(); worldHud(); }
   if (Fx.fade > 0) { ctx.fillStyle = `rgba(8,16,28,${Fx.fade})`; ctx.fillRect(0, 0, W, H); }
 }
 let _hudK = '';

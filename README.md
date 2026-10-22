@@ -1,7 +1,7 @@
 # Coral Crown N5 🏝️ — game RPG học tiếng Nhật JLPT N5
 
 Game **HTML5 canvas, một file duy nhất, chạy offline**, chơi được trên **điện thoại (cảm ứng) và máy tính (bàn phím)**.
-Phong cách GBA / Pokémon Emerald (lớp pixel 240×160 phóng to, Tideling vẽ bằng vector mượt). **IP gốc hoàn toàn**: quần đảo *Coral Crown* (Vương Miện San Hô), sinh vật **Tideling**, vật phẩm **Tidefruit**.
+Phong cách GBA / Pokémon Emerald nhưng đồ hoạ vẽ vector ở độ phân giải thật của màn hình (sắc nét, có chi tiết; bản đồ logic 240×160). **IP gốc hoàn toàn**: quần đảo *Coral Crown* (Vương Miện San Hô), sinh vật **Tideling**, vật phẩm **Tidefruit**.
 Giao diện tiếng Việt, giáo trình **Minna no Nihongo I (bài 1–25)**, đáp án luôn bằng tiếng Nhật.
 
 > Đây là bản **N5** làm theo khuôn của "Pearl Archipelago" (N4), nhưng là một cuộc phiêu lưu khác (đảo, boss, NPC đều đổi tên).
@@ -17,11 +17,12 @@ Giao diện tiếng Việt, giáo trình **Minna no Nihongo I (bài 1–25)**, �
 | Nói chuyện / xác nhận | Z / Enter / Space | A (hoặc chạm hộp thoại) |
 | Huỷ / quay lại | X / Esc | B |
 | Menu | M | MENU |
-| Trả lời câu hỏi | phím 1–4 | chạm đáp án |
+| Trả lời câu hỏi | phím 1–4, hoặc ↑↓ rồi Enter | chạm đáp án |
+| Mọi menu / Hải đồ / màn hình tiêu đề | ↑↓←→ chọn, Enter xác nhận, Esc quay lại | chạm |
 
 ## Vòng lặp chơi
 
-- Khám phá bản đồ theo ô (thị trấn, đường mòn cỏ cao, phòng boss), nói chuyện NPC, luyện tập với thầy Sora, bắt Tideling bằng lưới, chữa ở trạm y tế, mua đồ, đánh trainer và **boss** cuối mỗi chương.
+- Khám phá bản đồ theo ô (thị trấn, đường mòn cỏ cao, phòng boss) và **vào trong nhà**: trạm y tế (y tá chữa bệnh), cửa hàng (nói chuyện qua quầy để mua đồ), nhà dân (bà Haru giảng ngữ pháp + thử tài, bé Hiro đố từ vựng, giá sách ngữ pháp của chương). Người dân ngoài phố cũng có câu thử tài nhỏ (thưởng lần đầu). Nói chuyện NPC, luyện tập với thầy Sora, bắt Tideling bằng lưới, chữa ở trạm y tế, mua đồ, đánh trainer và **boss** cuối mỗi chương.
 - **Mọi chiêu / ném lưới / bỏ chạy đều phải trả lời đúng một câu hỏi tiếng Nhật.** Đúng → trúng (thưởng trả lời nhanh + chuỗi đúng). Sai → hụt, hiện giải thích, và **câu đó được hỏi lại sau** (lặp lại ngắt quãng kiểu Leitner, hộp 1–5).
 - Sau mỗi câu (đúng *và* sai) có **bảng giải thích 5 phần**: ① câu hỏi + dịch → ② đáp án + nghĩa → ③ giải thích ngữ pháp → ④ từ trong câu (từ · cách đọc · nghĩa) → ⑤ dịch các đáp án (đọc hiểu: dịch cả đoạn văn). Không có nút "xem nghĩa" trước khi trả lời.
 
@@ -53,6 +54,7 @@ src/index.template.html   khung HTML
 src/style.css             giao diện (DOM overlay cho hộp thoại, menu, câu hỏi)
 src/js/00-core.js         RNG có hạt giống, coroutine (yield / yield*), input, âm thanh
 src/js/05-chapters.js     8 chương, bảng màu đảo, vị trí trên hải đồ, lối tắt
+src/js/06-notes.js        ghi chú ngữ pháp từng chương (giá sách, bà Haru)
 src/js/10-vocab.js        từ vựng + Hán Việt + furigana tự động
 src/js/11-questions.js    kho câu hỏi tĩnh
 src/js/12-dyn.js          câu hỏi sinh động
@@ -88,6 +90,6 @@ Sau khi sửa `src/`, nhớ chạy `./build.sh` và commit cả `docs/index.html
 
 - Kho câu hỏi tĩnh mới có 146 câu (mục tiêu ~200). Các bài 13–25 mới có 3–6 câu mỗi bài; câu sinh động (kana, kanji, từ vựng, số, giờ) bù phần còn lại. Thêm câu: dùng `Q(...)` trong `11-questions.js` (đáp án đúng viết đầu tiên, game tự xáo trộn) — bài kiểm thử dữ liệu sẽ báo nếu thiếu furigana/giải thích.
 - Bảng từ vựng là từ vựng Minna I (359 từ) nên số chữ Hán (~350) vượt "~100 chữ N5" — chưa lọc riêng danh sách kanji N5 chính thức; bảng Hán Việt mới có 163 chữ.
-- 8 đảo dùng chung 3 bản đồ mẫu (khác màu, NPC, trainer, boss, hội thoại); chưa có bản đồ riêng cho từng đảo, chưa có nội thất nhà.
+- 8 đảo dùng chung các bản đồ mẫu (thị trấn, đường mòn, phòng boss và 3 căn nhà; khác màu, NPC, trainer, boss, hội thoại); chưa có bản đồ riêng cho từng đảo.
 - Âm thanh mới có hiệu ứng (WebAudio), chưa có nhạc nền.
 - Trên điện thoại dọc, khung game giữ tỉ lệ 3:2 nên khá nhỏ (xoay ngang sẽ lớn hơn).

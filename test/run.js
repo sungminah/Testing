@@ -62,7 +62,7 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
 
   console.log('3b) Hải đồ: đi tàu bằng giao diện, lối tắt & điều kiện');
   const sail = await page.evaluate(`(()=>{ __bot.idle=false; const r=__bot.run(4000, ()=>G.S.cur===1 && G.ui()==='world' && !G.busy()); return {r:r.status, cur:G.S.cur, map:G.S.map}; })()`);
-  ok(sail.cur === 1 && sail.map === 'i1_town', 'bot ra khơi tới Đảo San Hô qua Hải đồ (' + JSON.stringify(sail) + ')');
+  ok(sail.cur === 1 && /^i1_/.test(sail.map), 'bot ra khơi tới Đảo San Hô qua Hải đồ (' + JSON.stringify(sail) + ')');
   const sea = await page.evaluate(`(()=>{ const bak=JSON.stringify(G.S), S=G.S, r={};
     S.maxCh=7; S.cur=0; S.sc={}; S.items={};
     r.adj=canSail(1); r.far=canSail(2); S.sc.root=1; r.short=canSail(2); S.cur=2; r.rev=canSail(0); S.cur=0; S.maxCh=1; r.locked=canSail(2); S.maxCh=7;
@@ -80,9 +80,9 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
   await page.evaluate(`window.__bot2=(${botFactory.toString()})({wrongRate:0})`);
   const drive = async (cond, max = 3000) => page.evaluate(`(()=>{ for(let i=0;i<${max};i++){ if(${cond}) return true; if(G.ui()==='dialog') G.Inp.a=1; G.sim(1); } return false; })()`);
   const base = await page.evaluate('(()=>{ loadMap("i1_town", 3, 4, "u"); const m=G.S.party[0]; m.hp=1; G.S.pearls=100; return G.S.bag.net; })()');
-  await page.evaluate('G.run(()=>door("1"))'); await drive('!G.busy()');
+  await page.evaluate('loadMap("i1_clinic", 5, 3, "u"); G.run(()=>nurse(G.Wd.npcs.find(n=>n.kind==="nurse")))'); await drive('!G.busy()');
   ok(await page.evaluate('G.S.party.every(m=>m.hp===18+m.lv*4)'), 'trạm y tế hồi đầy HP');
-  await page.evaluate('G.run(()=>door("2"))');
+  await page.evaluate('loadMap("i1_shop", 5, 3, "u"); G.run(()=>shopMenu(G.Wd.npcs.find(n=>n.kind==="shop")))');
   await drive(`G.ui()==='choose' && document.querySelector('#bmenu .ti')?.textContent.includes('Mua')`);
   await page.click('#bmenu .mb[data-i="0"]'); await drive("G.S.pearls===80 && G.ui()==='choose'", 200);
   ok(await page.evaluate(`G.S.bag.net===${base}+1 && G.S.pearls===80`), 'mua lưới: +1 lưới, -20 ngọc trai');
@@ -106,6 +106,23 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
     const s3 = await page.evaluate('__bot.summary()'); console.log('   ', JSON.stringify(s3), r2.status);
     ok(s3.flags.includes('boss7'), 'bot hoàn thành cả 8 chương');
     await page.screenshot({ path: path.join(OUT, '30-final.png') });
+  }
+  console.log('4b) Chỉ dùng bàn phím (không chuột)');
+  {
+    const k = await open({ viewport: { width: 960, height: 720 } });
+    await k.page.evaluate('G.step(3)'); await k.page.keyboard.press('Enter'); await k.page.evaluate('G.step(60)');
+    ok(await k.page.evaluate('G.mode==="world" && G.busy()'), 'Enter ở màn hình tiêu đề bắt đầu game');
+    await k.page.evaluate(`(()=>{ for(let i=0;i<8000 && G.busy();i++){ const u=G.ui(); if(u==='dialog'||u==='choose') G.Inp.a=1; G.sim(1);} })()`);
+    await k.page.evaluate('G.run(()=>Quiz.ask({area:"town"}))'); await k.page.evaluate('G.step(5)');
+    await k.page.keyboard.press('ArrowDown'); await k.page.keyboard.press('ArrowDown'); await k.page.keyboard.press('Enter'); await k.page.evaluate('G.step(5)');
+    ok(await k.page.evaluate('!!document.getElementById("qnext")'), 'mũi tên + Enter chọn đáp án → hiện giải thích');
+    await k.page.keyboard.press('Enter'); await k.page.evaluate('G.step(10)');
+    ok(await k.page.evaluate('document.getElementById("modal").hidden'), 'Enter đóng bảng giải thích');
+    await k.page.evaluate('G.sim(60)'); await k.page.keyboard.press('m'); await k.page.evaluate('G.step(5)');
+    await k.page.keyboard.press('ArrowDown'); await k.page.keyboard.press('ArrowDown'); await k.page.keyboard.press('Enter'); await k.page.evaluate('G.step(5)');
+    ok(await k.page.evaluate('!!document.querySelector("#modal h2") && /Túi đồ/.test(document.querySelector("#modal h2").textContent)'), 'menu: mũi tên + Enter mở Túi đồ');
+    await k.page.keyboard.press('Escape'); await k.page.evaluate('G.step(5)');
+    await k.browser.close();
   }
   console.log('5) Giao diện điện thoại (cảm ứng)');
   const m = await open({ viewport: { width: 390, height: 780 }, touch: true });
