@@ -2533,9 +2533,19 @@ const GYM = [
   '#............#',
   '######VV######'
 ];
-const CLINIC = ['##########', '#EE.....P#', '#...KKK..#', '#........#', '#.rr...rr#', '#........#', '#L......L#', '####VV####'];
-const SHOP = ['##########', '#LL....LP#', '#...KKK..#', '#........#', '#.rr...rr#', '#........#', '#L......L#', '####VV####'];
-const HOME = ['##########', '#E.LL..P.#', '#........#', '#..TT....#', '#........#', '#.rrrr...#', '#........#', '####VV####'];
+/* mỗi loại phòng có 3 kiểu bày trí; đảo i dùng kiểu i%3 (vị trí NPC/quầy giữ nguyên) */
+const CLINICS = [
+  ['##########', '#EE.....P#', '#...KKK..#', '#........#', '#.rr...rr#', '#........#', '#L......L#', '####VV####'],
+  ['##########', '#P.....LE#', '#...KKK..#', '#.E....E.#', '#.......r#', '#r.....rr#', '#L......L#', '####VV####'],
+  ['##########', '#EE....PL#', '#...KKK..#', '#........#', '#.r...rr.#', '#.r......#', '#L......L#', '####VV####']];
+const SHOPS = [
+  ['##########', '#LL....LP#', '#...KKK..#', '#........#', '#.rr...rr#', '#........#', '#L......L#', '####VV####'],
+  ['##########', '#P....LLL#', '#...KKK..#', '#L......L#', '#.rr...rr#', '#........#', '#.L....L.#', '####VV####'],
+  ['##########', '#LL.....P#', '#...KKK..#', '#........#', '#r.....r.#', '#rr...rr.#', '#L......L#', '####VV####']];
+const HOMES = [
+  ['##########', '#E.LL..P.#', '#........#', '#..TT....#', '#........#', '#.rrrr...#', '#........#', '####VV####'],
+  ['##########', '#LL.E..P.#', '#........#', '#.TT.....#', '#........#', '#...rrrr.#', '#........#', '####VV####'],
+  ['##########', '#E.P..LL.#', '#........#', '#.....TT.#', '#........#', '#rrrr....#', '#........#', '####VV####']];
 const SOLID = new Set(['#', 'R', 'W', '~', 'K', 'L', 'T', 'P', 'E', 'o', 'O', 'F', 'l']);
 const MAPS = {};
 const TRAINER_NAMES = ['Cậu bé Kai', 'Chị Yuna', 'Bác ngư dân Gen', 'Em Sora', 'Anh Riku', 'Cô Nao', 'Chú Taro', 'Bạn Mei', 'Anh Haru', 'Cô Rin', 'Cậu Ken', 'Bà Chiyo'];
@@ -2588,9 +2598,9 @@ function buildIsland(i) {
   const town = mk(`i${i}_town`, `${c.vi} · Thị trấn`, def.town.rows, 'town');
   const route = mk(`i${i}_route`, `${c.vi} · Đường mòn`, def.route.rows, 'route');
   const gym = mk(`i${i}_gym`, `${c.vi} · Nhà ${c.boss.name.split(' ').slice(-1)[0]}`, def.gym.rows, 'gym', { style: 'room' });
-  const clinic = mk(`i${i}_clinic`, `${c.vi} · Trạm y tế`, CLINIC, 'room', { style: 'room' });
-  const shop = mk(`i${i}_shop`, `${c.vi} · Cửa hàng`, SHOP, 'room', { style: 'room' });
-  const home = mk(`i${i}_home`, `${c.vi} · Nhà dân`, HOME, 'room', { style: 'room' });
+  const clinic = mk(`i${i}_clinic`, `${c.vi} · Trạm y tế`, CLINICS[i % 3], 'room', { style: 'room' });
+  const shop = mk(`i${i}_shop`, `${c.vi} · Cửa hàng`, SHOPS[i % 3], 'room', { style: 'room' });
+  const home = mk(`i${i}_home`, `${c.vi} · Nhà dân`, HOMES[i % 3], 'room', { style: 'room' });
   // ---- nối các bản đồ bằng cách quét ký tự ----
   link(town, 'U', route, 'V'); link(route, 'V', town, 'U'); link(route, 'G', gym, 'V'); link(gym, 'V', route, 'G');
   [['1', clinic], ['2', shop], ['3', home]].forEach(([d, rm]) => { link(town, d, rm, 'V'); link(rm, 'V', town, d); });

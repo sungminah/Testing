@@ -98,6 +98,6 @@ Sau khi sửa `src/`, nhớ chạy `./build.sh` và commit cả `docs/index.html
 
 - Câu hỏi do mình tự soạn, chưa có người bản ngữ rà soát; nếu thấy câu nào có hai đáp án đúng hoặc đáp án sai, hãy sửa trong `src/js/1x-questions*.js`.
 - Bảng từ vựng là từ vựng Minna I (359 từ) nên số chữ Hán (~350) vượt "~100 chữ N5"; chưa lọc riêng danh sách kanji N5 chính thức. Bảng Hán Việt đã phủ đủ các chữ này.
-- Mỗi đảo có bố cục và **màu cỏ riêng** (xanh tươi, vàng chanh, ngọc, rừng sẫm, xám lam, bạc hà, vàng cát, xanh tím, hồng); các đảo 3–8 ở mức "khung chủ đề" (ít chi tiết trang trí hơn 3 đảo đầu); 3 căn nhà (y tế, cửa hàng, nhà dân) dùng chung bố cục ở mọi đảo.
+- Mỗi đảo có bố cục và **màu cỏ riêng** (xanh tươi, vàng chanh, ngọc, rừng sẫm, xám lam, bạc hà, vàng cát, xanh tím, hồng); các đảo 3–8 ở mức "khung chủ đề" (ít chi tiết trang trí hơn 3 đảo đầu); 3 căn nhà (y tế, cửa hàng, nhà dân) có 3 kiểu bày trí luân phiên theo đảo.
 - Chưa có phần nghe (audio tiếng Nhật) trong câu hỏi.
 - Trên điện thoại dọc, khung game giữ tỉ lệ 3:2 nên khá nhỏ (có gợi ý xoay ngang).
