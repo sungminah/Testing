@@ -2966,7 +2966,7 @@ function teamFor(i, role, t) {
 /* ---- 50-battle.js ---- */
 'use strict';
 /* ===== Trận đấu: mỗi chiêu / lưới / bỏ chạy đều phải trả lời đúng một câu hỏi tiếng Nhật ===== */
-const B = { on: false, foe: null, me: null, kind: '', area: 'route', shake: { me: 0, foe: 0 }, flash: { me: 0, foe: 0 }, ball: null, hp: { me: 0, foe: 0 }, sink: { me: 0, foe: 0 }, hudKey: '', slide: 1, appear: 1, sparks: [], floats: [], lvlFx: 0, rings: [] };
+const B = { on: false, foe: null, me: null, kind: '', area: 'route', shake: { me: 0, foe: 0 }, flash: { me: 0, foe: 0 }, ball: null, hp: { me: 0, foe: 0 }, sink: { me: 0, foe: 0 }, hudKey: '', slide: 1, fx: [], appear: 1, sparks: [], floats: [], lvlFx: 0, rings: [] };
 function* note(text, n = 46) {
   const d = $('#dlg'); let go = false; d.innerHTML = `<div class="vi" style="opacity:1">${esc(text)}</div>`; d.hidden = false; d.onclick = () => { go = true; };
   Inp.a = Inp.b = 0; let k = Math.round(n * 1.6) + 14; yield 6;
@@ -3008,13 +3008,30 @@ function renderBattle() {
   draw(B.me, 'me', 62 - off, 78, 24, true);
   if (B.ball) { const b = B.ball; c2.fillStyle = '#e53935'; c2.beginPath(); c2.arc(b.x, b.y, 4.6, Math.PI, 0); c2.fill(); c2.fillStyle = '#fff'; c2.beginPath(); c2.arc(b.x, b.y, 4.6, 0, Math.PI); c2.fill(); c2.strokeStyle = '#1d2433'; c2.lineWidth = 1; c2.beginPath(); c2.arc(b.x, b.y, 4.6, 0, 7); c2.moveTo(b.x - 4.6, b.y); c2.lineTo(b.x + 4.6, b.y); c2.stroke(); c2.fillStyle = '#fff'; c2.beginPath(); c2.arc(b.x, b.y, 1.4, 0, 7); c2.fill(); c2.stroke(); }
   if (B.appear < 1) B.appear += 1 / 26;
+  // hiệu ứng chiêu thức theo hệ
+  for (const e of B.fx) {
+    e.t++; if (e.t < 0) continue; const k = e.t / e.dur; c2.save(); c2.lineCap = 'round';
+    if (e.kind === 'slash') { // Hệ Thú: những vết cào chéo
+      for (let i = 0; i <= e.tier; i++) { const ox = (i - e.tier / 2) * 7, p = Math.min(1, k * 2 - i * .12); if (p <= 0) continue; c2.globalAlpha = Math.max(0, 1 - k); c2.strokeStyle = '#fff'; c2.lineWidth = 2.4; c2.beginPath(); c2.moveTo(e.x - 12 + ox, e.y - 16); c2.lineTo(e.x - 12 + ox + 24 * p, e.y - 16 + 32 * p); c2.stroke(); c2.strokeStyle = '#ffd54f'; c2.lineWidth = 1; c2.stroke(); }
+    } else if (e.kind === 'rings') { // Hệ Năng lực: sóng tâm lan toả
+      for (let i = 0; i < 2 + e.tier; i++) { const p = k * 1.4 - i * .18; if (p <= 0 || p > 1) continue; c2.globalAlpha = 1 - p; c2.strokeStyle = i & 1 ? '#e1b6ff' : '#9c6bff'; c2.lineWidth = 2.2 - p; c2.beginPath(); c2.arc(e.x, e.y, 4 + p * 30, 0, 7); c2.stroke(); }
+      c2.globalAlpha = .5 * (1 - k); const gr = c2.createRadialGradient(e.x, e.y, 0, e.x, e.y, 26); gr.addColorStop(0, '#fff'); gr.addColorStop(1, 'rgba(156,107,255,0)'); c2.fillStyle = gr; c2.beginPath(); c2.arc(e.x, e.y, 26, 0, 7); c2.fill();
+    } else if (e.kind === 'orb') { // Hệ Nguyên tố: quả cầu bay tới rồi nổ
+      const p = Math.min(1, k / .7), x = e.sx + (e.tx - e.sx) * p, y = e.sy + (e.ty - e.sy) * p - Math.sin(p * Math.PI) * 14;
+      if (k < .72) { for (let i = 5; i >= 0; i--) { const q = Math.max(0, p - i * .05), tx = e.sx + (e.tx - e.sx) * q, ty = e.sy + (e.ty - e.sy) * q - Math.sin(q * Math.PI) * 14; c2.globalAlpha = (1 - i / 6) * .6; c2.fillStyle = e.c; c2.beginPath(); c2.arc(tx, ty, 5 - i * .6, 0, 7); c2.fill(); }
+        c2.globalAlpha = 1; const g2 = c2.createRadialGradient(x, y, 0, x, y, 7); g2.addColorStop(0, '#fff'); g2.addColorStop(.5, e.c); g2.addColorStop(1, 'rgba(255,255,255,0)'); c2.fillStyle = g2; c2.beginPath(); c2.arc(x, y, 7, 0, 7); c2.fill(); }
+      else { const q = (k - .72) / .28; c2.globalAlpha = 1 - q; c2.fillStyle = e.c; c2.beginPath(); c2.arc(e.tx, e.ty, 6 + q * 18, 0, 7); c2.fill(); c2.globalAlpha = (1 - q) * .9; c2.fillStyle = '#fff'; c2.beginPath(); c2.arc(e.tx, e.ty, 3 + q * 8, 0, 7); c2.fill(); }
+    }
+    c2.restore();
+  }
+  B.fx = B.fx.filter(e => e.t < e.dur);
   // vòng sáng, tia sáng, chữ nổi
   for (const r of B.rings) { r.t++; if (r.t < 0) continue; const k = r.t / 40; c2.strokeStyle = `rgba(255,240,150,${1 - k})`; c2.lineWidth = 1.6 * (1 - k) + .3; c2.beginPath(); c2.arc(r.x, r.y, 6 + k * 34, 0, 7); c2.stroke(); }
   B.rings = B.rings.filter(r => r.t < 40);
   for (const p of B.sparks) { p.t++; p.x += p.vx; p.y += p.vy; p.vy += .02; const a = 1 - p.t / p.life; c2.fillStyle = p.c; c2.globalAlpha = Math.max(0, a); c2.beginPath(); for (let i = 0; i < 8; i++) { const an = i * Math.PI / 4, rad = i & 1 ? p.s * .35 : p.s; c2.lineTo(p.x + Math.cos(an) * rad, p.y + Math.sin(an) * rad); } c2.fill(); c2.globalAlpha = 1; }
   B.sparks = B.sparks.filter(p => p.t < p.life);
   if (B.lvlFx > 0) { const k = 1 - B.lvlFx / 90, pop = k < .15 ? k / .15 : 1; c2.save(); c2.translate(62, 40 - k * 10); c2.scale(.6 + .5 * pop, .6 + .5 * pop); c2.globalAlpha = k > .8 ? (1 - k) / .2 : 1; c2.font = '800 13px system-ui, sans-serif'; c2.textAlign = 'center'; c2.lineWidth = 3; c2.strokeStyle = '#7a3b00'; c2.strokeText('LEVEL UP!', 0, 0); const g = c2.createLinearGradient(0, -10, 0, 3); g.addColorStop(0, '#fff7b0'); g.addColorStop(1, '#ffb300'); c2.fillStyle = g; c2.fillText('LEVEL UP!', 0, 0); c2.restore(); B.lvlFx--; }
-  for (const f of B.floats) { f.t++; const k = f.t / 70; c2.save(); c2.globalAlpha = k > .7 ? (1 - k) / .3 : 1; c2.font = '700 8px system-ui, sans-serif'; c2.textAlign = 'center'; c2.lineWidth = 2.4; c2.strokeStyle = '#0b2a44'; c2.strokeText(f.text, f.x, f.y - k * 12); c2.fillStyle = f.col; c2.fillText(f.text, f.x, f.y - k * 12); c2.restore(); }
+  for (const f of B.floats) { f.t++; if (f.t < 0) continue; const k = f.t / 70; c2.save(); c2.globalAlpha = k > .7 ? (1 - k) / .3 : 1; c2.font = '700 8px system-ui, sans-serif'; c2.textAlign = 'center'; c2.lineWidth = 2.4; c2.strokeStyle = '#0b2a44'; c2.strokeText(f.text, f.x, f.y - k * 12); c2.fillStyle = f.col; c2.fillText(f.text, f.x, f.y - k * 12); c2.restore(); }
   B.floats = B.floats.filter(f => f.t < 70);
   for (const w of ['me', 'foe']) { if (B.shake[w] > 0) B.shake[w]--; if (B.flash[w] > 0) B.flash[w]--; }
 }
@@ -3053,6 +3070,17 @@ function* gainXpAnim(m, amt) {
   }
   if (m.lv >= 60) m.xp = 0;
 }
+const FX_COLORS = ['#ff7a2a', '#3aa0ff', '#5ccf5a', '#ffe14a'];
+const SPOT = { me: [62, 74], foe: [172, 42] };
+/* chạy hiệu ứng chiêu thức theo hệ; tier = 0..3 (chiêu càng mạnh càng hoành tráng) */
+function* moveFx(side, g, tier) {
+  const A = SPOT[side], Tg = SPOT[side === 'me' ? 'foe' : 'me'];
+  if (g === 0) { B.fx.push({ kind: 'slash', x: Tg[0], y: Tg[1], tier, t: 0, dur: 24 }); Snd.tone(300, .06, 'sawtooth', .05); Snd.tone(220, .08, 'sawtooth', .05, .07); yield 10; }
+  else if (g === 1) { B.fx.push({ kind: 'rings', x: Tg[0], y: Tg[1], tier, t: 0, dur: 32 }); Snd.tone(520, .12, 'sine', .05); Snd.tone(780, .14, 'sine', .04, .1); yield 8; }
+  else { B.fx.push({ kind: 'orb', sx: A[0], sy: A[1], tx: Tg[0], ty: Tg[1], c: FX_COLORS[tier], t: 0, dur: 28 }); Snd.tone(260, .16, 'triangle', .05); yield 20; Snd.tone(110, .12, 'square', .06); }
+  yield 12;
+  burst(Tg[0], Tg[1], 10 + tier * 5, g === 1 ? ['#e1b6ff', '#fff', '#9c6bff'] : g === 2 ? [FX_COLORS[tier], '#fff'] : ['#fff7b0', '#ffffff', '#ffd54f']);
+}
 /* hiệu ứng trước khi vào trận */
 function* battleIntro(o) {
   const wild = o.kind === 'wild';
@@ -3063,7 +3091,7 @@ function* battleIntro(o) {
 }
 function* battle(o) {
   yield* battleIntro(o);
-  B.on = true; B.slide = 0; B.appear = 1; B.sparks = []; B.floats = []; B.rings = []; B.lvlFx = 0; B.kind = o.kind; B.area = o.area; B.foes = o.foes.slice(); B.fi = 0; B.foe = B.foes[0]; B.ball = null;
+  B.on = true; B.slide = 0; B.appear = 1; B.sparks = []; B.fx = []; B.floats = []; B.rings = []; B.lvlFx = 0; B.kind = o.kind; B.area = o.area; B.foes = o.foes.slice(); B.fi = 0; B.foe = B.foes[0]; B.ball = null;
   B.me = S.party.find(m => m.hp > 0); B.hp.foe = B.foe.hp; B.hp.me = B.me.hp; B.sink = { me: 0, foe: 0 }; B.shake = { me: 0, foe: 0 }; B.flash = { me: 0, foe: 0 };
   S.seen[B.foe.sp] = 1; Wd.mode = 'battle'; B.hudKey = '';
   for (let f = 0; f <= 32; f++) { B.slide = f / 32; Fx.wipe = Math.max(0, 1 - f / 22); yield 1; }
@@ -3074,7 +3102,7 @@ function* battle(o) {
   let result = null;
   while (!result) {
     const tr = o.kind === 'wild';
-    const a = yield* choose(`${spName(B.me.sp, B.me.form)}: HP ${B.me.hp}/${mhp(B.me)} — Làm gì?`, [
+    const a = yield* choose(`${spName(B.me.sp, B.me.form)}: HP ${B.me.hp}/${mhp(B.me)} · ${typeMult(grp(B.me.sp), grp(B.foe.sp)) > 1 ? '👍 hệ bạn khắc chế đối thủ' : typeMult(grp(B.me.sp), grp(B.foe.sp)) < 1 ? '⚠ đối thủ khắc chế hệ bạn' : 'hai hệ ngang nhau'} — Làm gì?`, [
       { t: '⚔ Chiêu thức' }, { t: '🕸 Lưới', dis: !tr || (S.bag.net + S.bag.snet) <= 0, s: tr ? `${S.bag.net}+${S.bag.snet}` : 'không dùng được' },
       { t: '🍎 Tidefruit', dis: S.bag.fruit <= 0, s: `x${S.bag.fruit}` }, { t: '🔁 Đổi', dis: alive().length < 2 }, { t: '🏃 Chạy', dis: !tr }], 3);
     let acted = false;
@@ -3092,7 +3120,10 @@ function* battle(o) {
         if (r.ok) {
           const tm = typeMult(grp(B.me.sp), grp(B.foe.sp));
           const dmg = Math.max(1, Math.round(mv.p * (0.7 + B.me.lv * 0.07) * tm * r.fast * (1 + Math.min(r.streak, 5) * 0.04) * (0.92 + rand() * 0.16)));
-          B.foe.hp = Math.max(0, B.foe.hp - dmg); B.shake.foe = 14; B.flash.foe = 14; Snd.hit(); yield 22;
+          yield* moveFx('me', grp(B.me.sp), Math.min(mi, 3));
+          B.foe.hp = Math.max(0, B.foe.hp - dmg); B.shake.foe = 14; B.flash.foe = 14; Snd.hit();
+          B.floats.push({ t: 0, text: `-${dmg}`, x: 172, y: 30, col: tm > 1 ? '#ffd54f' : '#ff6b6b' }); if (tm !== 1) B.floats.push({ t: -8, text: tm > 1 ? 'Hiệu quả cao!' : 'Không hiệu quả', x: 172, y: 16, col: tm > 1 ? '#ffd54f' : '#b0bec5' });
+          yield 22;
           yield* note(`Trúng đích! Gây ${dmg} sát thương.${tm > 1 ? ' Hiệu quả cao!' : tm < 1 ? ' Không hiệu quả lắm...' : ''}`, 30);
         } else yield* note('Chiêu thức bị hụt!', 30);
         acted = true;
@@ -3143,7 +3174,10 @@ function* battle(o) {
     if (rand() < 0.9) {
       yield* note(`${spName(B.foe.sp, B.foe.form)} tấn công!`, 22);
       const tm = typeMult(grp(B.foe.sp), grp(B.me.sp)), dmg = Math.max(1, Math.round((6 + B.foe.lv * 1.1) * tm * (0.85 + rand() * 0.3) * (o.kind === 'boss' ? 1.1 : 1)));
-      B.me.hp = Math.max(0, B.me.hp - dmg); B.shake.me = 14; B.flash.me = 14; Snd.hit(); yield 22;
+      yield* moveFx('foe', grp(B.foe.sp), Math.min(3, Math.floor(B.foe.lv / 12)));
+      B.me.hp = Math.max(0, B.me.hp - dmg); B.shake.me = 14; B.flash.me = 14; Snd.hit();
+      B.floats.push({ t: 0, text: `-${dmg}`, x: 62, y: 62, col: '#ff6b6b' }); if (tm !== 1) B.floats.push({ t: -8, text: tm > 1 ? 'Hiệu quả cao!' : 'Không hiệu quả', x: 62, y: 48, col: tm > 1 ? '#ffd54f' : '#b0bec5' });
+      yield 22;
       yield* note(`${spName(B.me.sp, B.me.form)} chịu ${dmg} sát thương.`, 28);
     } else yield* note(`${spName(B.foe.sp, B.foe.form)} đánh trượt!`, 28);
     if (B.me.hp <= 0) {
