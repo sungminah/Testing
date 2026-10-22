@@ -2725,6 +2725,7 @@ function interact() {
   if (!n && c === 'K') n = npcAt(tx + dx, ty + dy); // nói chuyện qua quầy
   if (n) { n.dir = OPP[Wd.face]; run(() => talk(n)); }
   else if (c === 'L') run(() => bookshelf());
+  else if ((c === 'R' || c === 'W') && Wd.map.style !== 'room') run(() => say('', Wd.map.area === 'route' ? 'Đây là nhà của boss. Cửa vào là ô có ngôi sao tím ⭐ — hãy đi tới ô ngay dưới cửa rồi bước lên.' : 'Tường nhà. Cửa là ô có cánh cửa gỗ — hãy đi tới ô ngay dưới cửa rồi bước lên để vào.'));
 }
 function onStep() {
   const m = Wd.map, ch = tileAt(m, S.x, S.y), key = S.x + ',' + S.y;
