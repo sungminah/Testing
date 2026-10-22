@@ -35,13 +35,14 @@ function paintTile(g, ch, p, fr, path, v, room) {
   const R = mulberry(v * 977 + ch.charCodeAt(0) * 31 + 5);
   const F = (c, x, y, w, h) => { g.fillStyle = c; g.fillRect(x, y, w, h); };
   const grass = (base) => {
-    g.fillStyle = lin(g, 0, 16, shade(base, 1.07), shade(base, .93)); g.fillRect(0, 0, 16, 16);
+    g.fillStyle = base; g.fillRect(0, 0, 16, 16);
+    for (let i = 0; i < 3; i++) { g.fillStyle = R() < .5 ? 'rgba(0,0,0,.045)' : 'rgba(255,255,255,.05)'; ell(g, R() * 16, R() * 16, 3 + R() * 3, 2 + R() * 2, R() * 3); g.fill(); }
     g.strokeStyle = shade(base, .78); g.lineWidth = .45; g.lineCap = 'round';
     for (let i = 0; i < 9; i++) { const x = R() * 15 + .5, y = R() * 14 + 1.5; g.beginPath(); g.moveTo(x, y); g.lineTo(x - .7, y - 1.7); g.moveTo(x, y); g.lineTo(x + .8, y - 1.5); g.stroke(); }
     g.fillStyle = shade(base, 1.18); for (let i = 0; i < 5; i++) { ell(g, R() * 16, R() * 16, .6, .35); g.fill(); }
   };
   const sand = () => {
-    g.fillStyle = lin(g, 0, 16, shade(p.path, 1.05), shade(p.path, .94)); g.fillRect(0, 0, 16, 16);
+    g.fillStyle = p.path; g.fillRect(0, 0, 16, 16);
     for (let i = 0; i < 9; i++) { g.fillStyle = R() < .5 ? shade(p.path, .86) : shade(p.path, 1.14); ell(g, R() * 16, R() * 16, .5 + R() * .9, .35 + R() * .4, R()); g.fill(); }
   };
   const ground = () => (path ? sand() : grass(p.g1));
@@ -91,7 +92,7 @@ function paintTile(g, ch, p, fr, path, v, room) {
     case '~': { g.fillStyle = lin(g, 0, 16, shade(p.water[1], 1.1), shade(p.water[0], .85)); g.fillRect(0, 0, 16, 16);
       g.strokeStyle = 'rgba(255,255,255,.5)'; g.lineWidth = .5; g.lineCap = 'round'; for (let r2 = 0; r2 < 3; r2++) { g.beginPath(); for (let x = 0; x <= 16; x += 1) { const y = 3 + r2 * 5 + Math.sin((x + fr * 4 + r2 * 3) * .6) * .9; x ? g.lineTo(x, y) : g.moveTo(x, y); } g.stroke(); }
       g.fillStyle = 'rgba(255,255,255,.7)'; for (let i = 0; i < 3; i++) { ell(g, (R() * 16 + fr * 3) % 16, R() * 16, .5, .3); g.fill(); } break; }
-    case 'g': { g.fillStyle = lin(g, 0, 16, shade(p.g2, .95), shade(p.g2, .78)); g.fillRect(0, 0, 16, 16);
+    case 'g': { g.fillStyle = shade(p.g2, .88); g.fillRect(0, 0, 16, 16);
       for (let i = 0; i < 20; i++) { const x = R() * 16, y = 3 + R() * 13, h = 3 + R() * 3, lean = (R() - .5) * 2.4; g.strokeStyle = [shade(p.g2, .55), shade(p.g2, .75), shade(p.g1, 1.12)][i % 3]; g.lineWidth = .55; g.beginPath(); g.moveTo(x, y); g.quadraticCurveTo(x + lean * .4, y - h * .6, x + lean, y - h); g.stroke(); } break; }
     case 'f': ground(); for (let i = 0; i < 6; i++) { const x = 1.5 + R() * 13, y = 2 + R() * 12, c = ['#fff', '#f48fb1', '#ffd54f', '#b39ddb'][i & 3]; g.strokeStyle = '#3c8a3c'; g.lineWidth = .35; g.beginPath(); g.moveTo(x, y); g.lineTo(x, y + 2); g.stroke(); g.fillStyle = c; for (let a = 0; a < 5; a++) { ell(g, x + Math.cos(a * 1.257) * .8, y + Math.sin(a * 1.257) * .8, .55, .55); g.fill(); } g.fillStyle = '#ffb300'; ell(g, x, y, .4, .4); g.fill(); } break;
     case 'K': floor(g, p, v, R); g.fillStyle = 'rgba(0,0,0,.2)'; rr(g, 0, 9, 16, 7, 0); g.fill(); g.fillStyle = lin(g, 4, 16, '#a67c52', '#6d4a30'); rr(g, 0, 5, 16, 11, 1); g.fill(); F('#d2a672', 0, 4, 16, 3); F('rgba(255,255,255,.35)', 0, 4, 16, .6); g.strokeStyle = '#5a3a28'; g.lineWidth = .4; rr(g, 1.5, 9, 13, 5.5, .6); g.stroke(); break;
@@ -130,18 +131,27 @@ function drawPerson(g, X, Y, dir, step, look) { // X,Y: góc trên-trái ô, the
   g.fillStyle = shade(body, .6); g.fillRect(3.9, 10.2, 8.2, .8); g.fillStyle = '#ffd54f'; g.fillRect(7.4, 10.1, 1.2, 1);
   g.fillStyle = shade(body, .95); if (dir === 'l' || dir === 'r') { rr(g, dir === 'l' ? 5.4 : 8.4, 7, 2.2, 3.8, 1); g.fill(); } else { rr(g, 2.5, 7, 1.9, 3.6, .9); g.fill(); rr(g, 11.6, 7, 1.9, 3.6, .9); g.fill(); g.fillStyle = skin; ell(g, 3.4, 10.9, .9, .9); g.fill(); ell(g, 12.6, 10.9, .9, .9); g.fill(); }
   // đầu
+  const side = dir === 'l' || dir === 'r';
+  g.save(); if (dir === 'r') { g.translate(16, 0); g.scale(-1, 1); }
   const hg = g.createRadialGradient(7, 2.4, .5, 8, 3.8, 4.6); hg.addColorStop(0, '#fff0de'); hg.addColorStop(1, skin);
   g.fillStyle = hg; ell(g, 8, 3.7, 4.3, 4); g.fill();
-  g.fillStyle = skin; ell(g, 3.8, 4.2, .8, 1); g.fill(); ell(g, 12.2, 4.2, .8, 1); g.fill();
+  if (!side) { g.fillStyle = skin; ell(g, 3.8, 4.2, .8, 1); g.fill(); ell(g, 12.2, 4.2, .8, 1); g.fill(); }
   g.fillStyle = hair;
   if (dir === 'u') { ell(g, 8, 3.6, 4.5, 4.2); g.fill(); g.fillStyle = shade(hair, 1.3); ell(g, 6.5, 1.8, 1.4, .8, -.5); g.fill(); }
   else if (dir === 'd') { g.beginPath(); g.moveTo(3.5, 4.2); g.quadraticCurveTo(3.2, -.6, 8, -.5); g.quadraticCurveTo(12.8, -.6, 12.5, 4.2); g.quadraticCurveTo(11.6, 1.6, 9.6, 1.9); g.quadraticCurveTo(8, 1, 6.2, 1.9); g.quadraticCurveTo(4.4, 1.6, 3.5, 4.2); g.fill(); g.fillStyle = shade(hair, 1.3); ell(g, 6.2, .5, 1.3, .6, -.4); g.fill(); }
-  else { const s = dir === 'l' ? 1 : -1; g.beginPath(); g.moveTo(8 - s * 4.4, 4.5); g.quadraticCurveTo(8 - s * 4.6, -.6, 8, -.5); g.quadraticCurveTo(8 + s * 4.4, -.4, 8 + s * 3.2, 2.4); g.quadraticCurveTo(8 + s * 1.2, 1.2, 8 + s * .2, 2.4); g.lineTo(8 - s * 1, 6); g.lineTo(8 - s * 3.4, 6.6); g.fill(); }
+  else { // quay sang trái (bên phải được lật gương): tóc phủ đỉnh đầu + sau gáy, chừa mặt
+    g.fillStyle = skin; ell(g, 10.6, 4.5, .9, 1.1); g.fill(); g.fillStyle = hair;
+    g.beginPath(); g.moveTo(12.3, 6.4); g.quadraticCurveTo(13, -.2, 8, -.6); g.quadraticCurveTo(3.6, -.4, 3.8, 2.6); g.quadraticCurveTo(5.4, 1.5, 7, 2); g.quadraticCurveTo(9.4, 2.2, 10.2, 4); g.lineTo(10.2, 6.6); g.closePath(); g.fill();
+    g.fillStyle = shade(hair, 1.3); ell(g, 6.4, .5, 1.3, .6, -.3); g.fill();
+    g.fillStyle = '#1d2433'; ell(g, 5.6, 4.4, .75, 1.05); g.fill(); g.fillStyle = '#fff'; ell(g, 5.4, 4, .28, .28); g.fill();
+    g.fillStyle = 'rgba(255,120,140,.4)'; ell(g, 6.2, 5.6, .8, .5); g.fill();
+    g.strokeStyle = '#8a4a3a'; g.lineWidth = .3; g.beginPath(); g.arc(4.9, 5.9, .6, .3, Math.PI - .6); g.stroke();
+  }
   if (dir === 'd') { for (const sx of [-1, 1]) { g.fillStyle = '#1d2433'; ell(g, 8 + sx * 1.7, 4.3, .75, 1.05); g.fill(); g.fillStyle = '#fff'; ell(g, 8 + sx * 1.7 - .2, 3.9, .28, .28); g.fill(); g.fillStyle = 'rgba(255,120,140,.4)'; ell(g, 8 + sx * 2.9, 5.5, .8, .5); g.fill(); }
     g.strokeStyle = '#8a4a3a'; g.lineWidth = .3; g.beginPath(); g.arc(8, 5.7, .9, .2, Math.PI - .2); g.stroke(); }
-  else if (dir === 'l' || dir === 'r') { const s = dir === 'l' ? -1 : 1; g.fillStyle = '#1d2433'; ell(g, 8 + s * 2.2, 4.3, .7, 1); g.fill(); g.fillStyle = '#fff'; ell(g, 8 + s * 2.2 - .15, 3.9, .25, .25); g.fill(); }
-  if (look.acc === 'cap') { g.fillStyle = '#e84a5f'; g.beginPath(); g.moveTo(3.4, 2.6); g.quadraticCurveTo(8, -3.4, 12.6, 2.6); g.lineTo(3.4, 2.6); g.fill(); g.fillStyle = '#c0334a'; if (dir === 'd') { rr(g, 4.2, 1.9, 7.6, 1.2, .5); g.fill(); } else if (dir === 'l') { rr(g, 1.6, 1.9, 5, 1.2, .5); g.fill(); } else if (dir === 'r') { rr(g, 9.4, 1.9, 5, 1.2, .5); g.fill(); } g.fillStyle = '#fff'; ell(g, 8, .2, .9, .9); g.fill(); }
+  if (look.acc === 'cap') { g.fillStyle = '#e84a5f'; g.beginPath(); g.moveTo(3.4, 2.6); g.quadraticCurveTo(8, -3.4, 12.6, 2.6); g.lineTo(3.4, 2.6); g.fill(); g.fillStyle = '#c0334a'; if (dir === 'd') { rr(g, 4.2, 1.9, 7.6, 1.2, .5); g.fill(); } else if (side) { rr(g, 1.4, 1.9, 5.4, 1.2, .5); g.fill(); } g.fillStyle = '#fff'; ell(g, 8, .2, .9, .9); g.fill(); }
   else if (look.acc === 'crown' || look.boss) { g.fillStyle = '#ffd54f'; g.beginPath(); g.moveTo(4.6, 1); g.lineTo(5.4, -1.8); g.lineTo(6.8, .2); g.lineTo(8, -2.2); g.lineTo(9.2, .2); g.lineTo(10.6, -1.8); g.lineTo(11.4, 1); g.fill(); }
+  g.restore();
   g.restore();
 }
 const PLAYER_LOOK = { hair: '#2b2118', body: '#2f9bd6', acc: 'cap' };
