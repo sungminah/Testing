@@ -1,0 +1,86 @@
+'use strict';
+/* ===== Khởi động, vòng lặp chính, màn hình tiêu đề, API kiểm thử ===== */
+function sizeUI() {
+  const sc = $('#screen'), u = sc.clientWidth / 240; document.documentElement.style.setProperty('--u', u + 'px');
+  const pad = $('#pad'); document.documentElement.style.setProperty('--padh', (getComputedStyle(pad).display === 'none' ? 0 : pad.offsetHeight + 12) + 'px');
+}
+window.addEventListener('resize', sizeUI);
+
+function renderTitle() {
+  const g = ctx.createLinearGradient(0, 0, 0, H); g.addColorStop(0, '#79c8ee'); g.addColorStop(.55, '#bfe8f7'); g.addColorStop(.56, '#2f86c4'); g.addColorStop(1, '#17517f');
+  ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+  for (let i = 0; i < 9; i++) { ctx.fillStyle = 'rgba(255,255,255,.35)'; ctx.fillRect(((i * 37 + FRAME / 4) % (W + 20)) - 10, 92 + i * 7, 14 + (i % 3) * 6, 1); }
+  [[40, 84, 22], [120, 80, 16], [190, 86, 26]].forEach(([x, y, r], i) => { ctx.fillStyle = '#f1dca0'; ctx.beginPath(); ctx.ellipse(x, y, r, r / 3, 0, 0, 7); ctx.fill(); ctx.fillStyle = CH[i].pal.g1; ctx.beginPath(); ctx.ellipse(x, y - 1, r * .75, r / 4, 0, 0, 7); ctx.fill(); });
+  c2.clearRect(0, 0, 720, 480);
+  drawTideling(c2, 0, 1, 130, 345, 52, { t: FRAME }); drawTideling(c2, 1, 1, 360, 330, 60, { t: FRAME + 10 }); drawTideling(c2, 5, 2, 590, 345, 52, { t: FRAME + 20, flip: true });
+}
+function showTitle() {
+  Wd.mode = 'title'; $('#hud').innerHTML = ''; $('#dlg').hidden = true; $('#bmenu').hidden = true;
+  const has = !!loadSave(); let t = $('.title'); if (t) t.remove();
+  t = el('div', 'title', `<h1>Coral Crown</h1><p>Quần đảo San Hô · Học tiếng Nhật JLPT <b>N5</b></p>
+    ${has ? '<button class="mb" id="bt-cont">▶ Tiếp tục</button>' : ''}<button class="mb" id="bt-new">${has ? '★ Chơi mới' : '★ Bắt đầu'}</button>
+    <p style="font-size:calc(var(--u)*4.5);opacity:.8">Phím mũi tên/WASD · Z/Enter = A · X/Esc = B · M = Menu</p>`);
+  t.style.cssText = 'position:absolute;inset:0;z-index:5;padding-top:calc(var(--u)*10)'; $('#screen').appendChild(t);
+  if (has) $('#bt-cont').onclick = () => { t.remove(); continueGame(); };
+  $('#bt-new').onclick = () => { if (has && !confirm('Chơi mới sẽ ghi đè bản lưu hiện tại. Tiếp tục?')) return; t.remove(); newGame(); };
+}
+function continueGame() { S = loadSave(); applyOpts(); loadMap(S.map, S.x, S.y, S.dir); Wd.mode = 'world'; Wd.banner = 90; }
+function newGame() {
+  S = newState(); applyOpts(); loadMap('i0_town', DOCK.x, DOCK.y, 'u'); Wd.mode = 'world';
+  run(function* () {
+    yield* fade(1, 1); yield* fade(0, 20);
+    yield* say('', 'Con thuyền cập bến Đảo Bình Minh (Asahi-jima) — đảo đầu tiên của Quần đảo San Hô. Có một người đang đợi bạn ở giữa thị trấn.', 'ようこそ！');
+    const mk = Wd.npcs.find(n => n.id === 'mika');
+    yield* npcStep(mk, 'd'); yield* npcStep(mk, 'd'); Wd.face = 'u';
+    yield* mika();
+    yield* npcStep(mk, 'u'); yield* npcStep(mk, 'u'); mk.dir = 'd';
+  });
+}
+function frame() {
+  FRAME++;
+  try {
+    if (Wd.mode !== 'title') worldUpdate();
+    if (Wd.mode === 'title') renderTitle();
+    else if (Wd.mode === 'battle') { renderBattle(); battleHud(); }
+    else { renderWorld(); c2.clearRect(0, 0, 720, 480); worldHud(); }
+    if (Fx.fade > 0) { ctx.fillStyle = `rgba(8,16,28,${Fx.fade})`; ctx.fillRect(0, 0, W, H); }
+    Quiz.tick();
+  } catch (e) { (window.__errors = window.__errors || []).push(String(e && e.stack || e)); console.error(e); }
+}
+/* mô phỏng không vẽ (nhanh gấp nhiều lần) — dùng cho bot kiểm thử */
+function sim(n) { for (let i = 0; i < n; i++) { FRAME++; if (Wd.mode !== 'title') worldUpdate(); } }
+function drawNow() {
+  if (Wd.mode === 'title') renderTitle(); else if (Wd.mode === 'battle') { renderBattle(); B.hudKey = ''; battleHud(); } else { renderWorld(); c2.clearRect(0, 0, 720, 480); worldHud(); }
+  if (Fx.fade > 0) { ctx.fillStyle = `rgba(8,16,28,${Fx.fade})`; ctx.fillRect(0, 0, W, H); }
+}
+let _hudK = '';
+function worldHud() {
+  const k = [Wd.banner > 0 ? Wd.bannerText : '', S.pearls, S.party[0] ? S.party[0].lv : 0].join('|');
+  if (Wd.banner > 0) Wd.banner--;
+  if (k === _hudK) return; _hudK = k;
+  $('#hud').innerHTML = (Wd.banner > 0 ? `<div class="hb" style="left:calc(var(--u)*5);top:calc(var(--u)*5)"><b>${esc(Wd.bannerText)}</b></div>` : '') +
+    `<div class="hb" style="right:calc(var(--u)*5);top:calc(var(--u)*5);min-width:0;padding:calc(var(--u)*1.5) calc(var(--u)*3)">💎 ${S.pearls}${S.party[0] ? ` · ${GROUP_ICON[grp(S.party[0].sp)]} Lv${S.party[0].lv}` : ''}</div>`;
+}
+let _last = performance.now(), _acc = 0;
+function loop(now) { _acc += Math.min(100, now - _last); _last = now; while (_acc >= 1000 / 60) { frame(); _acc -= 1000 / 60; } requestAnimationFrame(loop); }
+
+/* ---- API cho kiểm thử / bot ---- */
+window.G = {
+  get S() { return S; }, Wd, B, MAPS, CH, SQ, VOC, Quiz, frame, seed, rand, ri,
+  step(n = 1) { for (let i = 0; i < n; i++) frame(); }, sim, drawNow,
+  newGame, continueGame, showTitle, run, busy, Inp, dynMake, dynKey, furi, plain, numRead, timeRead, spName, spInfo, speciesOfChapter, SLICES, FRUITS, newMon, drawTideling, tidelingCanvas,
+  get mode() { return Wd.mode; }, get errors() { return window.__errors || []; }, get missingFuri() { return [...window.__missingFuri]; },
+  ui() { // mô tả giao diện hiện tại (cho bot)
+    if (Modal.open) {
+      if ($('#qnext')) return 'explain';
+      if (Quiz.cur) return 'quiz';
+      return 'modal';
+    }
+    if (!$('#bmenu').hidden && $$('.mb', $('#bmenu')).length) return 'choose';
+    if (!$('#dlg').hidden) return 'dialog';
+    return busy() ? 'script' : 'world';
+  }
+};
+window.addEventListener('DOMContentLoaded', () => { });
+sizeUI(); showTitle();
+if (!/[?&]manual\b/.test(location.search)) requestAnimationFrame(loop);

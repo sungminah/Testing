@@ -1,0 +1,49 @@
+'use strict';
+/* ===== 8 chương = 8 đảo của quần đảo "Coral Crown" (Vương Miện San Hô) ===== */
+const CH = [
+  { id: 'asahi', name: 'Asahi-jima', vi: 'Đảo Bình Minh', lessons: [1, 3], topic: 'Chào hỏi, giới thiệu, これ/それ/あれ, số, tiền, giờ',
+    boss: { name: 'Thuyền trưởng Minato', hair: '#27406b', body: '#d8453a' },
+    pal: { g1: '#7ccf6a', g2: '#5dbb55', path: '#e8d8a0', roof: '#d8553f', wall: '#f6ecd0', tree: '#2f8a4a', water: ['#3f9bd8', '#59b3ea'] },
+    phrases: [['はじめまして。わたしは ～です。', 'Chào lần đầu gặp. Tôi là ～.'], ['これは なんですか。', 'Đây là cái gì?'], ['これは いくらですか。', 'Cái này bao nhiêu tiền?']] },
+  { id: 'sango', name: 'Sango-jima', vi: 'Đảo San Hô', lessons: [4, 6], topic: 'Giờ giấc, động từ ます, đi/đến/về, ăn uống, mời rủ',
+    boss: { name: 'Bà Hanae', hair: '#8a3b5c', body: '#e48aa6' },
+    pal: { g1: '#8fd47a', g2: '#6cc062', path: '#f0cfa0', roof: '#e3708a', wall: '#fbeede', tree: '#3a9a58', water: ['#37a9c8', '#5cc4de'] },
+    phrases: [['いま なんじですか。', 'Bây giờ là mấy giờ?'], ['まいあさ ６じに おきます。', 'Mỗi sáng tôi dậy lúc 6 giờ.'], ['いっしょに ごはんを たべませんか。', 'Cùng ăn cơm nhé?']] },
+  { id: 'midori', name: 'Midori-jima', vi: 'Đảo Xanh Lục', lessons: [7, 9], topic: 'Cho/nhận, thể hiện bằng で, tính từ, thích/giỏi/hiểu',
+    boss: { name: 'Chú Daichi', hair: '#3b2f22', body: '#3f7a4a' },
+    pal: { g1: '#6ec46a', g2: '#4fae58', path: '#d9c690', roof: '#3f8f6b', wall: '#eef3dc', tree: '#1f7a3e', water: ['#3a8fb8', '#55a9d0'] },
+    phrases: [['はしで ごはんを たべます。', 'Tôi ăn cơm bằng đũa.'], ['もう ひるごはんを たべましたか。', 'Bạn đã ăn trưa chưa?'], ['わたしは おんがくが すきです。', 'Tôi thích âm nhạc.']] },
+  { id: 'todai', name: 'Todai-jima', vi: 'Đảo Hải Đăng', lessons: [10, 12], topic: 'あります/います, vị trí, đếm, so sánh, quá khứ tính từ',
+    boss: { name: 'Cô Ayame', hair: '#4b3a8c', body: '#6a5fcf' },
+    pal: { g1: '#9ad46a', g2: '#7cc05a', path: '#e6dcc0', roof: '#5a64c8', wall: '#f4f1e8', tree: '#38904a', water: ['#3d7fcf', '#5e9be4'] },
+    phrases: [['つくえの 上に 本が あります。', 'Trên bàn có sách.'], ['きのうは 雨でした。', 'Hôm qua trời mưa.'], ['夏より 冬の ほうが 好きです。', 'Tôi thích mùa đông hơn mùa hè.']] },
+  { id: 'kumo', name: 'Kumo-jima', vi: 'Đảo Mây', lessons: [13, 15], topic: '～たいです, thể て, ～てください, ～てもいいです, ～ています',
+    boss: { name: 'Anh Ren', hair: '#2d2d3a', body: '#3d8fd6' },
+    pal: { g1: '#a6dc86', g2: '#8acb72', path: '#f2ead0', roof: '#4aa0e0', wall: '#fbfbf4', tree: '#4aa860', water: ['#4aa3dc', '#78c0f0'] },
+    phrases: [['日本へ 行きたいです。', 'Tôi muốn đi Nhật.'], ['ちょっと 待って ください。', 'Xin chờ một chút.'], ['ここで 写真を 撮っても いいですか。', 'Chụp ảnh ở đây được không?']] },
+  { id: 'yuhi', name: 'Yuhi-jima', vi: 'Đảo Hoàng Hôn', lessons: [16, 19], topic: 'Nối câu bằng て, ない形, thể từ điển, ～たことがあります, ～たり～たり',
+    boss: { name: 'Cô Akane', hair: '#b4452a', body: '#ee8a3a' },
+    pal: { g1: '#c3d86a', g2: '#a9c458', path: '#efc890', roof: '#e07a3a', wall: '#fff0d2', tree: '#6a9a3a', water: ['#e08a5a', '#f0a878'] },
+    phrases: [['朝 起きて、シャワーを 浴びます。', 'Sáng dậy rồi tắm vòi sen.'], ['ここで たばこを 吸わないで ください。', 'Xin đừng hút thuốc ở đây.'], ['富士山に 登った ことが あります。', 'Tôi đã từng leo núi Phú Sĩ.']] },
+  { id: 'tsuki', name: 'Tsuki-jima', vi: 'Đảo Trăng', lessons: [20, 22], topic: 'Thể thường, ～と思います, ～と言いました, mệnh đề bổ nghĩa danh từ',
+    boss: { name: 'Thầy Tsubasa', hair: '#d8dce8', body: '#7a8cc8' },
+    pal: { g1: '#7fb8a0', g2: '#68a58c', path: '#d6d8e4', roof: '#6a78b8', wall: '#eceef8', tree: '#2e7a68', water: ['#2f5fa0', '#4a7cc0'] },
+    phrases: [['あした 行く？ — うん、行く。', 'Mai bạn đi không? — Ừ, đi.'], ['明日は 雨が 降ると 思います。', 'Tôi nghĩ ngày mai trời sẽ mưa.'], ['これは 母が 作った ケーキです。', 'Đây là bánh do mẹ tôi làm.']] },
+  { id: 'hoshi', name: 'Hoshi-jima', vi: 'Đảo Sao', lessons: [23, 25], topic: '～とき, ～と, くれる/あげる/もらう, ～たら, ～ても',
+    boss: { name: 'Nữ vương Hoshino', hair: '#f0d070', body: '#c8409a' },
+    pal: { g1: '#8ad0b8', g2: '#6cbaa0', path: '#f6e8b0', roof: '#c8409a', wall: '#fff6dc', tree: '#2e9a78', water: ['#2c4fa8', '#4a70c8'] },
+    phrases: [['まっすぐ 行くと、駅が あります。', 'Đi thẳng thì có nhà ga.'], ['友達に 本を 貸して あげました。', 'Tôi đã cho bạn mượn sách.'], ['雨が 降ったら、行きません。', 'Nếu trời mưa thì tôi không đi.']] }
+];
+const lessonEnd = c => CH[c].lessons[1];
+const lessonStart = c => CH[c].lessons[0];
+function chapterOfLesson(l) { for (let i = 0; i < CH.length; i++) if (l <= CH[i].lessons[1]) return i; return CH.length - 1; }
+/* hải đồ: toạ độ trên viewBox 360x240 */
+const ISLE_POS = [[39, 95], [117, 45], [231, 42], [316, 88], [321, 155], [243, 205], [129, 208], [44, 162]]; // vòng "vương miện"
+/* lối tắt: cần CẢ HAI đảo đã mở + điều kiện. bend = độ cong của đường trên hải đồ */
+const SHORTCUTS = [
+  { id: 'root', a: 0, b: 2, bend: -26, icon: '🌳', name: 'Đường rễ cây', cond: 'duel', text: 'Đấu với lính canh rễ cây', guard: { name: 'Lính canh rễ cây', lv: 7 } },
+  { id: 'buoy', a: 1, b: 4, bend: 22, icon: '🛟', name: 'Chuỗi phao', cond: 'item', item: 'buoy', text: 'Tìm "Dây phao" trên Đảo San Hô' },
+  { id: 'rope', a: 2, b: 5, bend: -24, icon: '🪢', name: 'Cầu dây', cond: 'dex', n: 25, text: 'Bắt đủ 25 loài trong Sổ Tideling' },
+  { id: 'root2', a: 3, b: 6, bend: 26, icon: '🌳', name: 'Đường rễ cổ thụ', cond: 'duel', text: 'Đấu với lính canh cổ thụ', guard: { name: 'Lính canh cổ thụ', lv: 28 } },
+  { id: 'current', a: 4, b: 7, bend: -22, icon: '🌊', name: 'Hải lưu', cond: 'lv', n: 30, text: 'Cấp trung bình đội hình ≥ 30' }
+];
