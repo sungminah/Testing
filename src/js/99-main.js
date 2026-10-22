@@ -29,14 +29,17 @@ function showTitle() {
 }
 function continueGame() { S = loadSave(); applyOpts(); loadMap(S.map, S.x, S.y, S.dir); Wd.mode = 'world'; Wd.banner = 90; }
 function newGame() {
-  S = newState(); applyOpts(); loadMap('i0_town', DOCK.x, DOCK.y, 'u'); Wd.mode = 'world';
+  S = newState(); applyOpts(); const tm = MAPS['i0_town']; loadMap('i0_town', tm.dock.x, tm.dock.y, tm.dock.dir); Wd.mode = 'world';
   run(function* () {
     yield* fade(1, 1); yield* fade(0, 20);
-    yield* say('', 'Con thuyền cập bến Đảo Bình Minh (Asahi-jima) — đảo đầu tiên của Quần đảo San Hô. Có một người đang đợi bạn ở giữa thị trấn.', 'ようこそ！');
-    const mk = Wd.npcs.find(n => n.id === 'mika');
-    yield* npcStep(mk, 'd'); yield* npcStep(mk, 'd'); Wd.face = 'u';
+    S.hero = yield* pickHero(); yield* say('', `Xin chào, ${HEROES[S.hero].name} — ${HEROES[S.hero].role.toLowerCase()} mới của Quần đảo San Hô!`, 'よろしく！');
+    yield* say('', 'Con thuyền cập bến Đảo Bình Minh (Asahi-jima) — đảo đầu tiên của Quần đảo San Hô. Có một người đang đợi bạn ở bến cảng.', 'ようこそ！');
+    const mk = Wd.npcs.find(n => n.id === 'mika'), path = [];
+    while (Math.abs(mk.x - S.x) + Math.abs(mk.y - S.y) > 1) { const d = Math.abs(S.y - mk.y) >= Math.abs(S.x - mk.x) ? (S.y > mk.y ? 'd' : 'u') : (S.x > mk.x ? 'r' : 'l'); path.push(d); yield* npcStep(mk, d); }
+    if (path.length) { Wd.face = OPP[path[path.length - 1]]; S.dir = Wd.face; }
     yield* mika();
-    yield* npcStep(mk, 'u'); yield* npcStep(mk, 'u'); mk.dir = 'd';
+    for (const d of path.reverse()) yield* npcStep(mk, OPP[d]);
+    mk.dir = 'd';
   });
 }
 function frame() {
@@ -69,7 +72,7 @@ function loop(now) { _acc += Math.min(100, now - _last); _last = now; while (_ac
 
 /* ---- API cho kiểm thử / bot ---- */
 window.G = {
-  get S() { return S; }, Wd, B, MAPS, CH, SQ, VOC, Quiz, frame, seed, rand, ri,
+  get S() { return S; }, Wd, B, baseLv, MAPS, CH, SQ, VOC, Quiz, frame, seed, rand, ri,
   step(n = 1) { for (let i = 0; i < n; i++) frame(); }, sim, drawNow,
   newGame, continueGame, showTitle, run, busy, Inp, dynMake, dynKey, furi, plain, numRead, timeRead, spName, spInfo, speciesOfChapter, SLICES, FRUITS, newMon, drawTideling, tidelingCanvas,
   get mode() { return Wd.mode; }, get errors() { return window.__errors || []; }, get missingFuri() { return [...window.__missingFuri]; },

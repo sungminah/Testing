@@ -180,6 +180,7 @@ const VOC_RAW = `
 青い|あおい|xanh dương|8
 桜|さくら|hoa anh đào|8
 山|やま|núi|8
+川|かわ|sông|8
 町|まち|thị trấn, phố|8
 食べ物|たべもの|đồ ăn|8
 所|ところ|nơi chốn|8

@@ -5,7 +5,7 @@ let S = null;
 let FRAME = 0;
 function newState() {
   return {
-    v: 1, cur: 0, maxCh: 0, map: 'i0_town', x: 9, y: 11, dir: 'u',
+    v: 1, hero: 0, cur: 0, maxCh: 0, map: 'i0_town', x: 9, y: 11, dir: 'u',
     party: [], box: [], bag: { net: 5, fruit: 3, snet: 0 }, pearls: 100,
     seen: {}, caught: {}, flags: {}, items: {}, leit: {}, pend: [], qCount: 0, recent: [], streak: 0,
     stats: { n: 0, ok: 0, by: {} }, sc: {}, opt: { sound: 1, furi: 'auto' }, defeated: {}, taken: {}, steps: 0, badges: []
@@ -22,7 +22,7 @@ function closeModal() { modalEl.hidden = true; modalEl.innerHTML = ''; Modal.ope
 function modalCard(inner) { return `<div class="card">${inner}</div>`; }
 
 /* ---- Tideling của người chơi ---- */
-const SLICES = [19, 19, 19, 19, 19, 19, 18, 18];
+const SLICES = [17, 17, 17, 17, 17, 17, 16, 16, 16];
 const SLICE_START = SLICES.reduce((a, n, i) => (a.push(i ? a[i - 1] + SLICES[i - 1] : 0), a), []);
 const chapterOfSp = sp => { for (let i = SLICES.length - 1; i >= 0; i--) if (sp >= SLICE_START[i]) return i; return 0; };
 const speciesOfChapter = c => Array.from({ length: SLICES[c] }, (_, i) => SLICE_START[c] + i);

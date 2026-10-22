@@ -39,9 +39,9 @@ function* scrJournal() {
   yield* modalRun(done => {
     const rows = CH.map((c, i) => {
       const cleared = !!S.flags['boss' + i], open = i <= S.maxCh;
-      return `<div class="item"><div style="font-size:22px">${cleared ? '✅' : open ? '▶️' : '🔒'}</div><div class="grow"><b>Chương ${i + 1} · ${c.vi}</b> <span class="chip">Bài ${c.lessons[0]}–${c.lessons[1]}</span><div style="font-size:13px" class="vi">${c.topic}<br>Boss: ${c.boss.name}</div></div></div>`;
+      return `<div class="item"><div style="font-size:22px">${cleared ? '✅' : open ? '▶️' : '🔒'}</div><div class="grow"><b>${chLabel(i)} · ${c.vi}</b> <span class="chip">Bài ${c.lessons[0]}–${c.lessons[1]}</span><div style="font-size:13px" class="vi">${c.topic}<br>Boss: ${c.boss.name}</div></div></div>`;
     }).join('');
-    showModal(modalCard(`<h2>📜 Nhật ký</h2><div class="box"><b>Việc cần làm:</b> ${esc(objective())}</div><div class="row" style="margin:6px 0"><span class="chip">💎 ${S.pearls}</span><span class="chip">🏅 Huy hiệu: ${S.badges.length}/8</span><span class="chip">📖 Sổ: ${caughtCount()}/150</span></div><div class="list">${rows}</div>${backBtn}`));
+    showModal(modalCard(`<h2>📜 Nhật ký</h2><div class="box"><b>Việc cần làm:</b> ${esc(objective())}</div><div class="row" style="margin:6px 0"><span class="chip">${HEROES[S.hero || 0].name} · ${HEROES[S.hero || 0].role}</span><span class="chip">💎 ${S.pearls}</span><span class="chip">🏅 Huy hiệu: ${S.badges.length}/${CH.length}</span><span class="chip">📖 Sổ: ${caughtCount()}/150</span></div><div class="list">${rows}</div>${backBtn}`));
     wireBack(done);
   }, escBack);
 }
@@ -93,7 +93,7 @@ function* scrDex() {
       const seen = ids.filter(i => S.seen[i]).length, got = ids.filter(i => S.caught[i]).length;
       showModal(modalCard(`<h2>📖 Sổ Tideling</h2><div class="row" style="margin-bottom:6px"><span class="chip t">Đã bắt ${caughtCount()}/150</span><span class="chip">Đã thấy ${Object.keys(S.seen).length}</span></div>
         <div class="tabs">${GROUP_NAME.map((n, k) => `<button class="tab ${k === g ? 'on' : ''}" data-g="${k}">${GROUP_ICON[k]} ${n} (${ids.length && k === g ? got : '·'})</button>`).join('')}</div>
-        <div class="dexg">${ids.map(i => { const sn = S.seen[i], ct = S.caught[i]; const m = S.party.concat(S.box).find(x => x.sp === i); return `<div class="dc ${ct ? 'ct' : ''}">${cvThumb(i, ct && m ? m.form : 1, !sn)}<div>${sn ? spName(i) : '???'}</div><div style="opacity:.6">#${String(Math.floor(i / 3) * 3 + g + 1).padStart(3, '0')} · Đảo ${chapterOfSp(i) + 1}</div></div>`; }).join('')}</div>${backBtn}`));
+        <div class="dexg">${ids.map(i => { const sn = S.seen[i], ct = S.caught[i]; const m = S.party.concat(S.box).find(x => x.sp === i); return `<div class="dc ${ct ? 'ct' : ''}">${cvThumb(i, ct && m ? m.form : 1, !sn)}<div>${sn ? spName(i) : '???'}</div><div style="opacity:.6">#${String(Math.floor(i / 3) * 3 + g + 1).padStart(3, '0')} · Đảo ${chapterOfSp(i)}</div></div>`; }).join('')}</div>${backBtn}`));
       wireBack(done); $$('[data-g]', modalEl).forEach(b => b.addEventListener('click', () => done(+b.dataset.g)));
     }, escBack);
     if (typeof r !== 'number') return; g = r;
@@ -149,7 +149,7 @@ function seaSvg(sel) {
   const P = ISLE_POS; let s = `<svg id="sea" viewBox="0 0 360 240" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="sg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3b9fd8"/><stop offset="1" stop-color="#1d5f9a"/></linearGradient></defs><rect width="360" height="240" fill="url(#sg)"/>`;
   for (let i = 0; i < 26; i++) { const x = (i * 83) % 350, y = (i * 47) % 230; s += `<path d="M${x} ${y} q4 -3 8 0 t8 0" stroke="#ffffff55" fill="none" stroke-width="1"/>`; }
   s += `<g transform="translate(26 28)"><circle r="14" fill="#fff8" stroke="#fff" stroke-width="1"/><path d="M0 -11 L3 0 L0 11 L-3 0Z" fill="#e53935"/><path d="M-11 0 L0 -3 L11 0 L0 3Z" fill="#fff"/><text y="-16" text-anchor="middle" font-size="7" fill="#fff" font-weight="700">N</text></g>`;
-  for (let i = 0; i < 7; i++) { const [x1, y1] = P[i], [x2, y2] = P[i + 1], op = i + 1 <= S.maxCh; s += `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="#fff" stroke-width="${op ? 2 : 1.2}" stroke-dasharray="${op ? '5 3' : '2 4'}" opacity="${op ? .85 : .35}"/>`; }
+  for (let i = 0; i < CH.length - 1; i++) { const [x1, y1] = P[i], [x2, y2] = P[i + 1], op = i + 1 <= S.maxCh; s += `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="#fff" stroke-width="${op ? 2 : 1.2}" stroke-dasharray="${op ? '5 3' : '2 4'}" opacity="${op ? .85 : .35}"/>`; }
   SHORTCUTS.forEach(sc => {
     const [x1, y1] = P[sc.a], [x2, y2] = P[sc.b], len = Math.hypot(x2 - x1, y2 - y1), nx = (y2 - y1) / len, ny = -(x2 - x1) / len;
     const mx = (x1 + x2) / 2 + nx * sc.bend * 2, my = (y1 + y2) / 2 + ny * sc.bend * 2;
@@ -160,7 +160,7 @@ function seaSvg(sel) {
   CH.forEach((c, i) => {
     const [x, y] = P[i], open = i <= S.maxCh, done = !!S.flags['boss' + i], selI = sel && sel.i === i;
     s += `<g class="isl" data-i="${i}" tabindex="0" opacity="${open ? 1 : .55}"><ellipse cx="${x}" cy="${y + 2}" rx="25" ry="15" fill="#0003"/><ellipse cx="${x}" cy="${y}" rx="24" ry="14.5" fill="#f1dca0" stroke="${selI ? '#fff' : '#d8c07a'}" stroke-width="${selI ? 3 : 1.2}"/><ellipse cx="${x}" cy="${y - 1.5}" rx="18" ry="10" fill="${open ? c.pal.g1 : '#8a9a98'}"/><circle cx="${x - 8}" cy="${y - 3}" r="3.6" fill="${open ? c.pal.tree : '#6c7a78'}"/><circle cx="${x + 7}" cy="${y + 1}" r="3" fill="${open ? c.pal.tree : '#6c7a78'}"/><circle cx="${x + 1}" cy="${y - 7}" r="2.4" fill="${open ? c.pal.tree : '#6c7a78'}"/>
-      <circle cx="${x - 20}" cy="${y - 13}" r="7" fill="#1d2433" stroke="#fff" stroke-width="1"/><text x="${x - 20}" y="${y - 10}" text-anchor="middle" font-size="9" fill="#fff" font-weight="800">${i + 1}</text>
+      <circle cx="${x - 20}" cy="${y - 13}" r="7" fill="#1d2433" stroke="#fff" stroke-width="1"/><text x="${x - 20}" y="${y - 10}" text-anchor="middle" font-size="9" fill="#fff" font-weight="800">${i}</text>
       <text x="${x}" y="${y + 24}" text-anchor="middle" font-size="7.5" fill="#fff" stroke="#0b2a44" stroke-width="2" paint-order="stroke" font-weight="700">${esc(c.vi)}</text>
       ${!open ? `<text x="${x}" y="${y + 3}" text-anchor="middle" font-size="12">🔒</text>` : ''}${done ? `<text x="${x + 18}" y="${y - 10}" font-size="11">🏅</text>` : ''}
       ${i === S.cur ? `<text x="${x + 2}" y="${y - 16}" text-anchor="middle" font-size="15">⛵</text>` : ''}</g>`;
@@ -178,7 +178,7 @@ function* scrSea() {
         if (!open) act = `<button class="btn" data-k="open" ${both && cd.ok ? '' : 'disabled'}>${sc.cond === 'duel' ? '⚔️ Thách đấu lính canh' : 'Mở lối tắt'}</button>`;
       } else {
         const c = CH[sel.i], open = sel.i <= S.maxCh;
-        info = `<b>Chương ${sel.i + 1} · ${c.vi}</b> <span class="chip">Bài ${c.lessons[0]}–${c.lessons[1]}</span><div class="vi">${c.topic}</div><div class="vi">${open ? (S.flags['boss' + sel.i] ? '🏅 Đã hoàn thành' : 'Đã mở') : '🔒 Hoàn thành đảo trước để mở khoá'}${sel.i === S.cur ? ' · Bạn đang ở đây' : ''}</div>`;
+        info = `<b>${chLabel(sel.i)} · ${c.vi}</b> <span class="chip">Bài ${c.lessons[0]}–${c.lessons[1]}</span><div class="vi">${c.topic}</div><div class="vi">${open ? (S.flags['boss' + sel.i] ? '🏅 Đã hoàn thành' : 'Đã mở') : '🔒 Hoàn thành đảo trước để mở khoá'}${sel.i === S.cur ? ' · Bạn đang ở đây' : ''}</div>`;
         if (sel.i !== S.cur && open) act = canSail(sel.i) ? `<button class="btn" data-k="sail">⛵ Giương buồm</button>` : `<span class="vi">Chỉ đi được sang đảo liền kề, hoặc qua lối tắt đã mở.</span>`;
       }
       showModal(modalCard(`<h2>🧭 Hải đồ Coral Crown</h2>${seaSvg(sel)}<div class="box">${info}</div><div class="foot">${act}<button class="btn g" data-k="back">Đóng</button></div>`));
@@ -194,7 +194,7 @@ function* scrSea() {
   }
 }
 function* afterSea(r) {
-  if (r.sail != null) { yield* fade(1, 10); S.cur = r.sail; loadMap(`i${r.sail}_town`, DOCK.x, DOCK.y, 'u'); yield 6; yield* fade(0, 10); save(); return; }
+  if (r.sail != null) { yield* fade(1, 10); S.cur = r.sail; { const dk = MAPS[`i${r.sail}_town`].dock; loadMap(`i${r.sail}_town`, dk.x, dk.y, dk.dir); } yield 6; yield* fade(0, 10); save(); return; }
   const sc = SHORTCUTS.find(x => x.id === r.open);
   if (sc.cond === 'duel') {
     yield* say(sc.guard.name, 'Muốn đi qua đường này à? Thắng ta trước đã!', 'しょうぶ しましょう！');

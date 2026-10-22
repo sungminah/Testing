@@ -93,6 +93,11 @@ ruby{ruby-position:over}
 #sea{width:100%;height:auto;border-radius:12px;display:block;background:#2a79b0}
 #sea .isl{cursor:pointer}
 #sea text{font-family:inherit;pointer-events:none}
+.heroes{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px}
+.hero{font:inherit;background:#f1f5fa;border:3px solid #cdd8e6;border-radius:16px;padding:10px 10px 12px;display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;color:var(--ink);text-align:center}
+.hero:hover,.hero:focus{border-color:var(--acc);background:#eaf6fd;outline:none}
+.hero canvas{width:96px;height:112px}
+.hero b{font-size:20px}.hero small{font-size:13px;line-height:1.35;color:#40526b}
 .title{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:calc(var(--u)*4);text-align:center}
 .title h1{margin:0;font-size:calc(var(--u)*17);text-shadow:0 calc(var(--u)*1.5) 0 #0b3a5a;letter-spacing:.02em}
 .title p{margin:0;font-size:calc(var(--u)*6.5);opacity:.92}
@@ -225,6 +230,10 @@ const Snd = {
 'use strict';
 /* ===== 8 chương = 8 đảo của quần đảo "Coral Crown" (Vương Miện San Hô) ===== */
 const CH = [
+  { id: 'hajime', name: 'Hajime-jima', vi: 'Đảo Khởi Hành', lessons: [0, 0], topic: 'Romaji, hiragana, katakana và chữ Hán đơn giản',
+    boss: { name: 'Cô Kana', hair: '#e08a3a', body: '#f0c040' },
+    pal: { g1: '#86d56e', g2: '#66c060', path: '#ecd9a2', roof: '#e0703a', wall: '#fbf0d6', tree: '#2f9a52', water: ['#45a5de', '#62bff0'] },
+    phrases: [['ありがとう。 (arigatou)', 'Cảm ơn.'], ['おはよう。 (ohayou)', 'Chào buổi sáng.'], ['さようなら。 (sayounara)', 'Tạm biệt.']] },
   { id: 'asahi', name: 'Asahi-jima', vi: 'Đảo Bình Minh', lessons: [1, 3], topic: 'Chào hỏi, giới thiệu, これ/それ/あれ, số, tiền, giờ',
     boss: { name: 'Thuyền trưởng Minato', hair: '#27406b', body: '#d8453a' },
     pal: { g1: '#7ccf6a', g2: '#5dbb55', path: '#e8d8a0', roof: '#d8553f', wall: '#f6ecd0', tree: '#2f8a4a', water: ['#3f9bd8', '#59b3ea'] },
@@ -258,24 +267,30 @@ const CH = [
     pal: { g1: '#8ad0b8', g2: '#6cbaa0', path: '#f6e8b0', roof: '#c8409a', wall: '#fff6dc', tree: '#2e9a78', water: ['#2c4fa8', '#4a70c8'] },
     phrases: [['まっすぐ 行くと、駅が あります。', 'Đi thẳng thì có nhà ga.'], ['友達に 本を 貸して あげました。', 'Tôi đã cho bạn mượn sách.'], ['雨が 降ったら、行きません。', 'Nếu trời mưa thì tôi không đi.']] }
 ];
+const chLabel = i => i === 0 ? 'Chương mở đầu' : 'Chương ' + i;
 const lessonEnd = c => CH[c].lessons[1];
 const lessonStart = c => CH[c].lessons[0];
 function chapterOfLesson(l) { for (let i = 0; i < CH.length; i++) if (l <= CH[i].lessons[1]) return i; return CH.length - 1; }
 /* hải đồ: toạ độ trên viewBox 360x240 */
-const ISLE_POS = [[39, 95], [117, 45], [231, 42], [316, 88], [321, 155], [243, 205], [129, 208], [44, 162]]; // vòng "vương miện"
+const ISLE_POS = (() => { const out = []; for (let i = 0; i < 9; i++) { const th = (200 + i * 40) * Math.PI / 180; out.push([Math.round(180 + 148 * Math.cos(th)), Math.round(124 + 86 * Math.sin(th))]); } return out; })(); // vòng "vương miện"
 /* lối tắt: cần CẢ HAI đảo đã mở + điều kiện. bend = độ cong của đường trên hải đồ */
 const SHORTCUTS = [
-  { id: 'root', a: 0, b: 2, bend: -26, icon: '🌳', name: 'Đường rễ cây', cond: 'duel', text: 'Đấu với lính canh rễ cây', guard: { name: 'Lính canh rễ cây', lv: 7 } },
-  { id: 'buoy', a: 1, b: 4, bend: 22, icon: '🛟', name: 'Chuỗi phao', cond: 'item', item: 'buoy', text: 'Tìm "Dây phao" trên Đảo San Hô' },
-  { id: 'rope', a: 2, b: 5, bend: -24, icon: '🪢', name: 'Cầu dây', cond: 'dex', n: 25, text: 'Bắt đủ 25 loài trong Sổ Tideling' },
-  { id: 'root2', a: 3, b: 6, bend: 26, icon: '🌳', name: 'Đường rễ cổ thụ', cond: 'duel', text: 'Đấu với lính canh cổ thụ', guard: { name: 'Lính canh cổ thụ', lv: 28 } },
-  { id: 'current', a: 4, b: 7, bend: -22, icon: '🌊', name: 'Hải lưu', cond: 'lv', n: 30, text: 'Cấp trung bình đội hình ≥ 30' }
+  { id: 'root', a: 1, b: 3, bend: -26, icon: '🌳', name: 'Đường rễ cây', cond: 'duel', text: 'Đấu với lính canh rễ cây', guard: { name: 'Lính canh rễ cây', lv: 13 } },
+  { id: 'buoy', a: 2, b: 5, bend: 22, icon: '🛟', name: 'Chuỗi phao', cond: 'item', item: 'buoy', text: 'Tìm "Dây phao" trên Đảo San Hô' },
+  { id: 'rope', a: 3, b: 6, bend: -24, icon: '🪢', name: 'Cầu dây', cond: 'dex', n: 25, text: 'Bắt đủ 25 loài trong Sổ Tideling' },
+  { id: 'root2', a: 4, b: 7, bend: 26, icon: '🌳', name: 'Đường rễ cổ thụ', cond: 'duel', text: 'Đấu với lính canh cổ thụ', guard: { name: 'Lính canh cổ thụ', lv: 33 } },
+  { id: 'current', a: 5, b: 8, bend: -22, icon: '🌊', name: 'Hải lưu', cond: 'lv', n: 30, text: 'Cấp trung bình đội hình ≥ 30' }
 ];
 
 /* ---- 06-notes.js ---- */
 'use strict';
 /* ===== Ghi chú ngữ pháp theo chương (hiện ở giá sách & khi nói chuyện với người dân trong nhà) ===== */
 const NOTES = [
+  [ // Chương 0 · chữ cái & romaji
+    { t: 'Romaji (kiểu Hepburn) cho hiragana & katakana', b: 'Mỗi chữ kana là một âm tiết. Những chữ cần nhớ: し = shi · ち = chi · つ = tsu · ふ = fu · じ = ji · を = o (khi là trợ từ). Chữ ん luôn là "n".', ex: [['し = shi, ち = chi, つ = tsu, ふ = fu', 'Bốn chữ hay bị viết sai thành si, ti, tu, hu.'], ['さくら = sakura', 'Hoa anh đào.'], ['ともだち = tomodachi', 'Bạn bè.']] },
+    { t: 'Âm ghép, âm đôi và âm kéo dài', b: 'Chữ nhỏ ゃ ゅ ょ ghép với chữ trước: き+ゃ = kya, し+ゅ = shu, ち+ょ = cho. Chữ っ nhỏ nhân đôi phụ âm sau: きって = kitte, ざっし = zasshi. Âm kéo dài: おう → ou, えい → ei, katakana dùng 「ー」 → lặp nguyên âm (コーヒー = koohii).', ex: [['がっこう = gakkou', 'Trường học (っ → kk, おう → ou).'], ['りょこう = ryokou', 'Du lịch (りょ → ryo).'], ['ラーメン = raamen', 'Mì ramen (ー → aa).']] },
+    { t: 'Chữ Hán đơn giản', b: 'Mỗi chữ Hán có nghĩa và cách đọc riêng; người Việt có thể dùng âm Hán Việt để nhớ nghĩa: 山 (sơn) = núi, 川 (xuyên) = sông, 木 (mộc) = cây, 水 (thủy) = nước, 人 (nhân) = người.', ex: [['山 = やま (yama)', 'Núi.'], ['川 = かわ (kawa)', 'Sông.'], ['人 = ひと (hito)', 'Người.']] }
+  ],
   [ // Chương 1 · bài 1–3
     { t: 'N1 は N2 です · じゃ ありません · か · も · の', b: '「A は B です」= A là B. Phủ định: 「じゃ ありません」. Câu hỏi: thêm 「か」 cuối câu. 「も」= cũng. 「の」nối hai danh từ.', ex: [['わたしは ミラーです。', 'Tôi là Miller.'], ['ミラーさんは 学生ですか。', 'Anh Miller là sinh viên à?'], ['いいえ、学生じゃ ありません。', 'Không, không phải sinh viên.'], ['わたしも 会社員です。', 'Tôi cũng là nhân viên công ty.']] },
     { t: 'これ・それ・あれ / この・その・あの', b: 'これ = gần người nói, それ = gần người nghe, あれ = xa cả hai, どれ = cái nào. Khi đi cùng danh từ dùng この/その/あの + N.', ex: [['これは 本です。', 'Đây là sách.'], ['その かばんは だれのですか。', 'Cái cặp đó của ai?'], ['あの 方は だれですか。', 'Vị kia là ai?']] },
@@ -501,6 +516,7 @@ const VOC_RAW = `
 青い|あおい|xanh dương|8
 桜|さくら|hoa anh đào|8
 山|やま|núi|8
+川|かわ|sông|8
 町|まち|thị trấn, phố|8
 食べ物|たべもの|đồ ăn|8
 所|ところ|nơi chốn|8
@@ -1070,6 +1086,7 @@ const kanjiNote = w => [...w].filter(c => KANJI[c]).map(c => `${c} (${KANJI[c].h
 /* ---- tạo câu hỏi từ khoá ---- */
 function dynMake(key, ch) {
   const [type, ...a] = key.split(':'); const maxL = lessonEnd(ch == null ? 7 : ch);
+  if (type === 'rom') return romQuestion(key);
   if (type === 'kana') {
     const [mode, rom] = a, i = ROM.indexOf(rom), h = HIRA[i], k = KATA[i];
     let q, ans, pool, sim;
@@ -1132,9 +1149,10 @@ function dynMake(key, ch) {
 /* ---- chọn khoá ngẫu nhiên theo chương & độ khó ---- */
 function dynKey(type, ch, d) {
   const maxL = lessonEnd(ch);
+  if (type === 'rom') return romKey(d);
   if (type === 'kana') {
-    const modes = ch === 0 ? ['rh', 'rk', 'kh', 'hk'] : ['kh', 'hk'];
-    const rom = pick(ch === 0 && d === 1 ? ROM.slice(0, 46) : ROM);
+    const modes = ch <= 1 ? ['rh', 'rk', 'kh', 'hk'] : ['kh', 'hk'];
+    const rom = pick(ch <= 1 && d === 1 ? ROM.slice(0, 46) : ROM);
     return `kana:${pick(modes)}:${rom}`;
   }
   if (type === 'read' || type === 'write') {
@@ -1167,8 +1185,63 @@ function dynKey(type, ch, d) {
   }
   return null;
 }
-/* tỉ trọng từng loại động theo chương (kana nhiều ở chương 1) */
+/* ===== Chương mở đầu: luyện romaji (kana → romaji, romaji → kana, từ, chữ Hán đơn giản) ===== */
+const toKata = t => t.replace(/[\u3041-\u3096]/g, c => String.fromCharCode(c.charCodeAt(0) + 0x60));
+const HIRA_Y = 'きゃ きゅ きょ しゃ しゅ しょ ちゃ ちゅ ちょ にゃ にゅ にょ ひゃ ひゅ ひょ みゃ みゅ みょ りゃ りゅ りょ ぎゃ ぎゅ ぎょ じゃ じゅ じょ びゃ びゅ びょ ぴゃ ぴゅ ぴょ'.split(' ');
+const ROM_Y = 'kya kyu kyo sha shu sho cha chu cho nya nyu nyo hya hyu hyo mya myu myo rya ryu ryo gya gyu gyo ja ju jo bya byu byo pya pyu pyo'.split(' ');
+const KANA_ALL = ROM.map((r, i) => ({ r, h: HIRA[i], k: KATA[i], y: 0, base: i < 46 })).concat(ROM_Y.map((r, i) => ({ r, h: HIRA_Y[i], k: toKata(HIRA_Y[i]), y: 1, base: false })));
+const HW = [['ねこ', 'neko', 'con mèo'], ['いぬ', 'inu', 'con chó'], ['さくら', 'sakura', 'hoa anh đào'], ['みず', 'mizu', 'nước'], ['やま', 'yama', 'núi'], ['かわ', 'kawa', 'sông'], ['うみ', 'umi', 'biển'], ['そら', 'sora', 'bầu trời'], ['はな', 'hana', 'hoa'], ['つき', 'tsuki', 'mặt trăng'], ['ひと', 'hito', 'người'], ['ちず', 'chizu', 'bản đồ'],
+  ['ともだち', 'tomodachi', 'bạn bè'], ['わたし', 'watashi', 'tôi'], ['おんがく', 'ongaku', 'âm nhạc'], ['にほんご', 'nihongo', 'tiếng Nhật'], ['ふじさん', 'fujisan', 'núi Phú Sĩ'], ['しんぶん', 'shinbun', 'tờ báo'], ['ありがとう', 'arigatou', 'cảm ơn'], ['おはよう', 'ohayou', 'chào buổi sáng'], ['こんにちは', 'konnichiwa', 'xin chào'], ['さようなら', 'sayounara', 'tạm biệt'],
+  ['がっこう', 'gakkou', 'trường học'], ['せんせい', 'sensei', 'giáo viên'], ['おおきい', 'ookii', 'to lớn'], ['きって', 'kitte', 'con tem'], ['ざっし', 'zasshi', 'tạp chí'], ['さんぽ', 'sanpo', 'đi dạo'], ['りょこう', 'ryokou', 'du lịch'], ['じてんしゃ', 'jitensha', 'xe đạp'], ['しゅくだい', 'shukudai', 'bài tập'], ['ちょっと', 'chotto', 'một chút'], ['びょういん', 'byouin', 'bệnh viện'], ['ちゅうごく', 'chuugoku', 'Trung Quốc']];
+const KW = [['パン', 'pan', 'bánh mì'], ['バス', 'basu', 'xe buýt'], ['ペン', 'pen', 'cây bút'], ['アイス', 'aisu', 'kem'], ['ホテル', 'hoteru', 'khách sạn'], ['カメラ', 'kamera', 'máy ảnh'], ['テレビ', 'terebi', 'tivi'], ['ピアノ', 'piano', 'đàn piano'], ['ビール', 'biiru', 'bia'], ['コーヒー', 'koohii', 'cà phê'], ['ケーキ', 'keeki', 'bánh kem'], ['ノート', 'nooto', 'quyển vở'], ['ゲーム', 'geemu', 'trò chơi'], ['メール', 'meeru', 'thư điện tử'], ['チーズ', 'chiizu', 'phô mai'], ['ラーメン', 'raamen', 'mì ramen'], ['ジュース', 'juusu', 'nước ép'], ['タクシー', 'takushii', 'taxi'], ['スポーツ', 'supootsu', 'thể thao'], ['シャツ', 'shatsu', 'áo sơ mi']];
+const PK = [['山', 'やま', 'yama', 'sơn', 'núi'], ['川', 'かわ', 'kawa', 'xuyên', 'sông'], ['木', 'き', 'ki', 'mộc', 'cây'], ['水', 'みず', 'mizu', 'thủy', 'nước'], ['火', 'ひ', 'hi', 'hỏa', 'lửa'], ['月', 'つき', 'tsuki', 'nguyệt', 'mặt trăng'], ['花', 'はな', 'hana', 'hoa', 'hoa'], ['犬', 'いぬ', 'inu', 'khuyển', 'chó'], ['猫', 'ねこ', 'neko', 'miêu', 'mèo'], ['魚', 'さかな', 'sakana', 'ngư', 'cá'], ['人', 'ひと', 'hito', 'nhân', 'người'], ['目', 'め', 'me', 'mục', 'mắt'], ['口', 'くち', 'kuchi', 'khẩu', 'miệng'], ['手', 'て', 'te', 'thủ', 'bàn tay'], ['足', 'あし', 'ashi', 'túc', 'bàn chân'], ['耳', 'みみ', 'mimi', 'nhĩ', 'tai'], ['車', 'くるま', 'kuruma', 'xa', 'xe hơi'], ['雨', 'あめ', 'ame', 'vũ', 'mưa'], ['本', 'ほん', 'hon', 'bản', 'sách'], ['一', 'いち', 'ichi', 'nhất', 'một'], ['二', 'に', 'ni', 'nhị', 'hai'], ['三', 'さん', 'san', 'tam', 'ba'], ['五', 'ご', 'go', 'ngũ', 'năm'], ['六', 'ろく', 'roku', 'lục', 'sáu'], ['七', 'なな', 'nana', 'thất', 'bảy'], ['八', 'はち', 'hachi', 'bát', 'tám'], ['九', 'きゅう', 'kyuu', 'cửu', 'chín'], ['十', 'じゅう', 'juu', 'thập', 'mười'], ['百', 'ひゃく', 'hyaku', 'bách', 'trăm'], ['千', 'せん', 'sen', 'thiên', 'nghìn'], ['上', 'うえ', 'ue', 'thượng', 'trên'], ['下', 'した', 'shita', 'hạ', 'dưới'], ['中', 'なか', 'naka', 'trung', 'giữa, trong'], ['右', 'みぎ', 'migi', 'hữu', 'bên phải'], ['左', 'ひだり', 'hidari', 'tả', 'bên trái'], ['男', 'おとこ', 'otoko', 'nam', 'đàn ông'], ['女', 'おんな', 'onna', 'nữ', 'phụ nữ']];
+const TRICKY = { shi: 'し đọc "shi" (không phải "si")', chi: 'ち đọc "chi" (không phải "ti")', tsu: 'つ đọc "tsu" (không phải "tu")', fu: 'ふ đọc "fu" (không phải "hu")', ji: 'じ đọc "ji" (không phải "zi")', wo: 'を đọc là "o" (khi là trợ từ), gõ bàn phím là "wo"', n: 'ん luôn là "n"', wa: 'わ đọc "wa"' };
+function mutRomaji(r) {
+  const out = new Set(), reps = [['shi', 'si'], ['chi', 'ti'], ['tsu', 'tu'], ['fu', 'hu'], ['ji', 'zi'], ['sh', 's'], ['ch', 't'], ['ou', 'o'], ['oo', 'o'], ['ii', 'i'], ['aa', 'a'], ['ei', 'e'], ['kk', 'k'], ['ss', 's'], ['tt', 't'], ['pp', 'p'], ['ky', 'k'], ['ry', 'r'], ['ja', 'za'], ['n', 'm']];
+  for (const [a, b] of reps) if (r.includes(a)) out.add(r.replace(a, b));
+  if (!/[kstp]{2}/.test(r)) { const m = r.match(/[aiueo]([ktsp])[aiueo]/); if (m) out.add(r.replace(m[0], m[0][0] + m[1] + m[1] + m[0][2])); }
+  if (r.length > 3) out.add(r.slice(0, 2) + r[3] + r[2] + r.slice(4));
+  out.add(r.replace(/[aiueo]/, v => 'aiueo'[('aiueo'.indexOf(v) + 1) % 5]));
+  out.add(r + (/[aiueo]$/.test(r) ? r[r.length - 1] : 'u'));
+  out.delete(r); return [...out].filter(x => x && x !== r);
+}
+function romQuestion(key) {
+  const [, mode, idx] = key.split(':'), I = +idx;
+  const pickSet = (ans, pool, near) => { const set = []; shuffle(near.filter(x => x !== ans)).forEach(x => { if (set.length < 3 && !set.includes(x)) set.push(x); }); for (const x of shuffle(pool)) { if (set.length >= 3) break; if (x !== ans && !set.includes(x)) set.push(x); } return set; };
+  if (mode === 'hr' || mode === 'kr' || mode === 'hk2') {
+    const K = KANA_ALL[I], ch = mode === 'kr' ? K.k : K.h, script = mode === 'kr' ? 'katakana' : 'hiragana';
+    const near = KANA_ALL.filter(x => x.y === K.y && (x.r[0] === K.r[0] || x.r.slice(-1) === K.r.slice(-1))).map(x => x.r).concat(mutRomaji(K.r));
+    const set = pickSet(K.r, KANA_ALL.filter(x => x.y === K.y).map(x => x.r), near), c = [K.r, ...set];
+    return { id: key, t: 'm', d: K.y ? 3 : K.base ? 1 : 2, l: 0, q: `「${ch}」を ローマ字で かくと どれですか。`, qv: `Chữ ${script} 「${ch}」 đọc là gì (romaji)?`, c, ex: `「${K.h}」 (hiragana) = 「${K.k}」 (katakana) = "${K.r}". ${TRICKY[K.r] ? TRICKY[K.r] + '.' : ''}${K.y ? ' Chữ nhỏ ゃ ゅ ょ ghép với chữ đứng trước thành một âm tiết.' : ''}`, w: [[K.h, K.r, 'hiragana'], [K.k, K.r, 'katakana']], cv: c.map((x, n) => n === 0 ? 'đúng' : 'romaji khác'), nf: true };
+  }
+  if (mode === 'wr' || mode === 'kw') {
+    const lst = mode === 'wr' ? HW : KW, [w, r, m] = lst[I], script = mode === 'wr' ? 'hiragana' : 'katakana';
+    const near = mutRomaji(r), pool = lst.map(x => x[1]);
+    const set = pickSet(r, pool.filter(x => Math.abs(x.length - r.length) <= 2), near), c = [r, ...set];
+    const rules = [/っ|ッ/.test(w) ? 'Chữ っ/ッ nhỏ nhân đôi phụ âm sau nó.' : '', /ー/.test(w) ? 'Dấu ー kéo dài nguyên âm: lặp lại nguyên âm trước đó (koohii).' : '', /[おこそとのほもよろ]う|[えけせてねへめれ]い/.test(w) ? 'おう → "ou", えい → "ei" (âm kéo dài).' : '', /[ゃゅょ]/.test(w) ? 'ゃ ゅ ょ nhỏ ghép với chữ trước (しゃ = sha).' : ''].filter(Boolean).join(' ');
+    return { id: key, t: 'm', d: w.length <= 3 ? 1 : w.length <= 5 ? 2 : 3, l: 0, q: `「${w}」を ローマ字で かくと どれですか。`, qv: `Từ ${script} 「${w}」 (${m}) viết bằng romaji?`, c, ex: `「${w}」 = "${r}" (${m}). ${rules}`, w: [[w, r, m]], cv: c.map((x, n) => n === 0 ? m : 'romaji sai'), nf: true };
+  }
+  const [k, yomi, romaji, hv, mean] = PK[I];
+  if (mode === 'jr') { // kanji → hiragana
+    const near = PK.filter(x => x[1] !== yomi).map(x => x[1]), set = pickSet(yomi, near, near.filter(x => Math.abs(x.length - yomi.length) <= 1)), c = [yomi, ...set];
+    return { id: key, t: 'k', d: 1, l: 0, qh: `「${esc(k)}」の よみかたは どれですか。`, q: `「${k}」の よみかたは どれですか。`, qv: `Chữ Hán 「${k}」 đọc là gì?`, c, ex: `「${k}」 (${hv}) = ${mean}, đọc là 「${yomi}」 (${romaji}).`, w: [[k, yomi, mean]], cv: c.map((x, n) => n === 0 ? mean : '(cách đọc khác)'), nf: true };
+  }
+  if (mode === 'jo') { // kanji → romaji
+    const near = PK.filter(x => x[2] !== romaji).map(x => x[2]), set = pickSet(romaji, near, mutRomaji(romaji).concat(near.filter(x => Math.abs(x.length - romaji.length) <= 1))), c = [romaji, ...set];
+    return { id: key, t: 'k', d: 2, l: 0, qh: `「${esc(k)}」を ローマ字で よむと どれですか。`, q: `「${k}」を ローマ字で よむと どれですか。`, qv: `Chữ Hán 「${k}」 đọc bằng romaji?`, c, ex: `「${k}」 (${hv}) = ${mean}, đọc là 「${yomi}」 = "${romaji}".`, w: [[k, yomi, mean]], cv: c.map((x, n) => n === 0 ? mean : '(sai)'), nf: true };
+  }
+  // 'jj': hiragana → kanji
+  const near = PK.filter(x => x[0] !== k).map(x => x[0]), set = pickSet(k, near, near), c = [k, ...set];
+  return { id: key, t: 'k', d: 2, l: 0, q: `「${yomi}」を かんじで かくと どれですか。`, qv: `Viết 「${yomi}」 (${mean}) bằng chữ Hán.`, c, ex: `「${yomi}」 = 「${k}」 (${hv}) — ${mean}.`, w: [[k, yomi, mean]], cv: c.map((x, n) => n === 0 ? mean : (PK.find(p2 => p2[0] === x) || [])[4] || ''), nf: true };
+}
+function romKey(d) {
+  if (d === 1) { const m = pick(['hr', 'hr', 'kr', 'kr', 'jr', 'jr', 'wr']); if (m === 'jr') return `rom:jr:${ri(PK.length)}`; if (m === 'wr') return `rom:wr:${ri(12)}`; return `rom:${m}:${ri(46)}`; }
+  if (d === 2) { const m = pick(['hr', 'kr', 'wr', 'kw', 'jo', 'jj', 'jj']); if (m === 'jo' || m === 'jj') return `rom:${m}:${ri(PK.length)}`; if (m === 'wr') return `rom:wr:${12 + ri(HW.length - 12 - 8)}`; if (m === 'kw') return `rom:kw:${ri(10)}`; return `rom:${m}:${46 + ri(23)}`; }
+  const m = pick(['hr', 'kr', 'wr', 'kw']); if (m === 'wr') return `rom:wr:${HW.length - 12 + ri(12)}`; if (m === 'kw') return `rom:kw:${10 + ri(KW.length - 10)}`; return `rom:${m}:${69 + ri(33)}`;
+}
+/* tỉ trọng từng loại động theo chương (chương 0 chỉ luyện romaji; kana nhiều ở chương 1) */
 const DYN_W = [
+  { rom: 10 },
   { kana: 3, num: 2, time: 2, read: 3, write: 2, cat: 2 },
   { kana: 0.4, num: 1, time: 2, read: 3, write: 2, cat: 2 },
   { kana: 0.2, num: 0.6, time: 1, read: 3, write: 2, cat: 2 },
@@ -1311,6 +1384,18 @@ Q('g', 2, 25, '{日本語|にほんご}を {勉強|べんきょう}しなかっ�
 Q('g', 3, 25, 'お{金|かね}が ＿＿、{旅行|りょこう}に {行|い}きたいです。', 'Nếu có tiền tôi muốn đi du lịch.', ['あったら', 'あって', 'ありたら', 'あるたら'], 'Quá khứ thể thường + ら: ある → あった → あったら.', '', 'nếu có|có rồi (nối)|(sai)|(sai)');
 R(2, 25, '{私|わたし}は {来年|らいねん} {日本|にほん}へ {留学|りゅうがく}したいです。{日本語|にほんご}が {上手|じょうず}に なったら、{大学|だいがく}で {勉強|べんきょう}します。お{金|かね}が なかったら、アルバイトを します。', 'Năm sau tôi muốn đi du học Nhật. Nếu giỏi tiếng Nhật, tôi sẽ học đại học. Nếu không có tiền, tôi sẽ làm thêm.', '{私|わたし}は お{金|かね}が なかったら、{何|なに}を しますか。', 'Nếu không có tiền thì làm gì?', ['アルバイトを します', '{旅行|りょこう}に {行|い}きます', '{家|うち}で {寝|ね}ます', '{国|くに}へ {帰|かえ}ります'], '「お金が なかったら、アルバイトを します」.', '留学|りゅうがく|du học;来年|らいねん|năm sau', 'làm thêm|đi du lịch|ngủ ở nhà|về nước');
 
+/* ---- 14-questions0.js ---- */
+'use strict';
+/* ===== Chương mở đầu (bài 0): quy tắc romaji & chữ cái. Đáp án bằng romaji / kana. ===== */
+Q('m', 1, 0, '「は」は じょしの ときは ローマ字で なんと よみますか。', 'Khi 「は」 là trợ từ (chủ đề), nó đọc là gì?', ['wa', 'ha', 'ba', 'pa'], 'Trợ từ 「は」 đọc là "wa" (わたしは = watashi wa). Trong từ bình thường nó vẫn là "ha" (はな = hana).', 'わたしは|watashi wa|tôi (chủ đề)', 'wa (đúng)|ha|ba|pa');
+Q('m', 1, 0, 'じょしの 「を」は ローマ字で なんと よみますか。', 'Trợ từ 「を」 đọc là gì?', ['o', 'wo', 'u', 'wa'], 'Trợ từ 「を」 đọc là "o" (Hepburn). Trên bàn phím mới gõ "wo".', 'を|o|trợ từ tân ngữ', 'o (đúng)|wo (cách gõ phím)|u|wa');
+Q('m', 2, 0, '「きって」を ローマ字で かくと どれですか。', 'Viết 「きって」 (con tem) bằng romaji.', ['kitte', 'kite', 'kito', 'kitsute'], 'Chữ 「っ」 nhỏ nhân đôi phụ âm đứng sau nó: きって = ki-t-te → "kitte".', 'きって|kitte|con tem', 'kitte|kite (thiếu っ)|kito|kitsute');
+Q('m', 2, 0, '「コーヒー」を ローマ字で かくと どれですか。', 'Viết 「コーヒー」 bằng romaji.', ['koohii', 'kohi', 'koohi', 'kouhii'], 'Dấu 「ー」 trong katakana kéo dài nguyên âm: コー = koo, ヒー = hii.', 'コーヒー|koohii|cà phê', 'koohii|kohi (thiếu kéo dài)|koohi|kouhii');
+Q('m', 2, 0, '「おおきい」を ローマ字で かくと どれですか。', 'Viết 「おおきい」 (to lớn) bằng romaji.', ['ookii', 'okii', 'ookki', 'ookiii'], 'おお kéo dài nguyên âm o → "oo"; きい → "kii".', 'おおきい|ookii|to lớn', 'ookii|okii (thiếu kéo dài)|ookki|ookiii');
+Q('m', 1, 0, '「ん」は ローマ字で なんと かきますか。', 'Chữ 「ん」 viết bằng romaji là gì?', ['n', 'm', 'ng', 'nn'], '「ん」 luôn viết là "n" (さんぽ = sanpo, ほん = hon).', 'ほん|hon|quyển sách', 'n|m|ng|nn');
+Q('m', 3, 0, '「しゅくだい」を ローマ字で かくと どれですか。', 'Viết 「しゅくだい」 (bài tập) bằng romaji.', ['shukudai', 'sukudai', 'shikudai', 'shyukudai'], 'しゅ = shu (し + ゅ nhỏ). Không viết "shyu".', 'しゅくだい|shukudai|bài tập', 'shukudai|sukudai|shikudai|shyukudai');
+Q('m', 3, 0, '「ちょっと」を ローマ字で かくと どれですか。', 'Viết 「ちょっと」 (một chút) bằng romaji.', ['chotto', 'choto', 'chyotto', 'tyotto'], 'ちょ = cho; っと nhân đôi t → "chotto".', 'ちょっと|chotto|một chút', 'chotto|choto|chyotto|tyotto');
+
 /* ---- 20-state.js ---- */
 'use strict';
 /* ===== trạng thái game, lưu/tải, modal DOM ===== */
@@ -1319,7 +1404,7 @@ let S = null;
 let FRAME = 0;
 function newState() {
   return {
-    v: 1, cur: 0, maxCh: 0, map: 'i0_town', x: 9, y: 11, dir: 'u',
+    v: 1, hero: 0, cur: 0, maxCh: 0, map: 'i0_town', x: 9, y: 11, dir: 'u',
     party: [], box: [], bag: { net: 5, fruit: 3, snet: 0 }, pearls: 100,
     seen: {}, caught: {}, flags: {}, items: {}, leit: {}, pend: [], qCount: 0, recent: [], streak: 0,
     stats: { n: 0, ok: 0, by: {} }, sc: {}, opt: { sound: 1, furi: 'auto' }, defeated: {}, taken: {}, steps: 0, badges: []
@@ -1336,7 +1421,7 @@ function closeModal() { modalEl.hidden = true; modalEl.innerHTML = ''; Modal.ope
 function modalCard(inner) { return `<div class="card">${inner}</div>`; }
 
 /* ---- Tideling của người chơi ---- */
-const SLICES = [19, 19, 19, 19, 19, 19, 18, 18];
+const SLICES = [17, 17, 17, 17, 17, 17, 16, 16, 16];
 const SLICE_START = SLICES.reduce((a, n, i) => (a.push(i ? a[i - 1] + SLICES[i - 1] : 0), a), []);
 const chapterOfSp = sp => { for (let i = SLICES.length - 1; i >= 0; i--) if (sp >= SLICE_START[i]) return i; return 0; };
 const speciesOfChapter = c => Array.from({ length: SLICES[c] }, (_, i) => SLICE_START[c] + i);
@@ -1373,7 +1458,7 @@ const DIFF_NAME = ['', 'Dễ', 'Vừa', 'Khó'];
 const AREA_DL = { town: [9, 1, 0], route: [7, 3, 0.4], gym: [4, 5, 1.2], boss: [2, 4, 4], drill: [8, 2, 0] };
 function diffWeights(ch, area) {
   const b = AREA_DL[area] || AREA_DL.route; let w = [b[0] * (1 - 0.08 * ch), b[1], b[2] * (1 + 0.3 * ch)];
-  if (ch === 0 && area !== 'boss') w[2] = 0; // chương 1: d3 chỉ ở boss
+  if (ch <= 1 && area !== 'boss') w[2] = 0; // chương mở đầu & chương 1: d3 chỉ ở boss
   return w;
 }
 const Quiz = {
@@ -1399,6 +1484,7 @@ const Quiz = {
     const maxL = lessonEnd(ch);
     const gw = { st: 5 }; const dwt = DYN_W[ch];
     for (const k in dwt) gw[k] = dwt[k];
+    if (!SQ.some(q => q.l <= maxL)) delete gw.st;
     for (let tries = 0; tries < 8; tries++) {
       const g = wpick(Object.keys(gw), k => gw[k]);
       let cands;
@@ -1596,6 +1682,221 @@ function tidelingCanvas(sp, form, size, sil) {
   _tcache.set(key, c); return c;
 }
 
+/* ---- 39-islands.js ---- */
+'use strict';
+/* ===== Bản đồ riêng cho từng đảo (đảo nào chưa khai báo sẽ dùng bản đồ mẫu trong 40-maps.js) =====
+   Ký tự: # cây/tường  R mái  W tường nhà  1 2 3 cửa (y tế / cửa hàng / nhà)  ~ nước  b cầu/bến gỗ  s cát  g cỏ cao
+          f hoa  o đá  F hàng rào  l đèn  U lối ra thị trấn → đường mòn  V lối ra  G cửa nhà boss  . cỏ / sàn
+   npcs(h): h.guide h.sensei h.phrase(n,..) h.trainer(t,..) h.item h.fruit h.boss */
+const ISLANDS = {
+  /* ---------- 1 · Đảo Khởi Hành (chương mở đầu): bến cảng ---------- */
+  0: {
+    town: {
+      dock: [11, 14],
+      rows: [
+        '##########UU############',
+        '#......................#',
+        '#..RRR.......RRR..RRR..#',
+        '#..W1W.......W2W..W3W..#',
+        '#......................#',
+        '#...ff...........ff....#',
+        '#......................#',
+        '#.....~~~~.............#',
+        '#.....~~~~.....FFF.....#',
+        '#......................#',
+        '#.o.......l..........l.#',
+        '#......................#',
+        '#ssssssssssssssssssssss#',
+        '~~~~~~~~~~~bb~~~~~~~~~~~',
+        '~~~~~~~~~~~bb~~~~~~~~~~~',
+        '~~~~~~~~~~~bb~~~~~~~~~~~'
+      ],
+      npcs: h => [h.guide(11, 10, 'd'), h.sensei(5, 8, 'r'), h.phrase(0, 16, 6, 'l'), h.phrase(1, 21, 9, 'l'), h.phrase(2, 13, 12, 'l')]
+    },
+    route: {
+      rows: [
+        '######################',
+        '#.......RRRRR........#',
+        '#.......WWGWW........#',
+        '#....................#',
+        '#.ggggg..........ggg.#',
+        '#.ggggg....o.....ggg.#',
+        '#....................#',
+        '#..FFFF........FFFF..#',
+        '#....................#',
+        '~~~~~~~~~~~~~~bb~~~~~~',
+        '~~~~~~~~~~~~~~bb~~~~~~',
+        '#....................#',
+        '#.gggg...........gg..#',
+        '#.gggg....o..........#',
+        '#....................#',
+        '#.......gggg.........#',
+        '#.......gggg.........#',
+        '#.o..................#',
+        '#....................#',
+        '#########VV###########'
+      ],
+      npcs: h => [h.trainer(0, 14, 7, 'd', 4), h.trainer(1, 6, 14, 'r', 4), h.item(18, 3), h.fruit(3, 18)]
+    },
+    gym: {
+      rows: [
+        '################',
+        '#P............P#',
+        '#..............#',
+        '#......rr......#',
+        '#..o...rr...o..#',
+        '#......rr......#',
+        '#..............#',
+        '#..o...rr...o..#',
+        '#......rr......#',
+        '#..............#',
+        '#......rr......#',
+        '#######VV#######'
+      ],
+      npcs: h => [h.trainer(2, 3, 6, 'r', 5), h.trainer(3, 12, 9, 'l', 5), h.boss(7, 2, 'd')]
+    }
+  },
+  /* ---------- 2 · Đảo Bình Minh: rừng sáng sớm, suối ---------- */
+  1: {
+    town: {
+      dock: [9, 14],
+      rows: [
+        '###############UU#######',
+        '###..................###',
+        '##..RRR...RRR....RRR...#',
+        '##..W1W...W2W....W3W...#',
+        '##.....................#',
+        '##..ff....#.......ff...#',
+        '###...................##',
+        '###....ooo......f.....##',
+        '##.....................#',
+        '##...~~~~.............##',
+        '##...~~~~......ff.....##',
+        '###...................##',
+        '###..................###',
+        '~~~~~~~~~bb~~~~~~~~~~~~~',
+        '~~~~~~~~~bb~~~~~~~~~~~~~',
+        '~~~~~~~~~bb~~~~~~~~~~~~~'
+      ],
+      npcs: h => [h.guide(11, 6, 'd'), h.sensei(4, 10, 'r'), h.phrase(0, 14, 8, 'l'), h.phrase(1, 20, 6, 'l'), h.phrase(2, 16, 11, 'l')]
+    },
+    route: {
+      rows: [
+        '######################',
+        '#........RRRRR.......#',
+        '#........WWGWW.......#',
+        '#....................#',
+        '#.##..ggg....##..ggg.#',
+        '#.##..ggg....##..ggg.#',
+        '#....................#',
+        '#..ff...######...ff..#',
+        '#....................#',
+        '#.ggg..........ggg...#',
+        '#.ggg..........ggg...#',
+        '~~~~~~~~~~bb~~~~~~~~~~',
+        '~~~~~~~~~~bb~~~~~~~~~~',
+        '#....................#',
+        '#.####..ggg....####..#',
+        '#.####..ggg....####..#',
+        '#....................#',
+        '#..ggg....ff....ggg..#',
+        '#....................#',
+        '#....................#',
+        '#....................#',
+        '##########VV##########'
+      ],
+      npcs: h => [h.trainer(0, 6, 8, 'r', 6), h.trainer(1, 14, 16, 'l', 6), h.item(19, 3), h.fruit(2, 19)]
+    },
+    gym: {
+      rows: [
+        '################',
+        '#PP..........PP#',
+        '#..............#',
+        '#..o........o..#',
+        '#..............#',
+        '#~~~~~bbbb~~~~~#',
+        '#~~~~~bbbb~~~~~#',
+        '#..............#',
+        '#..o........o..#',
+        '#..............#',
+        '#..............#',
+        '#..PP......PP..#',
+        '#..............#',
+        '#######VV#######'
+      ],
+      npcs: h => [h.trainer(2, 3, 4, 'r', 6), h.trainer(3, 12, 9, 'l', 6), h.boss(7, 2, 'd')]
+    }
+  },
+  /* ---------- 3 · Đảo San Hô: làng kênh rạch, bãi cát ---------- */
+  2: {
+    town: {
+      dock: [5, 14],
+      rows: [
+        '##############UU########',
+        '#......................#',
+        '#..RRR.........RRR.RRR.#',
+        '#..W1W.........W2W.W3W.#',
+        '#...ff.........ff......#',
+        '#.........~~...........#',
+        '#.........~~...........#',
+        '#.........bb...........#',
+        '#.........~~...........#',
+        '#.........~~...........#',
+        '#.o.......bb..........o#',
+        '#.........~~...........#',
+        '#sssssssss~~sssssssssss#',
+        '~~~~~bb~~~~~~~~~~~~~~~~~',
+        '~~~~~bb~~~~~~~~~~~~~~~~~',
+        '~~~~~bb~~~~~~~~~~~~~~~~~'
+      ],
+      npcs: h => [h.guide(7, 8, 'r'), h.sensei(4, 9, 'r'), h.phrase(0, 14, 6, 'l'), h.phrase(1, 19, 9, 'l'), h.phrase(2, 13, 12, 'l')]
+    },
+    route: {
+      rows: [
+        '######################',
+        '#..........RRRRR.....#',
+        '#..........WWGWW.....#',
+        '#ssssssssssssssssssss#',
+        '#sgggsss~~~sssggggsss#',
+        '#sgggsss~~~sssggggsss#',
+        '#ssssss~~~~ssssssssss#',
+        '#ssOss~~~~~sssss~~sss#',
+        '#sssss~~~~~sssss~~sss#',
+        '#ssssssssssssssssssss#',
+        '~~~~bb~~~~~~~~~~~~~~~~',
+        '~~~~bb~~~~~~~~~~~~~~~~',
+        '#ssssssssssssssssssss#',
+        '#sssggggsssssssssssss#',
+        '#sssggggsssssssssssss#',
+        '#sssssssssssggggsssss#',
+        '#sssssssssssggggsssss#',
+        '#ssssssssssssssssOOss#',
+        '#ssssssssssssssssssss#',
+        '#######VV#############'
+      ],
+      npcs: h => [h.trainer(0, 4, 7, 'd', 4), h.trainer(1, 12, 14, 'l', 6), h.item(18, 3), h.fruit(19, 18)]
+    },
+    gym: {
+      rows: [
+        '##################',
+        '#P..............P#',
+        '#................#',
+        '#...~~~....~~~...#',
+        '#...~~~....~~~...#',
+        '#................#',
+        '#.......rr.......#',
+        '#...o...rr...o...#',
+        '#.......rr.......#',
+        '#................#',
+        '#.......rr.......#',
+        '#................#',
+        '########VV########'
+      ],
+      npcs: h => [h.trainer(2, 3, 9, 'r', 6), h.trainer(3, 14, 5, 'l', 6), h.boss(8, 2, 'd')]
+    }
+  }
+};
+
 /* ---- 40-maps.js ---- */
 'use strict';
 /* ===== Bản đồ: mỗi đảo gồm thị trấn – đường mòn – phòng boss. Ký tự:
@@ -1655,14 +1956,14 @@ const GYM = [
 const CLINIC = ['##########', '#EE.....P#', '#...KKK..#', '#........#', '#.rr...rr#', '#........#', '#L......L#', '####VV####'];
 const SHOP = ['##########', '#LL....LP#', '#...KKK..#', '#........#', '#.rr...rr#', '#........#', '#L......L#', '####VV####'];
 const HOME = ['##########', '#E.LL..P.#', '#........#', '#..TT....#', '#........#', '#.rrrr...#', '#........#', '####VV####'];
-const SOLID = new Set(['#', 'R', 'W', '~', 'K', 'L', 'T', 'P', 'E']);
+const SOLID = new Set(['#', 'R', 'W', '~', 'K', 'L', 'T', 'P', 'E', 'o', 'O', 'F', 'l']);
 const MAPS = {};
 const TRAINER_NAMES = ['Cậu bé Kai', 'Chị Yuna', 'Bác ngư dân Gen', 'Em Sora', 'Anh Riku', 'Cô Nao', 'Chú Taro', 'Bạn Mei', 'Anh Haru', 'Cô Rin', 'Cậu Ken', 'Bà Chiyo'];
 const LOOKS = [
   { hair: '#3b2f22', body: '#4c8fd6' }, { hair: '#8a3b5c', body: '#e48aa6' }, { hair: '#555', body: '#6d8f5a' }, { hair: '#d9b44a', body: '#e07a3a' },
   { hair: '#2d2d3a', body: '#8a6fcf' }, { hair: '#7a4a2a', body: '#d8c04a' }
 ];
-const baseLv = i => [4, 10, 16, 22, 28, 34, 40, 46][i];
+const baseLv = i => [3, 6, 11, 16, 21, 26, 31, 36, 41][i];
 function bfsPath(rows, from, to, avoidGrass) {
   const h = rows.length, w = rows[0].length, key = (x, y) => y * w + x, prev = new Map([[key(from[0], from[1]), null]]), q = [from];
   while (q.length) {
@@ -1676,23 +1977,59 @@ function bfsPath(rows, from, to, avoidGrass) {
   }
   return null;
 }
+const findTiles = (m, ch) => { const out = []; m.rows.forEach((r, y) => { for (let x = 0; x < r.length; x++) if (r[x] === ch) out.push([x, y]); }); return out; };
+/* ô đứng cạnh một cửa/lối ra (dùng làm điểm xuất hiện sau khi chuyển bản đồ) */
+function arrivalNear(m, ch) {
+  const t = findTiles(m, ch)[0], prefs = ch === 'V' ? [[0, -1], [0, 1], [1, 0], [-1, 0]] : [[0, 1], [0, -1], [1, 0], [-1, 0]];
+  for (const [dx, dy] of prefs) {
+    const x = t[0] + dx, y = t[1] + dy, c = (m.rows[y] || '')[x];
+    if (c !== undefined && !SOLID.has(c) && !'UVG123'.includes(c)) return { x, y, dir: dy > 0 ? 'd' : dy < 0 ? 'u' : dx > 0 ? 'r' : 'l' };
+  }
+  throw new Error('không có ô đứng cạnh ' + ch + ' trong ' + m.id);
+}
+function link(a, cha, b, chb) { const ar = arrivalNear(b, chb); findTiles(a, cha).forEach(([x, y]) => { a.warps[x + ',' + y] = { map: b.id, x: ar.x, y: ar.y, dir: ar.dir }; }); }
+function markPath(m, from, to) {
+  const p = bfsPath(m.rows, from, to, true) || bfsPath(m.rows, from, to, false);
+  if (p) p.forEach(q => m.path.add(q.join(',')));
+}
+/* bản đồ mẫu cho đảo chưa có bản đồ riêng */
+const DEFAULT_DEF = {
+  town: { rows: TOWN, dock: [9, 11], npcs: h => [h.guide(9, 8, 'd'), h.sensei(5, 6, 'r'), h.phrase(0, 15, 9, 'l'), h.phrase(1, 4, 9, 'r'), h.phrase(2, 12, 6, 'r')] },
+  route: { rows: ROUTE, npcs: h => [h.trainer(0, 9, 6, 'd', 4), h.trainer(1, 6, 14, 'r', 4), h.item(18, 3), h.fruit(2, 17)] },
+  gym: { rows: GYM, npcs: h => [h.trainer(2, 3, 6, 'r', 5), h.trainer(3, 10, 9, 'l', 5), h.boss(6, 2, 'd')] }
+};
 function buildIsland(i) {
-  const c = CH[i], L = i % LOOKS.length;
+  const c = CH[i], L = i % LOOKS.length, def = ISLANDS[i] || DEFAULT_DEF;
   const tn = (n) => TRAINER_NAMES[(i * 3 + n) % TRAINER_NAMES.length];
   const mk = (id, name, rows, area, extra) => {
     const m = Object.assign({ id, name, rows, w: rows[0].length, h: rows.length, area, isl: i, warps: {}, npcs: [], path: new Set() }, extra);
     MAPS[id] = m; return m;
   };
-  const town = mk(`i${i}_town`, `${c.vi} · Thị trấn`, TOWN, 'town');
-  const route = mk(`i${i}_route`, `${c.vi} · Đường mòn`, ROUTE, 'route');
-  const gym = mk(`i${i}_gym`, `${c.vi} · Nhà ${c.boss.name.split(' ').slice(-1)[0]}`, GYM, 'gym');
-  const clinic = mk(`i${i}_clinic`, `${c.vi} · Trạm y tế`, CLINIC, 'room');
-  const shop = mk(`i${i}_shop`, `${c.vi} · Cửa hàng`, SHOP, 'room');
-  const home = mk(`i${i}_home`, `${c.vi} · Nhà dân`, HOME, 'room');
-  [[3, clinic], [8, shop], [13, home]].forEach(([dx, rm]) => {
-    town.warps[`${dx},3`] = { map: rm.id, x: 4, y: 6, dir: 'u' };
-    for (const x of [4, 5]) rm.warps[`${x},7`] = { map: town.id, x: dx, y: 4, dir: 'd' };
-  });
+  const town = mk(`i${i}_town`, `${c.vi} · Thị trấn`, def.town.rows, 'town');
+  const route = mk(`i${i}_route`, `${c.vi} · Đường mòn`, def.route.rows, 'route');
+  const gym = mk(`i${i}_gym`, `${c.vi} · Nhà ${c.boss.name.split(' ').slice(-1)[0]}`, def.gym.rows, 'gym', { style: 'room' });
+  const clinic = mk(`i${i}_clinic`, `${c.vi} · Trạm y tế`, CLINIC, 'room', { style: 'room' });
+  const shop = mk(`i${i}_shop`, `${c.vi} · Cửa hàng`, SHOP, 'room', { style: 'room' });
+  const home = mk(`i${i}_home`, `${c.vi} · Nhà dân`, HOME, 'room', { style: 'room' });
+  // ---- nối các bản đồ bằng cách quét ký tự ----
+  link(town, 'U', route, 'V'); link(route, 'V', town, 'U'); link(route, 'G', gym, 'V'); link(gym, 'V', route, 'G');
+  [['1', clinic], ['2', shop], ['3', home]].forEach(([d, rm]) => { link(town, d, rm, 'V'); link(rm, 'V', town, d); });
+  town.dock = { x: def.town.dock[0], y: def.town.dock[1], dir: 'u' }; town.heal = arrivalNear(town, '1');
+  // ---- đường cát ----
+  const dk = def.town.dock, ex = findTiles(town, 'U')[0];
+  markPath(town, dk, ex); ['1', '2', '3'].forEach(d => { const a = arrivalNear(town, d); markPath(town, dk, [a.x, a.y]); town.path.add(a.x + ',' + a.y); });
+  const rv = arrivalNear(route, 'V'), rg = arrivalNear(route, 'G'); markPath(route, [rv.x, rv.y], [rg.x, rg.y]); route.path.add(findTiles(route, 'G')[0].join(','));
+  // ---- NPC dùng chung ----
+  const h = {
+    guide: (x, y, dir) => i === 0 ? { id: 'mika', x, y, dir, kind: 'mika', look: { hair: '#c0553a', body: '#2f9bd6' }, name: 'Cô Mika' } : { id: 'elder' + i, x, y, dir, kind: 'elder', look: LOOKS[L], name: 'Trưởng làng' },
+    sensei: (x, y, dir) => ({ id: 'sensei' + i, x, y, dir, kind: 'sensei', look: { hair: '#222', body: '#8d6e63' }, name: 'Thầy Sora' }),
+    phrase: (n, x, y, dir) => ({ id: 'ph' + (n + 1) + '_' + i, x, y, dir, kind: 'phrase', n, look: LOOKS[(L + 1 + n) % 6], name: n === 2 ? 'Ngư dân' : 'Dân đảo' }),
+    trainer: (t, x, y, dir, reach) => ({ id: t < 2 ? `tr${i}_${'ab'[t]}` : `gt${i}_${'ab'[t - 2]}`, x, y, dir, kind: 'trainer', t, look: LOOKS[(L + 4 + t) % 6], name: tn(t), reach }),
+    item: (x, y) => i === 2 ? { id: 'item_buoy', x, y, dir: 'd', kind: 'item', key: 'buoy', name: 'Dây phao' } : { id: `item${i}`, x, y, dir: 'd', kind: 'item', key: 'pouch', name: 'Túi ngọc trai' },
+    fruit: (x, y) => ({ id: `item${i}_b`, x, y, dir: 'd', kind: 'item', key: 'fruit', name: 'Tidefruit' }),
+    boss: (x, y, dir) => ({ id: `boss${i}`, x, y, dir, kind: 'boss', look: c.boss, name: c.boss.name, reach: 6 })
+  };
+  town.npcs.push(...def.town.npcs(h)); route.npcs.push(...def.route.npcs(h)); gym.npcs.push(...def.gym.npcs(h));
   clinic.npcs.push({ id: `nurse${i}`, x: 5, y: 1, dir: 'd', kind: 'nurse', look: { hair: '#6a3a5a', body: '#f4f4f8' }, name: 'Y tá Mimi' });
   shop.npcs.push({ id: `shop${i}`, x: 5, y: 1, dir: 'd', kind: 'shop', look: { hair: '#3a3a3a', body: '#e0a030' }, name: 'Chủ tiệm' });
   home.npcs.push({ id: `grandma${i}`, x: 2, y: 4, dir: 'r', kind: 'lesson', n: i % 3, look: { hair: '#d8d8e0', body: '#9a6ab0' }, name: 'Bà Haru' });
@@ -1700,38 +2037,8 @@ function buildIsland(i) {
   home.npcs.push({ id: `homeitem${i}`, x: 8, y: 1, dir: 'd', kind: 'item', key: 'fruit', name: 'Tidefruit' });
   clinic.npcs.push({ id: `patient${i}`, x: 7, y: 4, dir: 'l', kind: 'phrase', n: 1, look: { hair: '#7a4a2a', body: '#4c8fd6' }, name: 'Bệnh nhân' });
   shop.npcs.push({ id: `buyer${i}`, x: 2, y: 4, dir: 'r', kind: 'phrase', n: 2, look: { hair: '#555', body: '#d8553f' }, name: 'Khách hàng' });
-  for (const x of [8, 9]) town.warps[`${x},0`] = { map: route.id, x: 9, y: 18, dir: 'u' };
-  for (const x of [8, 9]) route.warps[`${x},19`] = { map: town.id, x: 9, y: 1, dir: 'd' };
-  route.warps['9,2'] = { map: gym.id, x: 6, y: 10, dir: 'u' };
-  for (const x of [6, 7]) gym.warps[`${x},11`] = { map: route.id, x: 9, y: 3, dir: 'd' };
-  // đường đi (vẽ màu cát)
-  for (let y = 0; y < town.h; y++) for (let x = 0; x < town.w; x++) if ((x === 8 || x === 9) && y <= 12 || y === 4 && x >= 3 && x <= 14 || (y === 4 && (x === 3 || x === 8 || x === 13))) town.path.add(x + ',' + y);
-  [[3, 4], [8, 4], [13, 4]].forEach(p => town.path.add(p.join(',')));
-  const rp = bfsPath(ROUTE, [9, 18], [9, 3], true) || bfsPath(ROUTE, [9, 18], [9, 3], false);
-  rp.forEach(p => route.path.add(p.join(','))); route.path.add('9,2');
-  for (let y = 1; y <= 10; y++) gym.path.add(`6,${y}`), gym.path.add(`7,${y}`);
-  // NPC thị trấn
-  town.npcs.push(i === 0
-    ? { id: 'mika', x: 9, y: 8, dir: 'd', kind: 'mika', look: { hair: '#c0553a', body: '#2f9bd6' }, name: 'Cô Mika' }
-    : { id: 'elder' + i, x: 9, y: 8, dir: 'd', kind: 'elder', look: LOOKS[L], name: 'Trưởng làng' });
-  town.npcs.push({ id: 'sensei' + i, x: 5, y: 6, dir: 'r', kind: 'sensei', look: { hair: '#222', body: '#8d6e63' }, name: 'Thầy Sora' });
-  town.npcs.push({ id: 'ph1_' + i, x: 15, y: 9, dir: 'l', kind: 'phrase', n: 0, look: LOOKS[(L + 1) % 6], name: 'Dân đảo' });
-  town.npcs.push({ id: 'ph2_' + i, x: 4, y: 9, dir: 'r', kind: 'phrase', n: 1, look: LOOKS[(L + 2) % 6], name: 'Dân đảo' });
-  town.npcs.push({ id: 'ph3_' + i, x: 12, y: 6, dir: 'r', kind: 'phrase', n: 2, look: LOOKS[(L + 3) % 6], name: 'Ngư dân' });
-  // đường mòn
-  route.npcs.push({ id: `tr${i}_a`, x: 9, y: 6, dir: 'd', kind: 'trainer', t: 0, look: LOOKS[(L + 4) % 6], name: tn(0), reach: 4 });
-  route.npcs.push({ id: `tr${i}_b`, x: 6, y: 14, dir: 'r', kind: 'trainer', t: 1, look: LOOKS[(L + 5) % 6], name: tn(1), reach: 4 });
-  route.npcs.push(i === 1
-    ? { id: 'item_buoy', x: 18, y: 3, dir: 'd', kind: 'item', key: 'buoy', name: 'Dây phao' }
-    : { id: `item${i}`, x: 18, y: 3, dir: 'd', kind: 'item', key: 'pouch', name: 'Túi ngọc trai' });
-  route.npcs.push({ id: `item${i}_b`, x: 2, y: 17, dir: 'd', kind: 'item', key: 'fruit', name: 'Tidefruit' });
-  // phòng boss
-  gym.npcs.push({ id: `gt${i}_a`, x: 3, y: 6, dir: 'r', kind: 'trainer', t: 2, look: LOOKS[(L + 1) % 6], name: tn(2), reach: 5 });
-  gym.npcs.push({ id: `gt${i}_b`, x: 10, y: 9, dir: 'l', kind: 'trainer', t: 3, look: LOOKS[(L + 3) % 6], name: tn(3), reach: 5 });
-  gym.npcs.push({ id: `boss${i}`, x: 6, y: 2, dir: 'd', kind: 'boss', look: c.boss, name: c.boss.name, reach: 6 });
 }
-for (let i = 0; i < 8; i++) buildIsland(i);
-const DOCK = { x: 9, y: 11, dir: 'u' };
+for (let i = 0; i < CH.length; i++) buildIsland(i);
 
 /* ---- 41-world.js ---- */
 'use strict';
@@ -1838,6 +2145,29 @@ function paintTile(g, ch, p, fr, path, v, room) {
     case 'P': floor(g, p, v, R); g.fillStyle = 'rgba(0,0,0,.2)'; ell(g, 8, 14.5, 4.5, 1.4); g.fill(); g.fillStyle = lin(g, 9, 15, '#d8704a', '#a0472c'); g.beginPath(); g.moveTo(4.5, 9); g.lineTo(11.5, 9); g.lineTo(10.4, 15); g.lineTo(5.6, 15); g.fill(); F('#e88a62', 4.2, 8.4, 7.6, 1.2);
       for (let i = 0; i < 7; i++) { const a = -2.6 + i * .75; g.fillStyle = ['#2e9e4a', '#3fb55a', '#278a3e'][i % 3]; ell(g, 8 + Math.cos(a) * 3.2, 6 + Math.sin(a) * 3.4, 1.1, 2.6, a + 1.57); g.fill(); } break;
     case 'E': floor(g, p, v, R); g.fillStyle = '#6d4a30'; rr(g, .6, 1, 14.8, 14.4, 1.4); g.fill(); g.fillStyle = '#fff'; rr(g, 1.6, 2, 12.8, 5, 1.6); g.fill(); g.strokeStyle = '#d8d8e0'; g.lineWidth = .3; rr(g, 3, 2.8, 9.6, 3.4, 1.2); g.stroke(); g.fillStyle = lin(g, 7, 15, shade(p.roof, 1.1), shade(p.roof, .8)); rr(g, 1.6, 7, 12.8, 7.8, 1); g.fill(); g.strokeStyle = 'rgba(255,255,255,.35)'; g.lineWidth = .4; g.beginPath(); g.moveTo(1.6, 8.8); g.lineTo(14.4, 8.8); g.stroke(); break;
+    case 's': { g.fillStyle = '#f0dca6'; g.fillRect(0, 0, 16, 16); g.strokeStyle = 'rgba(190,150,80,.45)'; g.lineWidth = .4; g.lineCap = 'round';
+      for (let i = 0; i < 3; i++) { const y = 3 + i * 5 + R() * 2, x = R() * 6; g.beginPath(); g.moveTo(x, y); g.quadraticCurveTo(x + 3, y - 1.2, x + 6, y); g.quadraticCurveTo(x + 9, y + 1.2, x + 12, y); g.stroke(); }
+      g.fillStyle = 'rgba(255,255,255,.5)'; for (let i = 0; i < 4; i++) { ell(g, R() * 16, R() * 16, .5, .3, R() * 3); g.fill(); }
+      if (R() < .35) { g.fillStyle = '#f6b8c0'; ell(g, 3 + R() * 10, 3 + R() * 10, .9, .6, R()); g.fill(); } break; }
+    case 'b': { g.fillStyle = lin(g, 0, 16, shade(p.water[1], 1.1), shade(p.water[0], .85)); g.fillRect(0, 0, 16, 16);
+      g.fillStyle = 'rgba(0,0,0,.22)'; g.fillRect(2, 1, 12.6, 15); g.fillStyle = lin(g, 0, 16, '#b8875a', '#8d6340', 0, 16); g.fillRect(1.5, 0, 13, 16);
+      g.strokeStyle = '#5a3a28'; g.lineWidth = .4; for (let y = 0; y <= 16; y += 4) { g.beginPath(); g.moveTo(1.5, y); g.lineTo(14.5, y); g.stroke(); }
+      g.strokeStyle = 'rgba(255,255,255,.22)'; g.lineWidth = .3; for (let y = 1; y < 16; y += 4) { g.beginPath(); g.moveTo(2.5, y); g.lineTo(13.5, y); g.stroke(); }
+      g.fillStyle = '#6a4a30'; g.fillRect(0, 0, 1.6, 16); g.fillRect(14.4, 0, 1.6, 16); g.fillStyle = '#8d6a48'; for (let y = 1; y < 16; y += 8) { g.fillRect(-.2, y, 2.2, 2.4); g.fillRect(14, y, 2.2, 2.4); } break; }
+    case 'o': if (room) { floor(g, p, v, R); g.fillStyle = 'rgba(0,0,0,.25)'; ell(g, 8, 14.6, 6, 1.8); g.fill(); g.fillStyle = lin(g, 0, 0, '#a9a39a', '#d9d3c8', 3, 13); g.fillRect(3.5, 2, 9, 12.5); g.fillStyle = 'rgba(0,0,0,.18)'; g.fillRect(10.8, 2, 1.7, 12.5); g.fillStyle = '#e6e0d4'; rr(g, 2.4, 0, 11.2, 3, .8); g.fill(); rr(g, 2.4, 13, 11.2, 3, .8); g.fill(); g.strokeStyle = 'rgba(0,0,0,.2)'; g.lineWidth = .3; for (const x of [6.2, 8.4]) { g.beginPath(); g.moveTo(x, 3); g.lineTo(x, 13); g.stroke(); } }
+      else { grass(p.g1); g.fillStyle = 'rgba(0,0,0,.22)'; ell(g, 8, 13.4, 6.4, 2); g.fill();
+        g.fillStyle = lin(g, 3, 14, '#9a9aa0', '#6e6e76'); g.beginPath(); g.moveTo(2, 13); g.quadraticCurveTo(1.5, 7, 6, 4.5); g.quadraticCurveTo(10, 2.5, 13, 6.5); g.quadraticCurveTo(15, 10, 14, 13); g.closePath(); g.fill();
+        g.fillStyle = 'rgba(255,255,255,.35)'; ell(g, 6, 6.6, 2.2, 1.1, -.5); g.fill(); g.strokeStyle = 'rgba(0,0,0,.25)'; g.lineWidth = .35; g.beginPath(); g.moveTo(8, 6); g.lineTo(9.5, 10); g.moveTo(5, 9); g.lineTo(7, 12); g.stroke(); } break;
+    case 'O': { g.fillStyle = '#f0dca6'; g.fillRect(0, 0, 16, 16); g.fillStyle = 'rgba(0,0,0,.2)'; ell(g, 8, 13.8, 6, 1.8); g.fill();
+      g.fillStyle = lin(g, 3, 14, '#ff9aa8', '#e8708a'); g.beginPath(); g.moveTo(2, 13); g.quadraticCurveTo(1.5, 7, 6, 4.5); g.quadraticCurveTo(10, 2.5, 13, 6.5); g.quadraticCurveTo(15, 10, 14, 13); g.closePath(); g.fill();
+      g.fillStyle = 'rgba(255,255,255,.35)'; ell(g, 6, 6.6, 2.2, 1.1, -.5); g.fill(); g.strokeStyle = '#e8708a'; g.lineWidth = .8; g.lineCap = 'round'; for (const [x, a2] of [[5, -.3], [10.5, .3], [8, 0]]) { g.beginPath(); g.moveTo(x, 6); g.lineTo(x + a2 * 4, 1.4); g.stroke(); } break; }
+    case 'F': grass(p.g1);
+      g.fillStyle = 'rgba(0,0,0,.2)'; g.fillRect(0, 12.5, 16, 1.8); g.fillStyle = lin(g, 4, 14, '#c9976a', '#8d6340'); g.fillRect(0, 5.6, 16, 1.7); g.fillRect(0, 9.2, 16, 1.7);
+      for (const x of [1.6, 7.4, 13.2]) { g.fillStyle = lin(g, 3, 14, '#d8a878', '#8d6340'); rr(g, x - .2, 3.2, 2.2, 10.8, .6); g.fill(); g.fillStyle = 'rgba(255,255,255,.3)'; g.fillRect(x, 3.6, .4, 9.6); } break;
+    case 'l': if (path) sand(); else grass(p.g1);
+      g.fillStyle = 'rgba(0,0,0,.22)'; ell(g, 8, 14.6, 3, 1); g.fill(); g.fillStyle = '#4a4a56'; g.fillRect(7.4, 5, 1.2, 10); rr(g, 6, 13.4, 4, 1.8, .6); g.fill();
+      { const gl = g.createRadialGradient(8, 4, 0, 8, 4, 6); gl.addColorStop(0, 'rgba(255,230,140,.75)'); gl.addColorStop(1, 'rgba(255,230,140,0)'); g.fillStyle = gl; g.beginPath(); g.arc(8, 4, 6, 0, 7); g.fill(); }
+      g.fillStyle = '#ffe28a'; rr(g, 5.8, 2, 4.4, 4, 1); g.fill(); g.strokeStyle = '#4a4a56'; g.lineWidth = .5; rr(g, 5.8, 2, 4.4, 4, 1); g.stroke(); g.fillStyle = '#4a4a56'; g.beginPath(); g.moveTo(5.2, 2.2); g.lineTo(8, .2); g.lineTo(10.8, 2.2); g.fill(); break;
     default: ground();
   }
 }
@@ -1857,13 +2187,15 @@ function tileImg(isl, ch, fr, path, v, room) {
 
 /* ---- nhân vật (vector chibi) ---- */
 function drawPerson(g, X, Y, dir, step, look) { // X,Y: góc trên-trái ô, theo pixel thật; g ở hệ pixel thật
-  const k = SC, skin = '#f6d2ad', hair = look.hair, body = look.body;
-  g.save(); g.translate(X, Y); g.scale(k, k);
+  const k = SC, skin = look.skin || '#f6d2ad', hair = look.hair, body = look.body, sc = look.scale || 1;
+  g.save(); g.translate(X + 8 * k * (1 - sc), Y + 16 * k * (1 - sc)); g.scale(k * sc, k * sc);
   g.fillStyle = 'rgba(0,0,0,.25)'; ell(g, 8, 15.4, 5.2, 1.6); g.fill();
   const sw = step ? 1 : 0;
   g.fillStyle = '#3b4a5e'; rr(g, 5.1, 11, 2.5, 4.3 - sw * .9, 1); g.fill(); rr(g, 8.4, 11, 2.5, 3.4 + sw * .9, 1); g.fill();
   g.fillStyle = '#2a2a33'; ell(g, 6.4, 15 - sw * .9, 1.7, .9); g.fill(); ell(g, 9.6, 14.2 + sw * .9, 1.7, .9); g.fill();
+  if (look.acc === 'long' && dir !== 'd') { g.fillStyle = hair; rr(g, 3.2, 1.2, 9.6, 10.4, 3.6); g.fill(); }
   g.fillStyle = lin(g, 6, 12, shade(body, 1.18), shade(body, .82)); rr(g, 3.9, 6.2, 8.2, 6, 2); g.fill();
+  if (look.suit && dir !== 'u') { g.fillStyle = '#f4f4f8'; g.beginPath(); g.moveTo(6.3, 6.3); g.lineTo(9.7, 6.3); g.lineTo(8, 10); g.fill(); g.fillStyle = '#c0334a'; g.beginPath(); g.moveTo(7.5, 6.8); g.lineTo(8.5, 6.8); g.lineTo(8.8, 9.6); g.lineTo(8, 10.2); g.lineTo(7.2, 9.6); g.fill(); }
   g.fillStyle = shade(body, .6); g.fillRect(3.9, 10.2, 8.2, .8); g.fillStyle = '#ffd54f'; g.fillRect(7.4, 10.1, 1.2, 1);
   g.fillStyle = shade(body, .95); if (dir === 'l' || dir === 'r') { rr(g, dir === 'l' ? 5.4 : 8.4, 7, 2.2, 3.8, 1); g.fill(); } else { rr(g, 2.5, 7, 1.9, 3.6, .9); g.fill(); rr(g, 11.6, 7, 1.9, 3.6, .9); g.fill(); g.fillStyle = skin; ell(g, 3.4, 10.9, .9, .9); g.fill(); ell(g, 12.6, 10.9, .9, .9); g.fill(); }
   // đầu
@@ -1885,12 +2217,32 @@ function drawPerson(g, X, Y, dir, step, look) { // X,Y: góc trên-trái ô, the
   }
   if (dir === 'd') { for (const sx of [-1, 1]) { g.fillStyle = '#1d2433'; ell(g, 8 + sx * 1.7, 4.3, .75, 1.05); g.fill(); g.fillStyle = '#fff'; ell(g, 8 + sx * 1.7 - .2, 3.9, .28, .28); g.fill(); g.fillStyle = 'rgba(255,120,140,.4)'; ell(g, 8 + sx * 2.9, 5.5, .8, .5); g.fill(); }
     g.strokeStyle = '#8a4a3a'; g.lineWidth = .3; g.beginPath(); g.arc(8, 5.7, .9, .2, Math.PI - .2); g.stroke(); }
+  if (look.acc === 'long' && dir === 'd') { g.fillStyle = hair; rr(g, 3, 2.4, 1.9, 8.4, .95); g.fill(); rr(g, 11.1, 2.4, 1.9, 8.4, .95); g.fill(); }
+  if (look.acc === 'fringe' && dir === 'd') { g.fillStyle = hair; g.beginPath(); g.moveTo(7.6, .6); g.quadraticCurveTo(12.4, 1, 11.6, 5.8); g.quadraticCurveTo(10.6, 4.4, 9.4, 4.8); g.quadraticCurveTo(8.2, 3.2, 7.6, .6); g.fill(); }
+  if (look.acc === 'deer') {
+    g.strokeStyle = '#8a5a34'; g.lineWidth = .7; g.lineCap = 'round';
+    for (const sx of [-1, 1]) { g.beginPath(); g.moveTo(8 + sx * 2.4, 0); g.quadraticCurveTo(8 + sx * 4.6, -2.2, 8 + sx * 4, -4.4); g.moveTo(8 + sx * 3.9, -1.6); g.lineTo(8 + sx * 6, -2.4); g.stroke(); }
+    g.fillStyle = skin; ell(g, 3.2, 1.8, 1.2, 1.7, -.5); g.fill(); ell(g, 12.8, 1.8, 1.2, 1.7, .5); g.fill();
+    g.fillStyle = '#ff7fa5'; g.beginPath(); g.moveTo(3.8, 2.4); g.quadraticCurveTo(8, -3.4, 12.2, 2.4); g.lineTo(3.8, 2.4); g.fill(); g.fillStyle = '#fff'; g.fillRect(7.5, -1.3, 1, 2.6); g.fillRect(6.7, -.5, 2.6, 1);
+    if (dir === 'd') { g.fillStyle = '#d84a4a'; ell(g, 8, 5.6, .7, .55); g.fill(); }
+  }
   if (look.acc === 'cap') { g.fillStyle = '#e84a5f'; g.beginPath(); g.moveTo(3.4, 2.6); g.quadraticCurveTo(8, -3.4, 12.6, 2.6); g.lineTo(3.4, 2.6); g.fill(); g.fillStyle = '#c0334a'; if (dir === 'd') { rr(g, 4.2, 1.9, 7.6, 1.2, .5); g.fill(); } else if (side) { rr(g, 1.4, 1.9, 5.4, 1.2, .5); g.fill(); } g.fillStyle = '#fff'; ell(g, 8, .2, .9, .9); g.fill(); }
   else if (look.acc === 'crown' || look.boss) { g.fillStyle = '#ffd54f'; g.beginPath(); g.moveTo(4.6, 1); g.lineTo(5.4, -1.8); g.lineTo(6.8, .2); g.lineTo(8, -2.2); g.lineTo(9.2, .2); g.lineTo(10.6, -1.8); g.lineTo(11.4, 1); g.fill(); }
   g.restore();
   g.restore();
 }
-const PLAYER_LOOK = { hair: '#2b2118', body: '#2f9bd6', acc: 'cap' };
+/* 3 nguyên mẫu nhân vật (thiết kế gốc) */
+const HEROES = [
+  { id: 'cook', name: 'Hayato', role: 'Đầu bếp', desc: 'Tóc vàng, mái che một bên mắt, vest đen và cà vạt. Lịch lãm, nấu ăn giỏi.', look: { hair: '#f3d36a', body: '#252b3d', acc: 'fringe', suit: 1 } },
+  { id: 'scholar', name: 'Rika', role: 'Nhà khảo cổ', desc: 'Tóc đen dài, áo tím thanh lịch. Điềm tĩnh, mê đọc chữ cổ và tìm kho báu.', look: { hair: '#1b1b26', body: '#7a4fb0', acc: 'long' } },
+  { id: 'doctor', name: 'Momo', role: 'Bác sĩ nhí', desc: 'Chú tuần lộc nhỏ đội mũ hồng có dấu thập, luôn muốn chữa lành cho mọi Tideling.', look: { hair: '#7b4a2a', body: '#d85f8a', skin: '#c89560', acc: 'deer', scale: .84 } }
+];
+const playerLook = () => HEROES[(S && S.hero) || 0].look;
+const _heroImg = {};
+function heroCanvas(i) {
+  if (_heroImg[i]) return _heroImg[i];
+  const c = document.createElement('canvas'); c.width = 128; c.height = 150; const g = c.getContext('2d'), old = SC; SC = 7; drawPerson(g, 8, 24, 'd', 0, HEROES[i].look); SC = old; return (_heroImg[i] = c);
+}
 function drawItem(g, X, Y, t) {
   const k = SC, b = Math.sin(t / 10) * .8; g.save(); g.translate(X, Y); g.scale(k, k);
   g.fillStyle = 'rgba(0,0,0,.22)'; ell(g, 8, 14, 4, 1.3); g.fill();
@@ -1903,7 +2255,7 @@ function drawAlert(g, X, Y) { const k = SC; g.save(); g.translate(X, Y); g.scale
 
 function renderWorld() {
   const m = Wd.map; if (!m) return;
-  const k = SC, room = m.area === 'room';
+  const k = SC, room = m.style === 'room';
   ctx.setTransform(1, 0, 0, 1, 0, 0);
   const rx = S.x * T + (Wd.mv ? Wd.dx * (8 - Wd.mv) * 2 : 0), ry = S.y * T + (Wd.mv ? Wd.dy * (8 - Wd.mv) * 2 : 0);
   let cx = rx + 8 - W / 2, cy = ry + 8 - H / 2;
@@ -1920,7 +2272,7 @@ function renderWorld() {
   }
   const ents = Wd.npcs.map(n => ({ y: n.y * T, n })).concat([{ y: ry, p: 1 }]).sort((a, b) => a.y - b.y);
   for (const e of ents) {
-    if (e.p) { drawPerson(ctx, (rx - cx) * k, (ry - cy - 2) * k, Wd.face, Wd.mv ? (Wd.mv >> 1) & 1 : 0, PLAYER_LOOK); continue; }
+    if (e.p) { drawPerson(ctx, (rx - cx) * k, (ry - cy - 2) * k, Wd.face, Wd.mv ? (Wd.mv >> 1) & 1 : 0, playerLook()); continue; }
     const n = e.n, X = ((n.ox || 0) + n.x * T - cx) * k, Y = ((n.oy || 0) + n.y * T - cy) * k;
     if (n.kind === 'item') drawItem(ctx, X, Y, FRAME);
     else drawPerson(ctx, X, Y - 2 * k, n.dir, n.walk ? (FRAME >> 3) & 1 : 0, n.look);
@@ -2017,7 +2369,7 @@ function* npcStep(n, d) {
 }
 function* whiteout() {
   yield* say('', 'Tất cả Tideling của bạn đã kiệt sức... Bạn được đưa về trạm y tế.');
-  yield* fade(1, 10); healAll(); loadMap(`i${S.cur}_town`, 3, 4, 'd'); yield 4; yield* fade(0, 10); save();
+  yield* fade(1, 10); healAll(); { const hp = MAPS[`i${S.cur}_town`].heal; loadMap(`i${S.cur}_town`, hp.x, hp.y, hp.dir); } yield 4; yield* fade(0, 10); save();
 }
 
 /* ---- NPC ---- */
@@ -2027,8 +2379,8 @@ function objective() {
   if (!S.flags.drill0 && i === 0) return 'Học bảng chữ cái với Thầy Sora (người đứng gần hồ nước).';
   if (!S.flags.caught0 && i === 0) return 'Đi lên đường mòn phía bắc, bắt một Tideling hoang dã bằng lưới.';
   if (!S.flags['boss' + i]) return `Đánh bại ${c.boss.name} trong ngôi nhà ở cuối đường mòn. (Nên đạt cấp ${baseLv(i) + 3} trở lên.)`;
-  if (i < 7 && S.maxCh <= i) return 'Hãy mở Hải đồ để ra khơi.';
-  if (i < 7) return `Mở Hải đồ (MENU → Hải đồ) và đi tiếp tới ${CH[i + 1].vi}.`;
+  if (i < CH.length - 1 && S.maxCh <= i) return 'Hãy mở Hải đồ để ra khơi.';
+  if (i < CH.length - 1) return `Mở Hải đồ (MENU → Hải đồ) và đi tiếp tới ${CH[i + 1].vi}.`;
   return 'Bạn đã hoàn thành cuộc phiêu lưu! Hãy bắt đủ 150 Tideling và ôn lại câu sai.';
 }
 function* talk(n) {
@@ -2058,6 +2410,15 @@ function* pickup(n) {
   else if (n.key === 'pouch') { S.pearls += 60; yield* say('', 'Bạn nhặt được túi ngọc trai: +60 💎'); }
   else { S.bag.fruit += 2; yield* say('', 'Bạn nhặt được 2 Tidefruit 🍎 (hồi 40 HP).'); }
   Snd.ok();
+}
+function* pickHero() {
+  const r = yield* modalRun(done => {
+    showModal(modalCard(`<h2>Chọn nhân vật của bạn</h2><div class="vi" style="margin-bottom:8px">Ba nguyên mẫu — chỉ khác ngoại hình, cách chơi như nhau.</div>
+      <div class="heroes">${HEROES.map((h, i) => `<button class="hero" data-hero="${i}"><canvas width="128" height="150" data-h="${i}"></canvas><b>${h.name}</b><span class="chip t">${h.role}</span><small>${h.desc}</small></button>`).join('')}</div>`));
+    $$('canvas[data-h]', modalEl).forEach(c => c.getContext('2d').drawImage(heroCanvas(+c.dataset.h), 0, 0));
+    $$('[data-hero]', modalEl).forEach(b => b.addEventListener('click', () => done(+b.dataset.hero)));
+  });
+  return r;
 }
 function* mika() {
   if (!S.flags.starter) {
@@ -2160,9 +2521,9 @@ function* fightTrainer(n) {
   const gain = boss ? 250 + i * 60 : 30 + i * 12; S.pearls += gain;
   if (boss) {
     S.flags['boss' + i] = 1; if (!S.badges.includes(i)) S.badges.push(i);
-    const next = Math.min(7, i + 1); S.maxCh = Math.max(S.maxCh, next);
+    const next = Math.min(CH.length - 1, i + 1); S.maxCh = Math.max(S.maxCh, next);
     yield* say(n.name, `Bạn thắng rồi! Nhận ${gain} 💎 và Huy hiệu ${c.vi}.`, 'おめでとう！');
-    yield* say('', i < 7 ? `Hoàn thành Chương ${i + 1}! Đảo ${CH[next].vi} đã mở khoá — mở Hải đồ (MENU) để ra khơi.` : 'Bạn đã chinh phục cả Quần đảo San Hô! Chúc mừng thuyền trưởng!');
+    yield* say('', i < CH.length - 1 ? `Hoàn thành ${chLabel(i)}! Đảo ${CH[next].vi} đã mở khoá — mở Hải đồ (MENU) để ra khơi.` : 'Bạn đã chinh phục cả Quần đảo San Hô! Chúc mừng thuyền trưởng!');
     Snd.lvl();
   } else yield* say(n.name, `Bạn mạnh thật! Nhận ${gain} 💎.`, 'つよいですね！');
   save();
@@ -2413,9 +2774,9 @@ function* scrJournal() {
   yield* modalRun(done => {
     const rows = CH.map((c, i) => {
       const cleared = !!S.flags['boss' + i], open = i <= S.maxCh;
-      return `<div class="item"><div style="font-size:22px">${cleared ? '✅' : open ? '▶️' : '🔒'}</div><div class="grow"><b>Chương ${i + 1} · ${c.vi}</b> <span class="chip">Bài ${c.lessons[0]}–${c.lessons[1]}</span><div style="font-size:13px" class="vi">${c.topic}<br>Boss: ${c.boss.name}</div></div></div>`;
+      return `<div class="item"><div style="font-size:22px">${cleared ? '✅' : open ? '▶️' : '🔒'}</div><div class="grow"><b>${chLabel(i)} · ${c.vi}</b> <span class="chip">Bài ${c.lessons[0]}–${c.lessons[1]}</span><div style="font-size:13px" class="vi">${c.topic}<br>Boss: ${c.boss.name}</div></div></div>`;
     }).join('');
-    showModal(modalCard(`<h2>📜 Nhật ký</h2><div class="box"><b>Việc cần làm:</b> ${esc(objective())}</div><div class="row" style="margin:6px 0"><span class="chip">💎 ${S.pearls}</span><span class="chip">🏅 Huy hiệu: ${S.badges.length}/8</span><span class="chip">📖 Sổ: ${caughtCount()}/150</span></div><div class="list">${rows}</div>${backBtn}`));
+    showModal(modalCard(`<h2>📜 Nhật ký</h2><div class="box"><b>Việc cần làm:</b> ${esc(objective())}</div><div class="row" style="margin:6px 0"><span class="chip">${HEROES[S.hero || 0].name} · ${HEROES[S.hero || 0].role}</span><span class="chip">💎 ${S.pearls}</span><span class="chip">🏅 Huy hiệu: ${S.badges.length}/${CH.length}</span><span class="chip">📖 Sổ: ${caughtCount()}/150</span></div><div class="list">${rows}</div>${backBtn}`));
     wireBack(done);
   }, escBack);
 }
@@ -2467,7 +2828,7 @@ function* scrDex() {
       const seen = ids.filter(i => S.seen[i]).length, got = ids.filter(i => S.caught[i]).length;
       showModal(modalCard(`<h2>📖 Sổ Tideling</h2><div class="row" style="margin-bottom:6px"><span class="chip t">Đã bắt ${caughtCount()}/150</span><span class="chip">Đã thấy ${Object.keys(S.seen).length}</span></div>
         <div class="tabs">${GROUP_NAME.map((n, k) => `<button class="tab ${k === g ? 'on' : ''}" data-g="${k}">${GROUP_ICON[k]} ${n} (${ids.length && k === g ? got : '·'})</button>`).join('')}</div>
-        <div class="dexg">${ids.map(i => { const sn = S.seen[i], ct = S.caught[i]; const m = S.party.concat(S.box).find(x => x.sp === i); return `<div class="dc ${ct ? 'ct' : ''}">${cvThumb(i, ct && m ? m.form : 1, !sn)}<div>${sn ? spName(i) : '???'}</div><div style="opacity:.6">#${String(Math.floor(i / 3) * 3 + g + 1).padStart(3, '0')} · Đảo ${chapterOfSp(i) + 1}</div></div>`; }).join('')}</div>${backBtn}`));
+        <div class="dexg">${ids.map(i => { const sn = S.seen[i], ct = S.caught[i]; const m = S.party.concat(S.box).find(x => x.sp === i); return `<div class="dc ${ct ? 'ct' : ''}">${cvThumb(i, ct && m ? m.form : 1, !sn)}<div>${sn ? spName(i) : '???'}</div><div style="opacity:.6">#${String(Math.floor(i / 3) * 3 + g + 1).padStart(3, '0')} · Đảo ${chapterOfSp(i)}</div></div>`; }).join('')}</div>${backBtn}`));
       wireBack(done); $$('[data-g]', modalEl).forEach(b => b.addEventListener('click', () => done(+b.dataset.g)));
     }, escBack);
     if (typeof r !== 'number') return; g = r;
@@ -2523,7 +2884,7 @@ function seaSvg(sel) {
   const P = ISLE_POS; let s = `<svg id="sea" viewBox="0 0 360 240" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="sg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3b9fd8"/><stop offset="1" stop-color="#1d5f9a"/></linearGradient></defs><rect width="360" height="240" fill="url(#sg)"/>`;
   for (let i = 0; i < 26; i++) { const x = (i * 83) % 350, y = (i * 47) % 230; s += `<path d="M${x} ${y} q4 -3 8 0 t8 0" stroke="#ffffff55" fill="none" stroke-width="1"/>`; }
   s += `<g transform="translate(26 28)"><circle r="14" fill="#fff8" stroke="#fff" stroke-width="1"/><path d="M0 -11 L3 0 L0 11 L-3 0Z" fill="#e53935"/><path d="M-11 0 L0 -3 L11 0 L0 3Z" fill="#fff"/><text y="-16" text-anchor="middle" font-size="7" fill="#fff" font-weight="700">N</text></g>`;
-  for (let i = 0; i < 7; i++) { const [x1, y1] = P[i], [x2, y2] = P[i + 1], op = i + 1 <= S.maxCh; s += `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="#fff" stroke-width="${op ? 2 : 1.2}" stroke-dasharray="${op ? '5 3' : '2 4'}" opacity="${op ? .85 : .35}"/>`; }
+  for (let i = 0; i < CH.length - 1; i++) { const [x1, y1] = P[i], [x2, y2] = P[i + 1], op = i + 1 <= S.maxCh; s += `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="#fff" stroke-width="${op ? 2 : 1.2}" stroke-dasharray="${op ? '5 3' : '2 4'}" opacity="${op ? .85 : .35}"/>`; }
   SHORTCUTS.forEach(sc => {
     const [x1, y1] = P[sc.a], [x2, y2] = P[sc.b], len = Math.hypot(x2 - x1, y2 - y1), nx = (y2 - y1) / len, ny = -(x2 - x1) / len;
     const mx = (x1 + x2) / 2 + nx * sc.bend * 2, my = (y1 + y2) / 2 + ny * sc.bend * 2;
@@ -2534,7 +2895,7 @@ function seaSvg(sel) {
   CH.forEach((c, i) => {
     const [x, y] = P[i], open = i <= S.maxCh, done = !!S.flags['boss' + i], selI = sel && sel.i === i;
     s += `<g class="isl" data-i="${i}" tabindex="0" opacity="${open ? 1 : .55}"><ellipse cx="${x}" cy="${y + 2}" rx="25" ry="15" fill="#0003"/><ellipse cx="${x}" cy="${y}" rx="24" ry="14.5" fill="#f1dca0" stroke="${selI ? '#fff' : '#d8c07a'}" stroke-width="${selI ? 3 : 1.2}"/><ellipse cx="${x}" cy="${y - 1.5}" rx="18" ry="10" fill="${open ? c.pal.g1 : '#8a9a98'}"/><circle cx="${x - 8}" cy="${y - 3}" r="3.6" fill="${open ? c.pal.tree : '#6c7a78'}"/><circle cx="${x + 7}" cy="${y + 1}" r="3" fill="${open ? c.pal.tree : '#6c7a78'}"/><circle cx="${x + 1}" cy="${y - 7}" r="2.4" fill="${open ? c.pal.tree : '#6c7a78'}"/>
-      <circle cx="${x - 20}" cy="${y - 13}" r="7" fill="#1d2433" stroke="#fff" stroke-width="1"/><text x="${x - 20}" y="${y - 10}" text-anchor="middle" font-size="9" fill="#fff" font-weight="800">${i + 1}</text>
+      <circle cx="${x - 20}" cy="${y - 13}" r="7" fill="#1d2433" stroke="#fff" stroke-width="1"/><text x="${x - 20}" y="${y - 10}" text-anchor="middle" font-size="9" fill="#fff" font-weight="800">${i}</text>
       <text x="${x}" y="${y + 24}" text-anchor="middle" font-size="7.5" fill="#fff" stroke="#0b2a44" stroke-width="2" paint-order="stroke" font-weight="700">${esc(c.vi)}</text>
       ${!open ? `<text x="${x}" y="${y + 3}" text-anchor="middle" font-size="12">🔒</text>` : ''}${done ? `<text x="${x + 18}" y="${y - 10}" font-size="11">🏅</text>` : ''}
       ${i === S.cur ? `<text x="${x + 2}" y="${y - 16}" text-anchor="middle" font-size="15">⛵</text>` : ''}</g>`;
@@ -2552,7 +2913,7 @@ function* scrSea() {
         if (!open) act = `<button class="btn" data-k="open" ${both && cd.ok ? '' : 'disabled'}>${sc.cond === 'duel' ? '⚔️ Thách đấu lính canh' : 'Mở lối tắt'}</button>`;
       } else {
         const c = CH[sel.i], open = sel.i <= S.maxCh;
-        info = `<b>Chương ${sel.i + 1} · ${c.vi}</b> <span class="chip">Bài ${c.lessons[0]}–${c.lessons[1]}</span><div class="vi">${c.topic}</div><div class="vi">${open ? (S.flags['boss' + sel.i] ? '🏅 Đã hoàn thành' : 'Đã mở') : '🔒 Hoàn thành đảo trước để mở khoá'}${sel.i === S.cur ? ' · Bạn đang ở đây' : ''}</div>`;
+        info = `<b>${chLabel(sel.i)} · ${c.vi}</b> <span class="chip">Bài ${c.lessons[0]}–${c.lessons[1]}</span><div class="vi">${c.topic}</div><div class="vi">${open ? (S.flags['boss' + sel.i] ? '🏅 Đã hoàn thành' : 'Đã mở') : '🔒 Hoàn thành đảo trước để mở khoá'}${sel.i === S.cur ? ' · Bạn đang ở đây' : ''}</div>`;
         if (sel.i !== S.cur && open) act = canSail(sel.i) ? `<button class="btn" data-k="sail">⛵ Giương buồm</button>` : `<span class="vi">Chỉ đi được sang đảo liền kề, hoặc qua lối tắt đã mở.</span>`;
       }
       showModal(modalCard(`<h2>🧭 Hải đồ Coral Crown</h2>${seaSvg(sel)}<div class="box">${info}</div><div class="foot">${act}<button class="btn g" data-k="back">Đóng</button></div>`));
@@ -2568,7 +2929,7 @@ function* scrSea() {
   }
 }
 function* afterSea(r) {
-  if (r.sail != null) { yield* fade(1, 10); S.cur = r.sail; loadMap(`i${r.sail}_town`, DOCK.x, DOCK.y, 'u'); yield 6; yield* fade(0, 10); save(); return; }
+  if (r.sail != null) { yield* fade(1, 10); S.cur = r.sail; { const dk = MAPS[`i${r.sail}_town`].dock; loadMap(`i${r.sail}_town`, dk.x, dk.y, dk.dir); } yield 6; yield* fade(0, 10); save(); return; }
   const sc = SHORTCUTS.find(x => x.id === r.open);
   if (sc.cond === 'duel') {
     yield* say(sc.guard.name, 'Muốn đi qua đường này à? Thắng ta trước đã!', 'しょうぶ しましょう！');
@@ -2613,14 +2974,17 @@ function showTitle() {
 }
 function continueGame() { S = loadSave(); applyOpts(); loadMap(S.map, S.x, S.y, S.dir); Wd.mode = 'world'; Wd.banner = 90; }
 function newGame() {
-  S = newState(); applyOpts(); loadMap('i0_town', DOCK.x, DOCK.y, 'u'); Wd.mode = 'world';
+  S = newState(); applyOpts(); const tm = MAPS['i0_town']; loadMap('i0_town', tm.dock.x, tm.dock.y, tm.dock.dir); Wd.mode = 'world';
   run(function* () {
     yield* fade(1, 1); yield* fade(0, 20);
-    yield* say('', 'Con thuyền cập bến Đảo Bình Minh (Asahi-jima) — đảo đầu tiên của Quần đảo San Hô. Có một người đang đợi bạn ở giữa thị trấn.', 'ようこそ！');
-    const mk = Wd.npcs.find(n => n.id === 'mika');
-    yield* npcStep(mk, 'd'); yield* npcStep(mk, 'd'); Wd.face = 'u';
+    S.hero = yield* pickHero(); yield* say('', `Xin chào, ${HEROES[S.hero].name} — ${HEROES[S.hero].role.toLowerCase()} mới của Quần đảo San Hô!`, 'よろしく！');
+    yield* say('', 'Con thuyền cập bến Đảo Bình Minh (Asahi-jima) — đảo đầu tiên của Quần đảo San Hô. Có một người đang đợi bạn ở bến cảng.', 'ようこそ！');
+    const mk = Wd.npcs.find(n => n.id === 'mika'), path = [];
+    while (Math.abs(mk.x - S.x) + Math.abs(mk.y - S.y) > 1) { const d = Math.abs(S.y - mk.y) >= Math.abs(S.x - mk.x) ? (S.y > mk.y ? 'd' : 'u') : (S.x > mk.x ? 'r' : 'l'); path.push(d); yield* npcStep(mk, d); }
+    if (path.length) { Wd.face = OPP[path[path.length - 1]]; S.dir = Wd.face; }
     yield* mika();
-    yield* npcStep(mk, 'u'); yield* npcStep(mk, 'u'); mk.dir = 'd';
+    for (const d of path.reverse()) yield* npcStep(mk, OPP[d]);
+    mk.dir = 'd';
   });
 }
 function frame() {
@@ -2653,7 +3017,7 @@ function loop(now) { _acc += Math.min(100, now - _last); _last = now; while (_ac
 
 /* ---- API cho kiểm thử / bot ---- */
 window.G = {
-  get S() { return S; }, Wd, B, MAPS, CH, SQ, VOC, Quiz, frame, seed, rand, ri,
+  get S() { return S; }, Wd, B, baseLv, MAPS, CH, SQ, VOC, Quiz, frame, seed, rand, ri,
   step(n = 1) { for (let i = 0; i < n; i++) frame(); }, sim, drawNow,
   newGame, continueGame, showTitle, run, busy, Inp, dynMake, dynKey, furi, plain, numRead, timeRead, spName, spInfo, speciesOfChapter, SLICES, FRUITS, newMon, drawTideling, tidelingCanvas,
   get mode() { return Wd.mode; }, get errors() { return window.__errors || []; }, get missingFuri() { return [...window.__missingFuri]; },

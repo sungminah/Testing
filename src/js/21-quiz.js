@@ -6,7 +6,7 @@ const DIFF_NAME = ['', 'Dễ', 'Vừa', 'Khó'];
 const AREA_DL = { town: [9, 1, 0], route: [7, 3, 0.4], gym: [4, 5, 1.2], boss: [2, 4, 4], drill: [8, 2, 0] };
 function diffWeights(ch, area) {
   const b = AREA_DL[area] || AREA_DL.route; let w = [b[0] * (1 - 0.08 * ch), b[1], b[2] * (1 + 0.3 * ch)];
-  if (ch === 0 && area !== 'boss') w[2] = 0; // chương 1: d3 chỉ ở boss
+  if (ch <= 1 && area !== 'boss') w[2] = 0; // chương mở đầu & chương 1: d3 chỉ ở boss
   return w;
 }
 const Quiz = {
@@ -32,6 +32,7 @@ const Quiz = {
     const maxL = lessonEnd(ch);
     const gw = { st: 5 }; const dwt = DYN_W[ch];
     for (const k in dwt) gw[k] = dwt[k];
+    if (!SQ.some(q => q.l <= maxL)) delete gw.st;
     for (let tries = 0; tries < 8; tries++) {
       const g = wpick(Object.keys(gw), k => gw[k]);
       let cands;

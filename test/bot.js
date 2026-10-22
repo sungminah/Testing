@@ -4,7 +4,7 @@ module.exports = function botFactory(opts) {
   const bot = { frames: 0, log: [], stuck: null, answered: 0, wrong: 0, battles: 0, shots: {}, menuPlan: null, lastSig: '', lastChange: 0, goalName: '' };
   const S = () => G.S, Wd = G.Wd;
   const DIRS = { u: [0, -1], d: [0, 1], l: [-1, 0], r: [1, 0] };
-  const SOLIDC = '#RW~KLTPE';
+  const SOLIDC = '#RW~KLTPEoFl';
   const mapNpcs = id => { const m = G.MAPS[id]; if (id === S().map) return Wd.npcs; const tk = S().taken[id] || {}; return m.npcs.filter(n => !(n.kind === 'item' && tk[n.id])); };
   function bfs(goalFn, allowDoor1) {
     const s0 = [S().map, S().x, S().y], key = (m, x, y) => m + ':' + x + ',' + y, prev = new Map([[key(...s0), null]]), q = [s0];
@@ -38,7 +38,7 @@ module.exports = function botFactory(opts) {
   }
   function holdDir(d) { for (const k of ['u', 'd', 'l', 'r']) G.Inp.held[k] = k === d ? 1 : 0; }
   const buttons = sel => [...document.querySelectorAll(sel)];
-  const need = () => G.CH && (Math.min(60, [4, 10, 16, 22, 28, 34, 40, 46][S().cur] + 5));
+  const need = () => Math.min(60, G.baseLv(S().cur) + 5);
   const hpFrac = () => { const p = S().party; return p.length ? p.reduce((a, m) => a + m.hp / (18 + m.lv * 4), 0) / p.length : 1; };
 
   function answerQuiz() {
@@ -72,6 +72,7 @@ module.exports = function botFactory(opts) {
   }
   function modalAct() {
     const mod = document.getElementById('modal');
+    const hb = mod.querySelector('[data-hero]'); if (hb) { mod.querySelector(`[data-hero="${bot.heroPick == null ? Math.floor(G.rand() * 3) : bot.heroPick}"]`).click(); return; }
     if (bot.menuPlan && bot.menuPlan.length) {
       const [kind, arg] = bot.menuPlan[0];
       const el = kind === 'k' ? mod.querySelector(`[data-k="${arg}"]`) : mod.querySelector(`.isl[data-i="${arg}"]`);
@@ -95,12 +96,9 @@ module.exports = function botFactory(opts) {
     }
     if (!s.flags['drill' + i] && sensei) {
       name = 'drill';
-      const goalAdj = (m, x, y) => m === `i${i}_town` && Math.abs(x - 5) + Math.abs(y - 6) === 1;
-      if (Math.abs(s.x - 5) + Math.abs(s.y - 6) === 1 && s.map === `i${i}_town`) { // quay mặt về sensei rồi bấm A
-        const dx = 5 - s.x, dy = 6 - s.y, d = dx > 0 ? 'r' : dx < 0 ? 'l' : dy > 0 ? 'd' : 'u';
-        faceAndTalk(d); bot.goalName = name; return;
-      }
-      const d = firstDir(goalAdj); if (d) return move(d, name);
+      const adj = (x, y) => Math.abs(x - sensei.x) + Math.abs(y - sensei.y) === 1;
+      if (adj(s.x, s.y) && s.map === `i${i}_town`) { const dx = sensei.x - s.x, dy = sensei.y - s.y; faceAndTalk(dx > 0 ? 'r' : dx < 0 ? 'l' : dy > 0 ? 'd' : 'u'); bot.goalName = name; return; }
+      const d = firstDir((m, x, y) => m === `i${i}_town` && adj(x, y)); if (d) return move(d, name);
     }
     const lead = Math.max(...s.party.map(m => m.lv));
     const ready = lead >= need() && (i !== 0 || s.flags.caught0);
@@ -112,14 +110,15 @@ module.exports = function botFactory(opts) {
           const opts_ = ['u', 'd', 'l', 'r'].filter(d => { const nx = s.x + DIRS[d][0], ny = s.y + DIRS[d][1]; return here.rows[ny] && here.rows[ny][nx] === 'g' && !Wd.npcs.some(n => n.x === nx && n.y === ny); });
           if (opts_.length) return move(opts_[Math.floor(G.rand() * opts_.length)], name);
         }
-        const d = firstDir((m, x, y) => m === rid && G.MAPS[m].rows[y][x] === 'g' && !(y < 4)); if (d) return move(d, name);
+        const d = firstDir((m, x, y) => m === rid && G.MAPS[m].rows[y][x] === 'g'); if (d) return move(d, name);
       } else {
         name = 'boss';
-        const gid = `i${i}_gym`, d = firstDir((m, x, y) => m === gid && x === 6 && y === 3); if (d) return move(d, name);
-        // đã ở (6,3): quay lên bấm A nói chuyện với boss
-        if (s.map === gid && s.x === 6 && s.y === 3) { faceAndTalk('u'); return; }
+        const gid = `i${i}_gym`, bn = G.MAPS[gid].npcs.find(n => n.kind === 'boss');
+        const adjB = (x, y) => Math.abs(x - bn.x) + Math.abs(y - bn.y) === 1;
+        if (s.map === gid && adjB(s.x, s.y)) { const dx = bn.x - s.x, dy = bn.y - s.y; faceAndTalk(dx > 0 ? 'r' : dx < 0 ? 'l' : dy > 0 ? 'd' : 'u'); return; }
+        const d = firstDir((m, x, y) => m === gid && adjB(x, y)); if (d) return move(d, name);
       }
-    } else if (i < 7) {
+    } else if (i < G.CH.length - 1) {
       name = 'sail'; holdDir(null);
       if (!bot.menuPlan) bot.menuPlan = [['k', 'sea'], ['i', i + 1], ['k', 'sail']];
       G.Inp.m = 1; bot.goalName = name; bot.menuTries = (bot.menuTries || 0) + 1; return;

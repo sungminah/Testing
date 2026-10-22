@@ -1,6 +1,10 @@
 'use strict';
 /* ===== 8 chương = 8 đảo của quần đảo "Coral Crown" (Vương Miện San Hô) ===== */
 const CH = [
+  { id: 'hajime', name: 'Hajime-jima', vi: 'Đảo Khởi Hành', lessons: [0, 0], topic: 'Romaji, hiragana, katakana và chữ Hán đơn giản',
+    boss: { name: 'Cô Kana', hair: '#e08a3a', body: '#f0c040' },
+    pal: { g1: '#86d56e', g2: '#66c060', path: '#ecd9a2', roof: '#e0703a', wall: '#fbf0d6', tree: '#2f9a52', water: ['#45a5de', '#62bff0'] },
+    phrases: [['ありがとう。 (arigatou)', 'Cảm ơn.'], ['おはよう。 (ohayou)', 'Chào buổi sáng.'], ['さようなら。 (sayounara)', 'Tạm biệt.']] },
   { id: 'asahi', name: 'Asahi-jima', vi: 'Đảo Bình Minh', lessons: [1, 3], topic: 'Chào hỏi, giới thiệu, これ/それ/あれ, số, tiền, giờ',
     boss: { name: 'Thuyền trưởng Minato', hair: '#27406b', body: '#d8453a' },
     pal: { g1: '#7ccf6a', g2: '#5dbb55', path: '#e8d8a0', roof: '#d8553f', wall: '#f6ecd0', tree: '#2f8a4a', water: ['#3f9bd8', '#59b3ea'] },
@@ -34,16 +38,17 @@ const CH = [
     pal: { g1: '#8ad0b8', g2: '#6cbaa0', path: '#f6e8b0', roof: '#c8409a', wall: '#fff6dc', tree: '#2e9a78', water: ['#2c4fa8', '#4a70c8'] },
     phrases: [['まっすぐ 行くと、駅が あります。', 'Đi thẳng thì có nhà ga.'], ['友達に 本を 貸して あげました。', 'Tôi đã cho bạn mượn sách.'], ['雨が 降ったら、行きません。', 'Nếu trời mưa thì tôi không đi.']] }
 ];
+const chLabel = i => i === 0 ? 'Chương mở đầu' : 'Chương ' + i;
 const lessonEnd = c => CH[c].lessons[1];
 const lessonStart = c => CH[c].lessons[0];
 function chapterOfLesson(l) { for (let i = 0; i < CH.length; i++) if (l <= CH[i].lessons[1]) return i; return CH.length - 1; }
 /* hải đồ: toạ độ trên viewBox 360x240 */
-const ISLE_POS = [[39, 95], [117, 45], [231, 42], [316, 88], [321, 155], [243, 205], [129, 208], [44, 162]]; // vòng "vương miện"
+const ISLE_POS = (() => { const out = []; for (let i = 0; i < 9; i++) { const th = (200 + i * 40) * Math.PI / 180; out.push([Math.round(180 + 148 * Math.cos(th)), Math.round(124 + 86 * Math.sin(th))]); } return out; })(); // vòng "vương miện"
 /* lối tắt: cần CẢ HAI đảo đã mở + điều kiện. bend = độ cong của đường trên hải đồ */
 const SHORTCUTS = [
-  { id: 'root', a: 0, b: 2, bend: -26, icon: '🌳', name: 'Đường rễ cây', cond: 'duel', text: 'Đấu với lính canh rễ cây', guard: { name: 'Lính canh rễ cây', lv: 7 } },
-  { id: 'buoy', a: 1, b: 4, bend: 22, icon: '🛟', name: 'Chuỗi phao', cond: 'item', item: 'buoy', text: 'Tìm "Dây phao" trên Đảo San Hô' },
-  { id: 'rope', a: 2, b: 5, bend: -24, icon: '🪢', name: 'Cầu dây', cond: 'dex', n: 25, text: 'Bắt đủ 25 loài trong Sổ Tideling' },
-  { id: 'root2', a: 3, b: 6, bend: 26, icon: '🌳', name: 'Đường rễ cổ thụ', cond: 'duel', text: 'Đấu với lính canh cổ thụ', guard: { name: 'Lính canh cổ thụ', lv: 28 } },
-  { id: 'current', a: 4, b: 7, bend: -22, icon: '🌊', name: 'Hải lưu', cond: 'lv', n: 30, text: 'Cấp trung bình đội hình ≥ 30' }
+  { id: 'root', a: 1, b: 3, bend: -26, icon: '🌳', name: 'Đường rễ cây', cond: 'duel', text: 'Đấu với lính canh rễ cây', guard: { name: 'Lính canh rễ cây', lv: 13 } },
+  { id: 'buoy', a: 2, b: 5, bend: 22, icon: '🛟', name: 'Chuỗi phao', cond: 'item', item: 'buoy', text: 'Tìm "Dây phao" trên Đảo San Hô' },
+  { id: 'rope', a: 3, b: 6, bend: -24, icon: '🪢', name: 'Cầu dây', cond: 'dex', n: 25, text: 'Bắt đủ 25 loài trong Sổ Tideling' },
+  { id: 'root2', a: 4, b: 7, bend: 26, icon: '🌳', name: 'Đường rễ cổ thụ', cond: 'duel', text: 'Đấu với lính canh cổ thụ', guard: { name: 'Lính canh cổ thụ', lv: 33 } },
+  { id: 'current', a: 5, b: 8, bend: -22, icon: '🌊', name: 'Hải lưu', cond: 'lv', n: 30, text: 'Cấp trung bình đội hình ≥ 30' }
 ];

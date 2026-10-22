@@ -1,6 +1,11 @@
 'use strict';
 /* ===== Ghi chú ngữ pháp theo chương (hiện ở giá sách & khi nói chuyện với người dân trong nhà) ===== */
 const NOTES = [
+  [ // Chương 0 · chữ cái & romaji
+    { t: 'Romaji (kiểu Hepburn) cho hiragana & katakana', b: 'Mỗi chữ kana là một âm tiết. Những chữ cần nhớ: し = shi · ち = chi · つ = tsu · ふ = fu · じ = ji · を = o (khi là trợ từ). Chữ ん luôn là "n".', ex: [['し = shi, ち = chi, つ = tsu, ふ = fu', 'Bốn chữ hay bị viết sai thành si, ti, tu, hu.'], ['さくら = sakura', 'Hoa anh đào.'], ['ともだち = tomodachi', 'Bạn bè.']] },
+    { t: 'Âm ghép, âm đôi và âm kéo dài', b: 'Chữ nhỏ ゃ ゅ ょ ghép với chữ trước: き+ゃ = kya, し+ゅ = shu, ち+ょ = cho. Chữ っ nhỏ nhân đôi phụ âm sau: きって = kitte, ざっし = zasshi. Âm kéo dài: おう → ou, えい → ei, katakana dùng 「ー」 → lặp nguyên âm (コーヒー = koohii).', ex: [['がっこう = gakkou', 'Trường học (っ → kk, おう → ou).'], ['りょこう = ryokou', 'Du lịch (りょ → ryo).'], ['ラーメン = raamen', 'Mì ramen (ー → aa).']] },
+    { t: 'Chữ Hán đơn giản', b: 'Mỗi chữ Hán có nghĩa và cách đọc riêng; người Việt có thể dùng âm Hán Việt để nhớ nghĩa: 山 (sơn) = núi, 川 (xuyên) = sông, 木 (mộc) = cây, 水 (thủy) = nước, 人 (nhân) = người.', ex: [['山 = やま (yama)', 'Núi.'], ['川 = かわ (kawa)', 'Sông.'], ['人 = ひと (hito)', 'Người.']] }
+  ],
   [ // Chương 1 · bài 1–3
     { t: 'N1 は N2 です · じゃ ありません · か · も · の', b: '「A は B です」= A là B. Phủ định: 「じゃ ありません」. Câu hỏi: thêm 「か」 cuối câu. 「も」= cũng. 「の」nối hai danh từ.', ex: [['わたしは ミラーです。', 'Tôi là Miller.'], ['ミラーさんは 学生ですか。', 'Anh Miller là sinh viên à?'], ['いいえ、学生じゃ ありません。', 'Không, không phải sinh viên.'], ['わたしも 会社員です。', 'Tôi cũng là nhân viên công ty.']] },
     { t: 'これ・それ・あれ / この・その・あの', b: 'これ = gần người nói, それ = gần người nghe, あれ = xa cả hai, どれ = cái nào. Khi đi cùng danh từ dùng この/その/あの + N.', ex: [['これは 本です。', 'Đây là sách.'], ['その かばんは だれのですか。', 'Cái cặp đó của ai?'], ['あの 方は だれですか。', 'Vị kia là ai?']] },

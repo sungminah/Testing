@@ -64,8 +64,8 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
   const sail = await page.evaluate(`(()=>{ __bot.idle=false; const r=__bot.run(4000, ()=>G.S.cur===1 && G.ui()==='world' && !G.busy()); return {r:r.status, cur:G.S.cur, map:G.S.map}; })()`);
   ok(sail.cur === 1 && /^i1_/.test(sail.map), 'bot ra khơi tới Đảo San Hô qua Hải đồ (' + JSON.stringify(sail) + ')');
   const sea = await page.evaluate(`(()=>{ const bak=JSON.stringify(G.S), S=G.S, r={};
-    S.maxCh=7; S.cur=0; S.sc={}; S.items={};
-    r.adj=canSail(1); r.far=canSail(2); S.sc.root=1; r.short=canSail(2); S.cur=2; r.rev=canSail(0); S.cur=0; S.maxCh=1; r.locked=canSail(2); S.maxCh=7;
+    S.maxCh=8; S.cur=1; S.sc={}; S.items={};
+    r.adj=canSail(2); r.far=canSail(3); S.sc.root=1; r.short=canSail(3); S.cur=3; r.rev=canSail(1); S.cur=1; S.maxCh=2; r.locked=canSail(3); S.maxCh=8;
     r.item1=scCond(SHORTCUTS[1]).ok; S.items.buoy=1; r.item2=scCond(SHORTCUTS[1]).ok; r.dex=scCond(SHORTCUTS[2]).ok; r.lv=scCond(SHORTCUTS[4]).ok;
     Object.assign(G.S, JSON.parse(bak)); return r; })()`);
   ok(sea.adj && !sea.far && sea.short && sea.rev && !sea.locked, 'đi tàu: kề nhau được, xa thì cần lối tắt, đảo khoá không đi được ' + JSON.stringify(sea));
@@ -87,31 +87,33 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
   await page.click('#bmenu .mb[data-i="0"]'); await drive("G.S.pearls===80 && G.ui()==='choose'", 200);
   ok(await page.evaluate(`G.S.bag.net===${base}+1 && G.S.pearls===80`), 'mua lưới: +1 lưới, -20 ngọc trai');
   await page.click('#bmenu .mb[data-i="3"]'); await drive('!G.busy()');
-  await page.evaluate('loadMap("i1_route", 9, 18, "u")');
+  await page.evaluate('loadMap("i2_route", 9, 18, "u")');
   const buoy = await page.evaluate('(()=>{ const n=G.Wd.npcs.find(x=>x.id==="item_buoy"); G.run(()=>pickup(n)); return !!n; })()'); await drive('!G.busy()');
   ok(buoy && await page.evaluate('G.S.items.buoy===1 && !G.Wd.npcs.some(x=>x.id==="item_buoy")'), 'nhặt "Dây phao" (vật phẩm lối tắt)');
   const evo = await page.evaluate('(()=>{ const m=newMon(0,11), out=[]; gainXp(m,300,out); return {lv:m.lv, form:m.form, out}; })()');
   ok(evo.form === 2 && evo.out.some(t => /tiến hoá/.test(t)), 'tiến hoá ở cấp ' + evo.lv + ': ' + evo.out.join(' | '));
   await page.evaluate('(()=>{ G.S.party.forEach(m=>m.hp=0); G.run(()=>whiteout()); })()'); await drive('!G.busy()');
-  ok(await page.evaluate('G.S.party.every(m=>m.hp>0) && G.S.map==="i1_town"'), 'whiteout: hồi phục và về thị trấn');
+  ok(await page.evaluate('G.S.party.every(m=>m.hp>0) && G.S.map==="i2_town"'), 'whiteout: hồi phục và về thị trấn');
   if (FULL) {
-    console.log('4) Bot chơi tiếp qua cả 8 chương');
+    console.log('4) Bot chơi tiếp qua cả 9 chương');
     await page.evaluate(`window.__bot=(${botFactory.toString()})({wrongRate:0.35})`);
     let r2, n = 0;
     while (n++ < 400) {
-      r2 = await page.evaluate(`__bot.run(2500, ()=>G.S.flags.boss7)`);
+      r2 = await page.evaluate(`__bot.run(2500, ()=>G.S.flags.boss8)`);
       const s2 = await page.evaluate('__bot.summary()'); if (n % 10 === 0) console.log('   …', JSON.stringify(s2));
       if (r2.status !== 'budget') break;
     }
     const s3 = await page.evaluate('__bot.summary()'); console.log('   ', JSON.stringify(s3), r2.status);
-    ok(s3.flags.includes('boss7'), 'bot hoàn thành cả 8 chương');
+    ok(s3.flags.includes('boss8'), 'bot hoàn thành cả 9 chương');
     await page.screenshot({ path: path.join(OUT, '30-final.png') });
   }
   console.log('4b) Chỉ dùng bàn phím (không chuột)');
   {
     const k = await open({ viewport: { width: 960, height: 720 } });
     await k.page.evaluate('G.step(3)'); await k.page.keyboard.press('Enter'); await k.page.evaluate('G.step(60)');
-    ok(await k.page.evaluate('G.mode==="world" && G.busy()'), 'Enter ở màn hình tiêu đề bắt đầu game');
+    ok(await k.page.evaluate('G.mode==="world" && !!document.querySelector("[data-hero]")'), 'Enter ở màn hình tiêu đề → màn hình chọn nhân vật');
+    await k.page.keyboard.press('ArrowRight'); await k.page.keyboard.press('Enter'); await k.page.evaluate('G.step(20)');
+    ok(await k.page.evaluate('G.S.hero===1'), 'chọn nhân vật bằng mũi tên + Enter (Rika)');
     await k.page.evaluate(`(()=>{ for(let i=0;i<8000 && G.busy();i++){ const u=G.ui(); if(u==='dialog'||u==='choose') G.Inp.a=1; G.sim(1);} })()`);
     await k.page.evaluate('G.run(()=>Quiz.ask({area:"town"}))'); await k.page.evaluate('G.step(5)');
     await k.page.keyboard.press('ArrowDown'); await k.page.keyboard.press('ArrowDown'); await k.page.keyboard.press('Enter'); await k.page.evaluate('G.step(5)');

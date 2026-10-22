@@ -35,7 +35,7 @@ function* npcStep(n, d) {
 }
 function* whiteout() {
   yield* say('', 'Tất cả Tideling của bạn đã kiệt sức... Bạn được đưa về trạm y tế.');
-  yield* fade(1, 10); healAll(); loadMap(`i${S.cur}_town`, 3, 4, 'd'); yield 4; yield* fade(0, 10); save();
+  yield* fade(1, 10); healAll(); { const hp = MAPS[`i${S.cur}_town`].heal; loadMap(`i${S.cur}_town`, hp.x, hp.y, hp.dir); } yield 4; yield* fade(0, 10); save();
 }
 
 /* ---- NPC ---- */
@@ -45,8 +45,8 @@ function objective() {
   if (!S.flags.drill0 && i === 0) return 'Học bảng chữ cái với Thầy Sora (người đứng gần hồ nước).';
   if (!S.flags.caught0 && i === 0) return 'Đi lên đường mòn phía bắc, bắt một Tideling hoang dã bằng lưới.';
   if (!S.flags['boss' + i]) return `Đánh bại ${c.boss.name} trong ngôi nhà ở cuối đường mòn. (Nên đạt cấp ${baseLv(i) + 3} trở lên.)`;
-  if (i < 7 && S.maxCh <= i) return 'Hãy mở Hải đồ để ra khơi.';
-  if (i < 7) return `Mở Hải đồ (MENU → Hải đồ) và đi tiếp tới ${CH[i + 1].vi}.`;
+  if (i < CH.length - 1 && S.maxCh <= i) return 'Hãy mở Hải đồ để ra khơi.';
+  if (i < CH.length - 1) return `Mở Hải đồ (MENU → Hải đồ) và đi tiếp tới ${CH[i + 1].vi}.`;
   return 'Bạn đã hoàn thành cuộc phiêu lưu! Hãy bắt đủ 150 Tideling và ôn lại câu sai.';
 }
 function* talk(n) {
@@ -76,6 +76,15 @@ function* pickup(n) {
   else if (n.key === 'pouch') { S.pearls += 60; yield* say('', 'Bạn nhặt được túi ngọc trai: +60 💎'); }
   else { S.bag.fruit += 2; yield* say('', 'Bạn nhặt được 2 Tidefruit 🍎 (hồi 40 HP).'); }
   Snd.ok();
+}
+function* pickHero() {
+  const r = yield* modalRun(done => {
+    showModal(modalCard(`<h2>Chọn nhân vật của bạn</h2><div class="vi" style="margin-bottom:8px">Ba nguyên mẫu — chỉ khác ngoại hình, cách chơi như nhau.</div>
+      <div class="heroes">${HEROES.map((h, i) => `<button class="hero" data-hero="${i}"><canvas width="128" height="150" data-h="${i}"></canvas><b>${h.name}</b><span class="chip t">${h.role}</span><small>${h.desc}</small></button>`).join('')}</div>`));
+    $$('canvas[data-h]', modalEl).forEach(c => c.getContext('2d').drawImage(heroCanvas(+c.dataset.h), 0, 0));
+    $$('[data-hero]', modalEl).forEach(b => b.addEventListener('click', () => done(+b.dataset.hero)));
+  });
+  return r;
 }
 function* mika() {
   if (!S.flags.starter) {
@@ -178,9 +187,9 @@ function* fightTrainer(n) {
   const gain = boss ? 250 + i * 60 : 30 + i * 12; S.pearls += gain;
   if (boss) {
     S.flags['boss' + i] = 1; if (!S.badges.includes(i)) S.badges.push(i);
-    const next = Math.min(7, i + 1); S.maxCh = Math.max(S.maxCh, next);
+    const next = Math.min(CH.length - 1, i + 1); S.maxCh = Math.max(S.maxCh, next);
     yield* say(n.name, `Bạn thắng rồi! Nhận ${gain} 💎 và Huy hiệu ${c.vi}.`, 'おめでとう！');
-    yield* say('', i < 7 ? `Hoàn thành Chương ${i + 1}! Đảo ${CH[next].vi} đã mở khoá — mở Hải đồ (MENU) để ra khơi.` : 'Bạn đã chinh phục cả Quần đảo San Hô! Chúc mừng thuyền trưởng!');
+    yield* say('', i < CH.length - 1 ? `Hoàn thành ${chLabel(i)}! Đảo ${CH[next].vi} đã mở khoá — mở Hải đồ (MENU) để ra khơi.` : 'Bạn đã chinh phục cả Quần đảo San Hô! Chúc mừng thuyền trưởng!');
     Snd.lvl();
   } else yield* say(n.name, `Bạn mạnh thật! Nhận ${gain} 💎.`, 'つよいですね！');
   save();

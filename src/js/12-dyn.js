@@ -89,6 +89,7 @@ const kanjiNote = w => [...w].filter(c => KANJI[c]).map(c => `${c} (${KANJI[c].h
 /* ---- tạo câu hỏi từ khoá ---- */
 function dynMake(key, ch) {
   const [type, ...a] = key.split(':'); const maxL = lessonEnd(ch == null ? 7 : ch);
+  if (type === 'rom') return romQuestion(key);
   if (type === 'kana') {
     const [mode, rom] = a, i = ROM.indexOf(rom), h = HIRA[i], k = KATA[i];
     let q, ans, pool, sim;
@@ -151,9 +152,10 @@ function dynMake(key, ch) {
 /* ---- chọn khoá ngẫu nhiên theo chương & độ khó ---- */
 function dynKey(type, ch, d) {
   const maxL = lessonEnd(ch);
+  if (type === 'rom') return romKey(d);
   if (type === 'kana') {
-    const modes = ch === 0 ? ['rh', 'rk', 'kh', 'hk'] : ['kh', 'hk'];
-    const rom = pick(ch === 0 && d === 1 ? ROM.slice(0, 46) : ROM);
+    const modes = ch <= 1 ? ['rh', 'rk', 'kh', 'hk'] : ['kh', 'hk'];
+    const rom = pick(ch <= 1 && d === 1 ? ROM.slice(0, 46) : ROM);
     return `kana:${pick(modes)}:${rom}`;
   }
   if (type === 'read' || type === 'write') {
@@ -186,8 +188,63 @@ function dynKey(type, ch, d) {
   }
   return null;
 }
-/* tỉ trọng từng loại động theo chương (kana nhiều ở chương 1) */
+/* ===== Chương mở đầu: luyện romaji (kana → romaji, romaji → kana, từ, chữ Hán đơn giản) ===== */
+const toKata = t => t.replace(/[\u3041-\u3096]/g, c => String.fromCharCode(c.charCodeAt(0) + 0x60));
+const HIRA_Y = 'きゃ きゅ きょ しゃ しゅ しょ ちゃ ちゅ ちょ にゃ にゅ にょ ひゃ ひゅ ひょ みゃ みゅ みょ りゃ りゅ りょ ぎゃ ぎゅ ぎょ じゃ じゅ じょ びゃ びゅ びょ ぴゃ ぴゅ ぴょ'.split(' ');
+const ROM_Y = 'kya kyu kyo sha shu sho cha chu cho nya nyu nyo hya hyu hyo mya myu myo rya ryu ryo gya gyu gyo ja ju jo bya byu byo pya pyu pyo'.split(' ');
+const KANA_ALL = ROM.map((r, i) => ({ r, h: HIRA[i], k: KATA[i], y: 0, base: i < 46 })).concat(ROM_Y.map((r, i) => ({ r, h: HIRA_Y[i], k: toKata(HIRA_Y[i]), y: 1, base: false })));
+const HW = [['ねこ', 'neko', 'con mèo'], ['いぬ', 'inu', 'con chó'], ['さくら', 'sakura', 'hoa anh đào'], ['みず', 'mizu', 'nước'], ['やま', 'yama', 'núi'], ['かわ', 'kawa', 'sông'], ['うみ', 'umi', 'biển'], ['そら', 'sora', 'bầu trời'], ['はな', 'hana', 'hoa'], ['つき', 'tsuki', 'mặt trăng'], ['ひと', 'hito', 'người'], ['ちず', 'chizu', 'bản đồ'],
+  ['ともだち', 'tomodachi', 'bạn bè'], ['わたし', 'watashi', 'tôi'], ['おんがく', 'ongaku', 'âm nhạc'], ['にほんご', 'nihongo', 'tiếng Nhật'], ['ふじさん', 'fujisan', 'núi Phú Sĩ'], ['しんぶん', 'shinbun', 'tờ báo'], ['ありがとう', 'arigatou', 'cảm ơn'], ['おはよう', 'ohayou', 'chào buổi sáng'], ['こんにちは', 'konnichiwa', 'xin chào'], ['さようなら', 'sayounara', 'tạm biệt'],
+  ['がっこう', 'gakkou', 'trường học'], ['せんせい', 'sensei', 'giáo viên'], ['おおきい', 'ookii', 'to lớn'], ['きって', 'kitte', 'con tem'], ['ざっし', 'zasshi', 'tạp chí'], ['さんぽ', 'sanpo', 'đi dạo'], ['りょこう', 'ryokou', 'du lịch'], ['じてんしゃ', 'jitensha', 'xe đạp'], ['しゅくだい', 'shukudai', 'bài tập'], ['ちょっと', 'chotto', 'một chút'], ['びょういん', 'byouin', 'bệnh viện'], ['ちゅうごく', 'chuugoku', 'Trung Quốc']];
+const KW = [['パン', 'pan', 'bánh mì'], ['バス', 'basu', 'xe buýt'], ['ペン', 'pen', 'cây bút'], ['アイス', 'aisu', 'kem'], ['ホテル', 'hoteru', 'khách sạn'], ['カメラ', 'kamera', 'máy ảnh'], ['テレビ', 'terebi', 'tivi'], ['ピアノ', 'piano', 'đàn piano'], ['ビール', 'biiru', 'bia'], ['コーヒー', 'koohii', 'cà phê'], ['ケーキ', 'keeki', 'bánh kem'], ['ノート', 'nooto', 'quyển vở'], ['ゲーム', 'geemu', 'trò chơi'], ['メール', 'meeru', 'thư điện tử'], ['チーズ', 'chiizu', 'phô mai'], ['ラーメン', 'raamen', 'mì ramen'], ['ジュース', 'juusu', 'nước ép'], ['タクシー', 'takushii', 'taxi'], ['スポーツ', 'supootsu', 'thể thao'], ['シャツ', 'shatsu', 'áo sơ mi']];
+const PK = [['山', 'やま', 'yama', 'sơn', 'núi'], ['川', 'かわ', 'kawa', 'xuyên', 'sông'], ['木', 'き', 'ki', 'mộc', 'cây'], ['水', 'みず', 'mizu', 'thủy', 'nước'], ['火', 'ひ', 'hi', 'hỏa', 'lửa'], ['月', 'つき', 'tsuki', 'nguyệt', 'mặt trăng'], ['花', 'はな', 'hana', 'hoa', 'hoa'], ['犬', 'いぬ', 'inu', 'khuyển', 'chó'], ['猫', 'ねこ', 'neko', 'miêu', 'mèo'], ['魚', 'さかな', 'sakana', 'ngư', 'cá'], ['人', 'ひと', 'hito', 'nhân', 'người'], ['目', 'め', 'me', 'mục', 'mắt'], ['口', 'くち', 'kuchi', 'khẩu', 'miệng'], ['手', 'て', 'te', 'thủ', 'bàn tay'], ['足', 'あし', 'ashi', 'túc', 'bàn chân'], ['耳', 'みみ', 'mimi', 'nhĩ', 'tai'], ['車', 'くるま', 'kuruma', 'xa', 'xe hơi'], ['雨', 'あめ', 'ame', 'vũ', 'mưa'], ['本', 'ほん', 'hon', 'bản', 'sách'], ['一', 'いち', 'ichi', 'nhất', 'một'], ['二', 'に', 'ni', 'nhị', 'hai'], ['三', 'さん', 'san', 'tam', 'ba'], ['五', 'ご', 'go', 'ngũ', 'năm'], ['六', 'ろく', 'roku', 'lục', 'sáu'], ['七', 'なな', 'nana', 'thất', 'bảy'], ['八', 'はち', 'hachi', 'bát', 'tám'], ['九', 'きゅう', 'kyuu', 'cửu', 'chín'], ['十', 'じゅう', 'juu', 'thập', 'mười'], ['百', 'ひゃく', 'hyaku', 'bách', 'trăm'], ['千', 'せん', 'sen', 'thiên', 'nghìn'], ['上', 'うえ', 'ue', 'thượng', 'trên'], ['下', 'した', 'shita', 'hạ', 'dưới'], ['中', 'なか', 'naka', 'trung', 'giữa, trong'], ['右', 'みぎ', 'migi', 'hữu', 'bên phải'], ['左', 'ひだり', 'hidari', 'tả', 'bên trái'], ['男', 'おとこ', 'otoko', 'nam', 'đàn ông'], ['女', 'おんな', 'onna', 'nữ', 'phụ nữ']];
+const TRICKY = { shi: 'し đọc "shi" (không phải "si")', chi: 'ち đọc "chi" (không phải "ti")', tsu: 'つ đọc "tsu" (không phải "tu")', fu: 'ふ đọc "fu" (không phải "hu")', ji: 'じ đọc "ji" (không phải "zi")', wo: 'を đọc là "o" (khi là trợ từ), gõ bàn phím là "wo"', n: 'ん luôn là "n"', wa: 'わ đọc "wa"' };
+function mutRomaji(r) {
+  const out = new Set(), reps = [['shi', 'si'], ['chi', 'ti'], ['tsu', 'tu'], ['fu', 'hu'], ['ji', 'zi'], ['sh', 's'], ['ch', 't'], ['ou', 'o'], ['oo', 'o'], ['ii', 'i'], ['aa', 'a'], ['ei', 'e'], ['kk', 'k'], ['ss', 's'], ['tt', 't'], ['pp', 'p'], ['ky', 'k'], ['ry', 'r'], ['ja', 'za'], ['n', 'm']];
+  for (const [a, b] of reps) if (r.includes(a)) out.add(r.replace(a, b));
+  if (!/[kstp]{2}/.test(r)) { const m = r.match(/[aiueo]([ktsp])[aiueo]/); if (m) out.add(r.replace(m[0], m[0][0] + m[1] + m[1] + m[0][2])); }
+  if (r.length > 3) out.add(r.slice(0, 2) + r[3] + r[2] + r.slice(4));
+  out.add(r.replace(/[aiueo]/, v => 'aiueo'[('aiueo'.indexOf(v) + 1) % 5]));
+  out.add(r + (/[aiueo]$/.test(r) ? r[r.length - 1] : 'u'));
+  out.delete(r); return [...out].filter(x => x && x !== r);
+}
+function romQuestion(key) {
+  const [, mode, idx] = key.split(':'), I = +idx;
+  const pickSet = (ans, pool, near) => { const set = []; shuffle(near.filter(x => x !== ans)).forEach(x => { if (set.length < 3 && !set.includes(x)) set.push(x); }); for (const x of shuffle(pool)) { if (set.length >= 3) break; if (x !== ans && !set.includes(x)) set.push(x); } return set; };
+  if (mode === 'hr' || mode === 'kr' || mode === 'hk2') {
+    const K = KANA_ALL[I], ch = mode === 'kr' ? K.k : K.h, script = mode === 'kr' ? 'katakana' : 'hiragana';
+    const near = KANA_ALL.filter(x => x.y === K.y && (x.r[0] === K.r[0] || x.r.slice(-1) === K.r.slice(-1))).map(x => x.r).concat(mutRomaji(K.r));
+    const set = pickSet(K.r, KANA_ALL.filter(x => x.y === K.y).map(x => x.r), near), c = [K.r, ...set];
+    return { id: key, t: 'm', d: K.y ? 3 : K.base ? 1 : 2, l: 0, q: `「${ch}」を ローマ字で かくと どれですか。`, qv: `Chữ ${script} 「${ch}」 đọc là gì (romaji)?`, c, ex: `「${K.h}」 (hiragana) = 「${K.k}」 (katakana) = "${K.r}". ${TRICKY[K.r] ? TRICKY[K.r] + '.' : ''}${K.y ? ' Chữ nhỏ ゃ ゅ ょ ghép với chữ đứng trước thành một âm tiết.' : ''}`, w: [[K.h, K.r, 'hiragana'], [K.k, K.r, 'katakana']], cv: c.map((x, n) => n === 0 ? 'đúng' : 'romaji khác'), nf: true };
+  }
+  if (mode === 'wr' || mode === 'kw') {
+    const lst = mode === 'wr' ? HW : KW, [w, r, m] = lst[I], script = mode === 'wr' ? 'hiragana' : 'katakana';
+    const near = mutRomaji(r), pool = lst.map(x => x[1]);
+    const set = pickSet(r, pool.filter(x => Math.abs(x.length - r.length) <= 2), near), c = [r, ...set];
+    const rules = [/っ|ッ/.test(w) ? 'Chữ っ/ッ nhỏ nhân đôi phụ âm sau nó.' : '', /ー/.test(w) ? 'Dấu ー kéo dài nguyên âm: lặp lại nguyên âm trước đó (koohii).' : '', /[おこそとのほもよろ]う|[えけせてねへめれ]い/.test(w) ? 'おう → "ou", えい → "ei" (âm kéo dài).' : '', /[ゃゅょ]/.test(w) ? 'ゃ ゅ ょ nhỏ ghép với chữ trước (しゃ = sha).' : ''].filter(Boolean).join(' ');
+    return { id: key, t: 'm', d: w.length <= 3 ? 1 : w.length <= 5 ? 2 : 3, l: 0, q: `「${w}」を ローマ字で かくと どれですか。`, qv: `Từ ${script} 「${w}」 (${m}) viết bằng romaji?`, c, ex: `「${w}」 = "${r}" (${m}). ${rules}`, w: [[w, r, m]], cv: c.map((x, n) => n === 0 ? m : 'romaji sai'), nf: true };
+  }
+  const [k, yomi, romaji, hv, mean] = PK[I];
+  if (mode === 'jr') { // kanji → hiragana
+    const near = PK.filter(x => x[1] !== yomi).map(x => x[1]), set = pickSet(yomi, near, near.filter(x => Math.abs(x.length - yomi.length) <= 1)), c = [yomi, ...set];
+    return { id: key, t: 'k', d: 1, l: 0, qh: `「${esc(k)}」の よみかたは どれですか。`, q: `「${k}」の よみかたは どれですか。`, qv: `Chữ Hán 「${k}」 đọc là gì?`, c, ex: `「${k}」 (${hv}) = ${mean}, đọc là 「${yomi}」 (${romaji}).`, w: [[k, yomi, mean]], cv: c.map((x, n) => n === 0 ? mean : '(cách đọc khác)'), nf: true };
+  }
+  if (mode === 'jo') { // kanji → romaji
+    const near = PK.filter(x => x[2] !== romaji).map(x => x[2]), set = pickSet(romaji, near, mutRomaji(romaji).concat(near.filter(x => Math.abs(x.length - romaji.length) <= 1))), c = [romaji, ...set];
+    return { id: key, t: 'k', d: 2, l: 0, qh: `「${esc(k)}」を ローマ字で よむと どれですか。`, q: `「${k}」を ローマ字で よむと どれですか。`, qv: `Chữ Hán 「${k}」 đọc bằng romaji?`, c, ex: `「${k}」 (${hv}) = ${mean}, đọc là 「${yomi}」 = "${romaji}".`, w: [[k, yomi, mean]], cv: c.map((x, n) => n === 0 ? mean : '(sai)'), nf: true };
+  }
+  // 'jj': hiragana → kanji
+  const near = PK.filter(x => x[0] !== k).map(x => x[0]), set = pickSet(k, near, near), c = [k, ...set];
+  return { id: key, t: 'k', d: 2, l: 0, q: `「${yomi}」を かんじで かくと どれですか。`, qv: `Viết 「${yomi}」 (${mean}) bằng chữ Hán.`, c, ex: `「${yomi}」 = 「${k}」 (${hv}) — ${mean}.`, w: [[k, yomi, mean]], cv: c.map((x, n) => n === 0 ? mean : (PK.find(p2 => p2[0] === x) || [])[4] || ''), nf: true };
+}
+function romKey(d) {
+  if (d === 1) { const m = pick(['hr', 'hr', 'kr', 'kr', 'jr', 'jr', 'wr']); if (m === 'jr') return `rom:jr:${ri(PK.length)}`; if (m === 'wr') return `rom:wr:${ri(12)}`; return `rom:${m}:${ri(46)}`; }
+  if (d === 2) { const m = pick(['hr', 'kr', 'wr', 'kw', 'jo', 'jj', 'jj']); if (m === 'jo' || m === 'jj') return `rom:${m}:${ri(PK.length)}`; if (m === 'wr') return `rom:wr:${12 + ri(HW.length - 12 - 8)}`; if (m === 'kw') return `rom:kw:${ri(10)}`; return `rom:${m}:${46 + ri(23)}`; }
+  const m = pick(['hr', 'kr', 'wr', 'kw']); if (m === 'wr') return `rom:wr:${HW.length - 12 + ri(12)}`; if (m === 'kw') return `rom:kw:${10 + ri(KW.length - 10)}`; return `rom:${m}:${69 + ri(33)}`;
+}
+/* tỉ trọng từng loại động theo chương (chương 0 chỉ luyện romaji; kana nhiều ở chương 1) */
 const DYN_W = [
+  { rom: 10 },
   { kana: 3, num: 2, time: 2, read: 3, write: 2, cat: 2 },
   { kana: 0.4, num: 1, time: 2, read: 3, write: 2, cat: 2 },
   { kana: 0.2, num: 0.6, time: 1, read: 3, write: 2, cat: 2 },

@@ -86,6 +86,11 @@ ruby{ruby-position:over}
 #sea{width:100%;height:auto;border-radius:12px;display:block;background:#2a79b0}
 #sea .isl{cursor:pointer}
 #sea text{font-family:inherit;pointer-events:none}
+.heroes{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px}
+.hero{font:inherit;background:#f1f5fa;border:3px solid #cdd8e6;border-radius:16px;padding:10px 10px 12px;display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;color:var(--ink);text-align:center}
+.hero:hover,.hero:focus{border-color:var(--acc);background:#eaf6fd;outline:none}
+.hero canvas{width:96px;height:112px}
+.hero b{font-size:20px}.hero small{font-size:13px;line-height:1.35;color:#40526b}
 .title{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:calc(var(--u)*4);text-align:center}
 .title h1{margin:0;font-size:calc(var(--u)*17);text-shadow:0 calc(var(--u)*1.5) 0 #0b3a5a;letter-spacing:.02em}
 .title p{margin:0;font-size:calc(var(--u)*6.5);opacity:.92}

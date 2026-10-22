@@ -14,7 +14,7 @@ module.exports = function validateInPage() {
     if (!q.ex || !q.qv) err(tag + ': thiếu giải thích/dịch');
     if (!q.cv || q.cv.length !== 4) err(tag + ': cv phải có 4 mục (có ' + (q.cv ? q.cv.length : 0) + ')');
     if (q.t === 'r' && (!q.p || !q.pv)) err(tag + ': đọc hiểu thiếu đoạn văn/dịch');
-    if (![1, 2, 3].includes(q.d) || q.l < 1 || q.l > 25) err(tag + ': d/l sai');
+    if (![1, 2, 3].includes(q.d) || q.l < 0 || q.l > 25) err(tag + ': d/l sai');
     const lens = q.c.map(c => G.plain(c).length);
     if (Math.max(...lens) > 3 * Math.max(1, Math.min(...lens)) + 6) err(tag + ': độ dài đáp án chênh lệch quá lớn ' + lens);
   });
@@ -23,6 +23,7 @@ module.exports = function validateInPage() {
   out.info.byType = G.SQ.reduce((a, q) => (a[q.t] = (a[q.t] || 0) + 1, a), {});
   const lessonCount = {}; G.SQ.forEach(q => { lessonCount[q.l] = (lessonCount[q.l] || 0) + 1; });
   for (let l = 1; l <= 25; l++) if (!lessonCount[l]) err('Bài ' + l + ' chưa có câu hỏi tĩnh');
+  if (!lessonCount[0]) err('Chương mở đầu (bài 0) chưa có câu hỏi tĩnh');
   // --- furigana phủ hết kanji ---
   window.__missingFuri.clear();
   G.SQ.forEach(q => { G.furi(q.q); if (q.p) G.furi(q.p); q.c.forEach(c => G.furi(c)); });
@@ -31,8 +32,9 @@ module.exports = function validateInPage() {
   if (window.__missingFuri.size) err('Ghi chú ngữ pháp: kanji thiếu furigana: ' + [...window.__missingFuri].join(''));
   // --- câu hỏi động ---
   const dynErr = {}; window.__missingFuri.clear(); let nd = 0;
-  const types = ['kana', 'read', 'write', 'cat', 'num', 'time'];
-  for (let ch = 0; ch < 8; ch++) for (const t of types) for (let d = 1; d <= 3; d++) for (let k = 0; k < 40; k++) {
+  const types = ['rom', 'kana', 'read', 'write', 'cat', 'num', 'time'];
+  for (let ch = 0; ch < G.CH.length; ch++) for (const t of types) for (let d = 1; d <= 3; d++) for (let k = 0; k < 40; k++) {
+    if (!(DYN_W[ch][t] > 0)) continue;
     let key; try { key = G.dynKey(t, ch, d); } catch (e) { err(`dynKey ${t} ch${ch} d${d}: ${e.message}`); continue; }
     if (!key) continue;
     let q; try { q = G.dynMake(key, ch); } catch (e) { err(`dynMake ${key}: ${e.stack}`); continue; }
@@ -41,7 +43,7 @@ module.exports = function validateInPage() {
     if (q.c.length !== 4 || new Set(q.c).size !== 4) dynErr[key] = '4 đáp án khác nhau: ' + JSON.stringify(q.c);
     else if (q.c.some(c => VI.test(c))) dynErr[key] = 'VI trong đáp án';
     else if (!q.ex || !q.cv || q.cv.length !== 4) dynErr[key] = 'thiếu ex/cv';
-    else if (q.l > [3, 6, 9, 12, 15, 19, 22, 25][ch] && t !== 'num' && t !== 'time') dynErr[key] = 'bài vượt chương: ' + q.l;
+    else if (q.l > G.CH[ch].lessons[1] && t !== 'num' && t !== 'time') dynErr[key] = 'bài vượt chương: ' + q.l;
     if (t === 'num') { const n = +key.split(':')[1]; if (q.c[0] !== G.numRead(n) + 'えん') dynErr[key] = 'num đáp án đầu sai'; }
     if (t === 'read' || t === 'write') { const v = G.VOC[+key.split(':')[1]]; const want = t === 'read' ? v.r : v.w; if (q.c[0] !== want) dynErr[key] = 'đáp án đúng không ở đầu'; if (t === 'write') { const dup = q.c.slice(1).filter(w => { const o = G.VOC.find(x => x.w === w); return o && o.r === v.r; }); if (dup.length) dynErr[key] = 'đồng âm trong đáp án sai: ' + dup; } }
   }
@@ -52,6 +54,8 @@ module.exports = function validateInPage() {
   for (const n in known) if (G.numRead(+n) !== known[n]) err(`numRead(${n}) = ${G.numRead(+n)} ≠ ${known[n]}`);
   const tk = [[4, 0, 'よじ'], [7, 30, 'しちじはん'], [9, 5, 'くじごふん'], [10, 10, 'じゅうじじゅっぷん'], [3, 1, 'さんじいっぷん'], [12, 45, 'じゅうにじよんじゅうごふん'], [6, 8, 'ろくじはっぷん']];
   tk.forEach(([h, m, w]) => { if (G.timeRead(h, m) !== w) err(`timeRead(${h},${m}) = ${G.timeRead(h, m)} ≠ ${w}`); });
+  // --- nhân vật: vẽ đủ 4 hướng × 2 nhịp bước ---
+  try { const cc = document.createElement('canvas'); cc.width = cc.height = 160; const g = cc.getContext('2d'); HEROES.forEach(h => ['u', 'd', 'l', 'r'].forEach(d => [0, 1].forEach(st => drawPerson(g, 40, 40, d, st, h.look)))); if (HEROES.length !== 3) err('cần 3 nhân vật'); } catch (e) { err('Vẽ nhân vật lỗi: ' + e.stack); }
   // --- Tideling ---
   const ns = G.SLICES.reduce((a, b) => a + b, 0);
   if (ns !== 150) err('Tổng loài ≠ 150: ' + ns);
@@ -60,7 +64,7 @@ module.exports = function validateInPage() {
   if (names.size !== 300) err('Tên loài/dạng không duy nhất: ' + names.size);
   const grpCount = [0, 0, 0]; for (let i = 0; i < 150; i++) grpCount[i % 3]++;
   if (grpCount.join() !== '50,50,50') err('3 nhóm × 50 sai: ' + grpCount);
-  const seen = new Set(); for (let c = 0; c < 8; c++) G.speciesOfChapter(c).forEach(s => { if (seen.has(s)) err('loài trùng chương ' + s); seen.add(s); });
+  const seen = new Set(); for (let c = 0; c < G.SLICES.length; c++) G.speciesOfChapter(c).forEach(s => { if (seen.has(s)) err('loài trùng chương ' + s); seen.add(s); });
   if (seen.size !== 150) err('Các chương không phủ đủ 150 loài');
   out.info.slices = G.SLICES.join('/');
   // vẽ thử mọi loài (không lỗi)
@@ -68,9 +72,9 @@ module.exports = function validateInPage() {
   // --- bản đồ ---
   for (const id in G.MAPS) {
     const m = G.MAPS[id], lens = new Set(m.rows.map(r => r.length)); if (lens.size !== 1) err(id + ': hàng không đều');
-    const free = (x, y) => !'#RW~KLTPE'.includes(m.rows[y][x]);
+    const free = (x, y) => !'#RW~KLTPEoFl'.includes(m.rows[y][x]);
     m.npcs.forEach(n => { if (!free(n.x, n.y)) err(`${id}: NPC ${n.id} đứng trên ô cứng`); });
-    for (const k in m.warps) { const w = m.warps[k], t = G.MAPS[w.map]; if (!t || !'#RW~KLTPE'.includes(t.rows[w.y][w.x]) === false) err(`${id}: warp ${k} đích sai`); }
+    for (const k in m.warps) { const w = m.warps[k], t = G.MAPS[w.map]; if (!t || !'#RW~KLTPEoFl'.includes(t.rows[w.y][w.x]) === false) err(`${id}: warp ${k} đích sai`); }
     // tới được mọi NPC và lối ra từ ô đầu tiên của mỗi bản đồ?
     const start = m.warps ? Object.values(G.MAPS).flatMap(mm => Object.values(mm.warps)).filter(w => w.map === id)[0] || { x: 9, y: 11 } : null;
     const seenT = new Set([start.x + ',' + start.y]); const q = [[start.x, start.y]];
