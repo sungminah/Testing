@@ -4,7 +4,7 @@ module.exports = function botFactory(opts) {
   const bot = { frames: 0, log: [], stuck: null, answered: 0, wrong: 0, battles: 0, shots: {}, menuPlan: null, lastSig: '', lastChange: 0, goalName: '' };
   const S = () => G.S, Wd = G.Wd;
   const DIRS = { u: [0, -1], d: [0, 1], l: [-1, 0], r: [1, 0] };
-  const SOLIDC = '#RW~KLTPEoFl';
+  const SOLIDC = '#RW~KLTPEoOFl';
   const mapNpcs = id => { const m = G.MAPS[id]; if (id === S().map) return Wd.npcs; const tk = S().taken[id] || {}; return m.npcs.filter(n => !(n.kind === 'item' && tk[n.id])); };
   function bfs(goalFn, allowDoor1) {
     const s0 = [S().map, S().x, S().y], key = (m, x, y) => m + ':' + x + ',' + y, prev = new Map([[key(...s0), null]]), q = [s0];

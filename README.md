@@ -61,7 +61,7 @@ src/js/11-questions.js    kho câu hỏi tĩnh
 src/js/12-dyn.js          câu hỏi sinh động
 src/js/13-questions2.js   câu hỏi bổ sung bài 10–25
 src/js/14-questions0.js   câu hỏi quy tắc romaji (chương mở đầu)
-src/js/39-islands.js      bản đồ riêng từng đảo (mở đầu, Bình Minh, San Hô; các đảo sau dùng bản đồ mẫu)
+src/js/39-islands.js      bản đồ riêng cho cả 9 đảo (đảo 3–8 dựng bởi tools/gen_islands.py, có tự kiểm tra đường đi)
 src/js/20-state.js        trạng thái, lưu/tải, Tideling của người chơi
 src/js/21-quiz.js         chọn câu (độ khó + Leitner), giao diện hỏi, bảng giải thích
 src/js/30-tideling.js     150 loài, vẽ vector
@@ -94,6 +94,6 @@ Sau khi sửa `src/`, nhớ chạy `./build.sh` và commit cả `docs/index.html
 
 - Kho câu hỏi tĩnh có 250 câu (đã vượt mục tiêu ~200), nhưng các bài 20–25 vẫn mỏng hơn bài đầu về số loại câu (chưa có nhiều câu sắp xếp `o`). Thêm câu: dùng `Q(...)` trong `11-questions.js` hoặc `13-questions2.js` (đáp án đúng viết đầu tiên, game tự xáo trộn) — bài kiểm thử dữ liệu sẽ báo nếu thiếu furigana/giải thích.
 - Bảng từ vựng là từ vựng Minna I (359 từ) nên số chữ Hán (~350) vượt "~100 chữ N5" — chưa lọc riêng danh sách kanji N5 chính thức; bảng Hán Việt mới có 163 chữ.
-- Mới có bản đồ riêng cho 3 đảo đầu (Khởi Hành: bến cảng; Bình Minh: rừng sáng sớm; San Hô: làng kênh rạch + bãi cát). 6 đảo sau còn dùng bản đồ mẫu (khác màu, NPC, trainer, boss, hội thoại); 3 căn nhà (y tế, cửa hàng, nhà dân) dùng chung bố cục.
+- Cả 9 đảo đã có bản đồ riêng (thị trấn, đường mòn, phòng boss) với chủ đề khác nhau: bến cảng, rừng sáng sớm, làng kênh rạch, đồng hoa, vách đá & hải đăng, cao nguyên & cầu, bãi biển, đền & hồ, thành phố. Riêng 3 căn nhà (y tế, cửa hàng, nhà dân) vẫn dùng chung bố cục; các bản đồ đảo 3–8 mới ở mức "khung chủ đề" (ít chi tiết hơn 3 đảo đầu) và chưa chơi thử bằng tay.
 - Âm thanh mới có hiệu ứng (WebAudio), chưa có nhạc nền.
 - Trên điện thoại dọc, khung game giữ tỉ lệ 3:2 nên khá nhỏ (xoay ngang sẽ lớn hơn).

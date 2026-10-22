@@ -72,9 +72,9 @@ module.exports = function validateInPage() {
   // --- bản đồ ---
   for (const id in G.MAPS) {
     const m = G.MAPS[id], lens = new Set(m.rows.map(r => r.length)); if (lens.size !== 1) err(id + ': hàng không đều');
-    const free = (x, y) => !'#RW~KLTPEoFl'.includes(m.rows[y][x]);
+    const free = (x, y) => !'#RW~KLTPEoOFl'.includes(m.rows[y][x]);
     m.npcs.forEach(n => { if (!free(n.x, n.y)) err(`${id}: NPC ${n.id} đứng trên ô cứng`); });
-    for (const k in m.warps) { const w = m.warps[k], t = G.MAPS[w.map]; if (!t || !'#RW~KLTPEoFl'.includes(t.rows[w.y][w.x]) === false) err(`${id}: warp ${k} đích sai`); }
+    for (const k in m.warps) { const w = m.warps[k], t = G.MAPS[w.map]; if (!t || !'#RW~KLTPEoOFl'.includes(t.rows[w.y][w.x]) === false) err(`${id}: warp ${k} đích sai`); }
     // tới được mọi NPC và lối ra từ ô đầu tiên của mỗi bản đồ?
     const start = m.warps ? Object.values(G.MAPS).flatMap(mm => Object.values(mm.warps)).filter(w => w.map === id)[0] || { x: 9, y: 11 } : null;
     const seenT = new Set([start.x + ',' + start.y]); const q = [[start.x, start.y]];
