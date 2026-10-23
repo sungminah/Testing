@@ -23,6 +23,7 @@ Giao diện tiếng Việt, giáo trình **Minna no Nihongo I (bài 1–25)**, �
 ## Vòng lặp chơi
 
 - **Chọn 1 trong 3 nhân vật** (đầu bếp Hayato, nhà khảo cổ Rika, bác sĩ nhí Momo — thiết kế gốc, chỉ khác ngoại hình) rồi khám phá bản đồ theo ô (thị trấn, đường mòn cỏ cao, phòng boss) và **vào trong nhà**: trạm y tế (y tá chữa bệnh), cửa hàng (nói chuyện qua quầy để mua đồ), nhà dân (bà Haru giảng ngữ pháp + thử tài, bé Hiro đố từ vựng, giá sách ngữ pháp của chương). Người dân ngoài phố cũng có câu thử tài nhỏ (thưởng lần đầu). Nói chuyện NPC, luyện tập với thầy Sora, bắt Tideling bằng lưới, chữa ở trạm y tế, mua đồ, đánh trainer và **boss** cuối mỗi chương.
+- NPC dân đảo, trưởng làng, bà và bé trong nhà đi lại tự nhiên (đi tới lui, đi vòng hình chữ nhật, hoặc đi quanh chỗ đứng); đứng yên khi đang nói chuyện hoặc có cảnh kịch bản.
 - Vào trận có hiệu ứng: chớp sáng → màn hình khép lại theo dải ngang (chữ **VS** khi đấu trainer/boss) → mở ra, hai Tideling trượt vào; hết trận mờ dần về bản đồ. Hết PP vẫn có đòn "Gắng sức" để không bị kẹt.
 - **Mọi chiêu / ném lưới / bỏ chạy đều phải trả lời đúng một câu hỏi tiếng Nhật.** Đúng → trúng (thưởng trả lời nhanh + chuỗi đúng). Sai → hụt, hiện giải thích, và **câu đó được hỏi lại sau** (lặp lại ngắt quãng kiểu Leitner, hộp 1–5).
 - Sau mỗi câu (đúng *và* sai) có **bảng giải thích 5 phần**: ① câu hỏi + dịch → ② đáp án + nghĩa → ③ giải thích ngữ pháp → ④ từ trong câu (từ · cách đọc · nghĩa) → ⑤ dịch các đáp án (đọc hiểu: dịch cả đoạn văn). Không có nút "xem nghĩa" trước khi trả lời.

@@ -2653,6 +2653,7 @@ function loadMap(id, x, y, dir) {
   const m = MAPS[id]; Wd.map = m; S.map = id; S.x = x; S.y = y; S.dir = dir || 'd'; Wd.face = S.dir; Wd.mv = 0;
   const taken = S.taken[id] || {};
   Wd.npcs = m.npcs.filter(n => !(n.kind === 'item' && taken[n.id])).map(n => Object.assign({}, n));
+  Wd.npcs.forEach(initAmbient);
   Wd.banner = 110; Wd.bannerText = m.name; Wd.grassCd = 3;
   if (S.cur !== m.isl) S.cur = m.isl;
 }
@@ -2880,9 +2881,39 @@ function renderWorld() {
   logicalT();
 }
 
+/* ---- NPC đi lại tự nhiên (đi tới lui / đi vòng / đi quanh nhà); dừng khi đang có thoại hoặc cảnh kịch bản ---- */
+const AM_KINDS = new Set(['phrase', 'elder', 'kid', 'lesson']);
+let amSeed = 12345;
+const amR = n => { amSeed = (Math.imul(amSeed, 1664525) + 1013904223) >>> 0; return (amSeed >>> 8) % n; };
+function initAmbient(n) {
+  if (!AM_KINDS.has(n.kind)) return;
+  const h = [...n.id].reduce((a, c) => a + c.charCodeAt(0), 0), room = Wd.map.style === 'room';
+  n.home = { x: n.x, y: n.y }; n.pat = room ? 'wander' : ['pace', 'loop', 'wander'][h % 3]; n.rad = room ? 1 : 2;
+  n.seq = n.pat === 'pace' ? (h & 1 ? ['r', 'r', 'l', 'l'] : ['d', 'd', 'u', 'u']) : ['r', 'r', 'd', 'd', 'l', 'l', 'u', 'u'];
+  n.si = 0; n.blk = 0; n.cd = 20 + amR(80); n.amF = 0;
+}
+const amOk = (x, y) => {
+  const c = tileAt(Wd.map, x, y);
+  return !SOLID.has(c) && !'123UVGbB'.includes(c) && !npcAt(x, y) && !(x === S.x && y === S.y) && !(Wd.mv && x === S.x + Wd.dx && y === S.y + Wd.dy);
+};
+function npcAmbient(canStart) {
+  for (const n of Wd.npcs) {
+    if (!n.pat) continue;
+    if (n.amF > 0) { n.amF--; n.ox = -n.adx * n.amF; n.oy = -n.ady * n.amF; if (!n.amF) { n.ox = n.oy = 0; n.walk = false; } continue; }
+    if (!canStart || --n.cd > 0) continue;
+    const d = n.pat === 'wander' ? 'udlr'[amR(4)] : n.seq[n.si % n.seq.length], [dx, dy] = DIRS[d], nx = n.x + dx, ny = n.y + dy;
+    const leash = n.pat !== 'wander' || Math.abs(nx - n.home.x) + Math.abs(ny - n.home.y) <= n.rad;
+    if (leash && amOk(nx, ny)) {
+      n.x = nx; n.y = ny; n.dir = d; n.walk = true; n.amF = 16; n.adx = dx; n.ady = dy; n.ox = -dx * 16; n.oy = -dy * 16; n.si++; n.blk = 0;
+      n.cd = n.pat === 'wander' ? 30 + amR(90) : 10 + amR(40);
+    } else { n.cd = 15; if (n.pat !== 'wander' && ++n.blk >= 3) n.pat = 'wander'; }
+  }
+}
+
 /* ---- cập nhật mỗi frame ---- */
 function worldUpdate() {
-  if (busy()) { script.step(); return; }
+  if (busy()) { npcAmbient(false); script.step(); return; }
+  npcAmbient(true);
   if (!$('#dlg').hidden || !$('#bmenu').hidden) { $('#dlg').hidden = true; $('#bmenu').hidden = true; }
   if (Wd.mv > 0) {
     Wd.mv--;
