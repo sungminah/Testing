@@ -1,0 +1,11 @@
+{
+  "name": "coral-crown-n5",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Coral Crown N5 — game RPG học tiếng Nhật JLPT N5 (HTML5 canvas, 1 file, offline)",
+  "scripts": {
+    "build": "./build.sh",
+    "test": "./build.sh && node test/run.js --full"
+  },
+  "devDependencies": { "playwright": "^1.56.1" }
+}
