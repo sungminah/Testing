@@ -5,5 +5,9 @@
   "author": "Lanternsinthesky",
   "year": 2026,
   "spine_inches_per_page": 0.002252,
-  "back_blurb": "Step into a cozy village where little hamsters celebrate every season. Each single-sided page is a richly detailed scene packed with tiny characters, lanterns, gardens and festivals, made for markers, gel pens and colored pencils.\n\nNo experience needed. Pick your favorite colors and enjoy a quiet, creative break."
+  "back_blurb": "Step into a cozy village where little hamsters celebrate every season. Each single-sided page is a richly detailed scene packed with tiny characters, lanterns, gardens and festivals, made for markers, gel pens and colored pencils.\n\nNo experience needed. Pick your favorite colors and enjoy a quiet, creative break.",
+  "cover_bg": "#FFF1CF",
+  "cover_text": "#1E4D2B",
+  "cover_accent": "#B5502B",
+  "cover_accent2": "#2A7F62"
 }

@@ -18,6 +18,7 @@ import sys
 from pathlib import Path
 
 from PIL import Image
+from reportlab.lib.colors import HexColor
 from reportlab.lib.utils import ImageReader
 from reportlab.pdfgen import canvas
 
@@ -104,31 +105,35 @@ def build_cover(cfg, total_pages, art_path, path):
     H = PAGE_H + 2 * bleed
     c = canvas.Canvas(str(path), pagesize=(W, H), initialFontName="Sans")
     c.setTitle(f"{cfg['title']} - cover")
-    c.setFillColor(NAVY)
+    bg = HexColor(cfg.get("cover_bg", "#12203a"))
+    txt = HexColor(cfg.get("cover_text", "#f4ecd8"))
+    acc = HexColor(cfg.get("cover_accent", "#ffd166"))
+    acc2 = HexColor(cfg.get("cover_accent2", "#4cc9f0"))
+    c.setFillColor(bg)
     c.rect(0, 0, W, H, stroke=0, fill=1)
     fcx = bleed + PAGE_W + spine + PAGE_W / 2
-    c.setFillColor(CREAM)
+    c.setFillColor(txt)
     centered(c, cfg["title"].upper(), H - 1.7 * IN, "Serif-Bold", 42, fcx)
-    c.setFillColor(PALETTE[1])
+    c.setFillColor(acc)
     centered(c, cfg["subtitle"], H - 2.3 * IN, "Sans-Bold", 17, fcx)
     if art_path and Path(art_path).exists():
         art = Image.open(art_path).convert("RGB")
         sc = min(6.6 * IN / art.width, 6.5 * IN / art.height)
         aw, ah = art.width * sc, art.height * sc
         c.drawImage(ImageReader(art), fcx - aw / 2, H / 2 - ah / 2 - 0.35 * IN, aw, ah)
-    c.setFillColor(CREAM)
+    c.setFillColor(txt)
     centered(c, cfg["tagline"], 1.45 * IN, "Sans-Bold", 15, fcx)
-    c.setFillColor(PALETTE[3])
+    c.setFillColor(acc2)
     centered(c, cfg["author"], 0.95 * IN, "Sans", 14, fcx)
     bx0 = bleed
-    c.setFillColor(CREAM)
+    c.setFillColor(txt)
     centered(c, cfg["title"].upper(), H - 1.5 * IN, "Serif-Bold", 24, bx0 + PAGE_W / 2)
     wrapped(c, cfg["back_blurb"], bx0 + 1.0 * IN, H - 2.3 * IN, PAGE_W - 2.0 * IN, "Sans", 12.5, leading=18)
     if spine >= 0.15 * IN:
         c.saveState()
         c.translate(bleed + PAGE_W + spine / 2, H / 2)
         c.rotate(-90)
-        c.setFillColor(CREAM)
+        c.setFillColor(txt)
         c.setFont("Sans-Bold", 11)
         c.drawCentredString(0, -4, f"{cfg['title'].upper()}   ·   {cfg['author']}")
         c.restoreState()
