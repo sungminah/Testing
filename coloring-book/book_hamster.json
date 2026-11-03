@@ -1,13 +1,17 @@
 {
-  "title": "Hamster Village",
-  "subtitle": "A Cozy Seasonal Coloring Book for Adults",
-  "tagline": "Detailed Scenes to Color and Relax",
+  "title": "Hamster Adventures in Vietnam",
+  "subtitle": "A Cozy Journey Coloring Book for Adults",
+  "tagline": "From the Northern Mountains to the Mekong Delta",
   "author": "Lanternsinthesky",
   "year": 2026,
   "spine_inches_per_page": 0.002252,
-  "back_blurb": "Step into a cozy village where little hamsters celebrate every season. Each single-sided page is a richly detailed scene packed with tiny characters, lanterns, gardens and festivals, made for markers, gel pens and colored pencils.\n\nNo experience needed. Pick your favorite colors and enjoy a quiet, creative break.",
+  "back_blurb": "Follow a little traveler hamster on a journey across Vietnam. From misty mountain terraces and bustling old streets to golden rice fields, lantern-lit towns and the floating markets of the Mekong Delta, every single-sided page is a richly detailed scene packed with tiny characters, markets, festivals and village life.\n\nMade for markers, gel pens and colored pencils. No experience needed: pick your favorite colors and enjoy a quiet, creative trip around the country.",
   "cover_bg": "#FFF1CF",
   "cover_text": "#1E4D2B",
   "cover_accent": "#B5502B",
-  "cover_accent2": "#2A7F62"
+  "cover_accent2": "#2A7F62",
+  "title_lines": [
+    "HAMSTER ADVENTURES",
+    "IN VIETNAM"
+  ]
 }

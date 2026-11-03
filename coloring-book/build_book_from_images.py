@@ -55,6 +55,21 @@ def prepare(path: Path, threshold: int):
     return page, warns
 
 
+def title_lines(c, cfg, x, y, font, max_size, max_width):
+    """Vẽ tên sách (có thể nhiều dòng) vừa khung, trả về toạ độ y của dòng cuối."""
+    from reportlab.pdfbase.pdfmetrics import stringWidth
+    lines = cfg.get("title_lines") or [cfg["title"].upper()]
+    size = max_size
+    for ln in lines:
+        w = stringWidth(ln, font, size)
+        if w > max_width:
+            size = min(size, size * max_width / w)
+    c.setFont(font, size)
+    for i, ln in enumerate(lines):
+        c.drawCentredString(x, y - i * size * 1.12, ln)
+    return y - (len(lines) - 1) * size * 1.12, size
+
+
 def draw_full(c, img):
     c.drawImage(ImageReader(img), 0, 0, PAGE_W, PAGE_H)
     c.showPage()
@@ -62,8 +77,8 @@ def draw_full(c, img):
 
 def title_page(c, cfg, first):
     c.setFillColorRGB(0, 0, 0)
-    centered(c, cfg["title"].upper(), PAGE_H - 2.0 * IN, "Serif-Bold", 38)
-    centered(c, cfg["subtitle"], PAGE_H - 2.65 * IN, "Sans", 18)
+    ly, sz = title_lines(c, cfg, PAGE_W / 2, PAGE_H - 1.8 * IN, "Serif-Bold", 38, 6.6 * IN)
+    centered(c, cfg["subtitle"], ly - 0.55 * IN, "Sans", 18)
     if first is not None:
         w = 5.2 * IN
         h = w * PXH / PXW
@@ -113,27 +128,27 @@ def build_cover(cfg, total_pages, art_path, path, back_art=None):
     c.rect(0, 0, W, H, stroke=0, fill=1)
     fcx = bleed + PAGE_W + spine + PAGE_W / 2
     c.setFillColor(txt)
-    centered(c, cfg["title"].upper(), H - 1.7 * IN, "Serif-Bold", 42, fcx)
+    ly, sz = title_lines(c, cfg, fcx, H - 1.45 * IN, "Serif-Bold", 44, 6.9 * IN)
     c.setFillColor(acc)
-    centered(c, cfg["subtitle"], H - 2.3 * IN, "Sans-Bold", 17, fcx)
+    centered(c, cfg["subtitle"], ly - 0.55 * IN, "Sans-Bold", 16, fcx)
     if art_path and Path(art_path).exists():
         art = Image.open(art_path).convert("RGB")
-        sc = min(6.6 * IN / art.width, 6.5 * IN / art.height)
+        sc = min(6.4 * IN / art.width, 6.1 * IN / art.height)
         aw, ah = art.width * sc, art.height * sc
-        c.drawImage(ImageReader(art), fcx - aw / 2, H / 2 - ah / 2 - 0.35 * IN, aw, ah)
+        c.drawImage(ImageReader(art), fcx - aw / 2, H / 2 - ah / 2 - 0.5 * IN, aw, ah)
     c.setFillColor(txt)
     centered(c, cfg["tagline"], 1.45 * IN, "Sans-Bold", 15, fcx)
     c.setFillColor(acc2)
     centered(c, cfg["author"], 0.95 * IN, "Sans", 14, fcx)
     bx0 = bleed
     c.setFillColor(txt)
-    centered(c, cfg["title"].upper(), H - 1.5 * IN, "Serif-Bold", 24, bx0 + PAGE_W / 2)
-    wrapped(c, cfg["back_blurb"], bx0 + 1.0 * IN, H - 2.3 * IN, PAGE_W - 2.0 * IN, "Sans", 12.5, leading=18)
+    title_lines(c, cfg, bx0 + PAGE_W / 2, H - 1.35 * IN, "Serif-Bold", 22, 6.4 * IN)
+    wrapped(c, cfg["back_blurb"], bx0 + 1.0 * IN, H - 2.25 * IN, PAGE_W - 2.0 * IN, "Sans", 12.5, leading=18)
     if back_art and Path(back_art).exists():  # ảnh nhỏ ở bìa sau (chừa góc dưới phải cho mã vạch KDP)
         ba = Image.open(back_art).convert("RGB")
-        sc = min(4.2 * IN / ba.width, 4.6 * IN / ba.height)
+        sc = min(3.6 * IN / ba.width, 3.9 * IN / ba.height)
         bw, bh = ba.width * sc, ba.height * sc
-        c.drawImage(ImageReader(ba), bx0 + PAGE_W / 2 - bw / 2, 2.4 * IN, bw, bh)
+        c.drawImage(ImageReader(ba), bx0 + PAGE_W / 2 - bw / 2, 1.9 * IN, bw, bh)
     if spine >= 0.15 * IN:
         c.saveState()
         c.translate(bleed + PAGE_W + spine / 2, H / 2)

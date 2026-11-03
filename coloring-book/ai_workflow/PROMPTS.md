@@ -129,3 +129,33 @@ python3 build_book_from_images.py THU_MUC_ANH --config book_hamster.json --out o
 Công cụ sẽ đổi ảnh về đen trắng thuần, chuẩn 8.5x11 in, **cảnh báo ảnh quá nhỏ, quá nhiều xám/đen hoặc trống**, rồi tạo PDF ruột KDP, bản PDF tải về, bìa trọn bộ và ảnh tổng hợp. Thêm `--cover-art anh_bia_mau.png` để đặt ảnh màu lên bìa trước. Chỉnh tên sách và mô tả trong `book_hamster.json`.
 
 Số trang nên tối thiểu khoảng 25-40 hình để sách đủ dày.
+
+## Cấu trúc sách hành trình: "Hamster Adventures in Vietnam"
+
+Ý tưởng: một chú hamster lữ khách đi dọc đất nước, mỗi vùng là một chương. **Không dùng tên hay nhân vật "Dế Mèn"** (tác phẩm của nhà văn Tô Hoài, còn trong thời hạn bản quyền). Chỉ mượn ý tưởng "hành trình phiêu lưu".
+
+### Nhân vật chính (xuất hiện ở mọi trang)
+
+Thêm câu này vào mọi prompt để người đọc tìm "chú hamster lữ khách" trong từng cảnh (tạo cảm giác tìm kiếm và theo dõi hành trình):
+
+```
+The same traveler hamster appears once in every scene: a cream hamster with a small backpack, a
+conical palm-leaf hat (non la), a checkered scarf and a tiny notebook, clearly visible among the others.
+```
+
+Các trang bạn đã tạo trước đó chưa có chú lữ khách. Bạn có thể nhờ ChatGPT thêm vào (*"Add one traveler hamster with a small backpack, conical hat and checkered scarf into this scene, keep everything else the same"*), hoặc chỉ bắt đầu từ các trang mới.
+
+### Thứ tự các chương (gợi ý, theo số cảnh trong bảng ở trên)
+
+| Chương | Vùng | Cảnh gợi ý |
+|---|---|---|
+| 1 | Miền Bắc | 12 ruộng bậc thang, 10 phố cổ Hà Nội, 27 vịnh Hạ Long, 3 Tết, 4 Trung thu |
+| 2 | Miền Trung | 11 Hội An, 25 làng chài thúng chai, 14 làng nón lá, 13 làng gốm |
+| 3 | Tây Nguyên và Đà Lạt | 26 Đà Lạt, 17 trâu và đồng cỏ, 9 trò chơi dân gian |
+| 4 | Miền Tây Nam Bộ | 6 chợ nổi, 7 cầu khỉ, 16 đầm sen, 5 đồng lúa chín, 29 chợ đêm |
+
+Cả sách nên có khoảng 25-40 trang. Có thể thêm một trang giới thiệu "chuyến đi" ở đầu sách: hình trang trí tuyến đường đi (hamster với ba lô, bản đồ minh họa). **Nếu làm trang bản đồ, hãy giữ ở mức trang trí** (đường đi, biểu tượng địa danh), không vẽ đường biên giới hay chú thích địa lý chi tiết, để tránh sai sót nhạy cảm.
+
+### Cấu hình bìa và tên sách
+
+Tên sách, phụ đề, giới thiệu bìa sau nằm trong `book_hamster.json` (`title`, `title_lines`, `subtitle`, `tagline`, `back_blurb`). Bạn có thể nhờ mình chỉnh bất cứ lúc nào.
