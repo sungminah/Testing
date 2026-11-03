@@ -38,40 +38,66 @@ eyes), every hamster in a DIFFERENT pose and doing a DIFFERENT activity: {ACTIVI
 Background: {DETAILS}. Dense with small details, every area large enough to color with a marker.
 ```
 
-### Danh sách 30 cảnh gợi ý (đều là ý tưởng gốc)
+### Nét Việt Nam: đoạn dán thêm vào mọi prompt
 
-| # | {SCENE} | Gợi ý {ACTIVITIES} (mỗi con một việc, một tư thế) |
-|---|---|---|
-| 1 | Lantern festival night in a hillside village | hanging lanterns from a ladder, carrying a tray of dumplings, releasing a sky lantern, sleeping in a basket, dancing, peeking from a barrel, reading on a roof |
-| 2 | Spring picnic under blossoming trees | spreading a blanket, pouring tea, climbing a trunk, napping on a petal pile, flying a kite, painting a fan, running with a net |
-| 3 | Mid-autumn mochi making | pounding rice with a mallet, shaping dough, carrying steaming baskets on the head, tasting, stirring a big pot, stacking boxes |
-| 4 | Pumpkin harvest | pushing a wheelbarrow, hugging a giant pumpkin, climbing a hay stack, carving, tying scarecrow, sitting on a cart |
-| 5 | Winter village with hot spring | sledding, building a snow hamster, soaking in the spring with a towel hat, carrying firewood, skating, shoveling |
-| 6 | Summer pond with fireflies | fishing from a boat, catching fireflies, swimming with a float ring, picking lotus, rowing, sleeping on a lily pad |
-| 7 | Village market street | selling fruit, haggling, carrying sacks, juggling, sampling noodles, sweeping, walking a duck on a string |
-| 8 | Morning bakery | kneading, loading an oven with a long paddle, frosting a cake, delivering bread on a bicycle, queueing, sweeping flour |
-| 9 | Tea house garden | pouring tea, serving sweets, playing a flute, bowing, reading, feeding koi, arranging flowers |
-| 10 | Library inside a hollow tree | climbing shelves on a ladder, reading in a hammock, stacking books, writing, whispering, sleeping over a book |
-| 11 | Fishing day by the river | casting, reeling in, cooking over a fire, hauling a net, waving from a bridge, building a sandcastle |
-| 12 | Kite-flying hill | holding a kite string, running, tangled in string, picnicking, sketching, rolling down the hill |
-| 13 | Rainy day with umbrellas | sharing a leaf umbrella, splashing in puddles, carrying a lantern, sheltering under a mushroom, sailing a paper boat |
-| 14 | Bridge festival over a stream | crossing with trays, hanging ribbons, drumming, juggling, peering over the rail, riding a small boat underneath |
-| 15 | Persimmon orchard picking | on ladders, catching falling fruit, sorting into baskets, drying fruit on strings, napping in the shade |
-| 16 | Dusk noodle stall | slurping, ladling soup, kneading noodles, delivering bowls, fanning the stove, waiting in line |
-| 17 | Moon-viewing terrace | stargazing with a telescope, sipping tea, composing a poem, dancing, hanging lanterns, hugging a cat |
-| 18 | Public bathhouse | scrubbing a friend's back, carrying buckets, drinking milk from a bottle, soaking, sweeping, sliding down a rail |
-| 19 | Flower festival | weaving garlands, planting, carrying flower baskets, painting a mural, watering with a can, crowning a friend |
-| 20 | River of paper lantern boats | launching boats, lighting candles, rowing, waving from a bridge, writing wishes, helping a baby hamster |
-| 21 | Pottery workshop | throwing clay on a wheel, glazing, carrying finished pots, firing the kiln, sweeping, drying cups on shelves |
-| 22 | Rice harvest | cutting, carrying bundles on poles, threshing, napping on the stack, stirring a pot, playing tug of war |
-| 23 | Winter solstice dumpling feast | rolling dough, filling dumplings, steaming, serving, lighting lanterns, taste-testing |
-| 24 | New Year street parade | lion dance with a costume, drumming, throwing confetti, carrying a dragon, selling sweets, riding shoulders |
-| 25 | Mountain temple stairs | climbing with baskets, ringing a bell, sweeping leaves, praying, resting, feeding birds |
-| 26 | Seaside harbor | mending nets, unloading crates, building a sandcastle, rowing, painting a boat, collecting shells |
-| 27 | Mushroom forest | harvesting giant mushrooms, riding a snail, sliding down a cap, hiding, reading under a cap, carrying lanterns |
-| 28 | Village wedding procession | carrying a sedan chair, scattering petals, playing music, holding a banner, dancing, cheering |
-| 29 | Night market | grilling skewers, juggling, fishing for toys, selling lanterns, riding a carousel, eating sweets |
-| 30 | School day under the big tree | reading, drawing on a board, raising paws, running with a bag, playing marbles, sleeping at a desk |
+AI hay trộn lẫn kiến trúc và đồ vật Trung Quốc, Nhật Bản vào cảnh. Để cảnh mang nét Việt Nam, thêm đoạn này vào cuối prompt (sau phần Background):
+
+```
+Vietnamese setting: some hamsters wear traditional Vietnamese clothing (conical palm-leaf hat "non la",
+simple ao ba ba shirt, ao dai, checkered scarf). Vietnamese village details: bamboo groves, banana
+trees, coconut palms, water buffalo, curved-roof communal house, red-tile roofs, lotus ponds, wooden
+sampans. Do NOT use Chinese or Japanese architecture, torii gates, pagodas with stacked roofs or
+kimono. No text or writing anywhere.
+```
+
+Nếu ảnh vẫn lẫn nét Trung/Nhật, nhắn tiếp:
+
+```
+Make this scene look clearly Vietnamese, not Chinese or Japanese: replace pagoda roofs with simple
+red-tile village roofs, replace round Chinese lanterns with Vietnamese star lanterns or none,
+and add conical palm-leaf hats and bamboo.
+```
+
+**Đừng yêu cầu chữ trong ảnh** (đặc biệt chữ tiếng Việt có dấu), vì AI thường viết sai. Nếu cần chữ, thêm sau bằng Canva.
+
+Bạn hãy so ảnh với hình thật (ảnh chụp, tư liệu) để kiểm tra chi tiết có đúng không trước khi dùng.
+
+### Danh sách 30 cảnh gợi ý
+
+Cảnh 1 và 2 bạn đã làm. Các cảnh 3-30 dưới đây mang nét Việt Nam. Điền cột thứ ba vào `{ACTIVITIES}` và cột thứ tư vào `{DETAILS}`.
+
+| # | {SCENE} | {ACTIVITIES} (mỗi con một việc, một tư thế) | {DETAILS} |
+|---|---|---|---|
+| 1 | Lantern festival night in a hillside village | hanging lanterns from a ladder, carrying a tray of dumplings, releasing a sky lantern, sleeping in a basket, dancing, peeking from a barrel, reading on a roof | wooden houses, strings of lanterns, full moon, stone bridge, pond |
+| 2 | Spring picnic under blossoming trees | spreading a blanket, pouring tea, climbing a trunk, napping, flying a kite, painting a fan, catching a butterfly with a net | blossoming trees, checkered blanket, picnic basket, pond, far houses |
+| 3 | Tet (Lunar New Year) in a village courtyard | wrapping square banh chung cakes in banana leaves, carrying a potted kumquat tree, hanging decorations, lion dance with a small drum, giving red envelopes, sweeping the yard, arranging a tray of five fruits | yellow apricot blossom (hoa mai) and pink peach blossom (hoa dao), kumquat trees, tray of five fruits, red-tile roof house, bamboo fence |
+| 4 | Vietnamese Mid-Autumn night in the village | carrying star-shaped lanterns, lion dance with a drum, cutting mooncakes, holding a carp-shaped lantern, sitting under a banyan tree telling stories, pouring tea, looking at the moon | star lanterns (den ong sao), carp lanterns, banyan tree with aerial roots, full moon, tiled communal house |
+| 5 | Golden rice harvest | cutting rice with sickles, carrying bundles on a shoulder pole, threshing, napping on straw in a conical hat, scarecrow, leading a water buffalo, bringing a lunch basket, flying a kite | ripe rice fields, straw stacks, bamboo groves, banana trees, egrets flying, water buffalo, ao ba ba |
+| 6 | Floating market in the Mekong Delta | paddling a sampan, selling pineapples, hanging produce on a tall pole, cooking noodles on a boat, passing iced coffee between boats, weighing watermelons, sitting on a bow | sampans full of fruit, tall pole with hanging produce (cay beo), palm-leaf houses on the river, conical hats, coconut palms |
+| 7 | Monkey bridge over a river village | balancing across a bamboo bridge, casting a fishing net, rowing, washing a pot, feeding ducks, carrying baskets, sitting on stilts | bamboo monkey bridge with a handrail, stilt houses, water coconut palms, ducks, small boats |
+| 8 | Village square with a banyan tree and well | drawing water from a well, playing chess on a mat, napping on a bamboo bed, drinking tea, selling ice cream from a box, chasing a chicken, sitting on the banyan roots | huge banyan tree, stone well, curved-roof communal house (dinh), bamboo bench, red-tile roofs |
+| 9 | Folk games in the village yard | jumping rope, kicking a shuttlecock, playing o an quan on the ground, hopscotch, blindfold game, tug of war, spinning tops, shooting marbles | dirt yard, small houses, tree shade, shuttlecocks, rope, marbles, simple clothes |
+| 10 | Hanoi old quarter street | slurping pho, ladling broth, selling flowers from a bicycle, reading a newspaper, playing chess on tiny stools, riding a cyclo, sipping egg coffee, carrying goods on a shoulder pole | narrow tube houses with balconies and shutters, bicycles with flower baskets, small sidewalk stools, shoulder-pole vendor, cyclo |
+| 11 | Hoi An old town at night | releasing lotus-shaped paper lights on the river, rowing a boat, hanging silk lanterns, a tailor sewing an ao dai, selling lanterns, drinking coffee on a balcony, riding a bicycle | yellow old-town houses, colorful silk lanterns, river with boats, covered bridge, bicycles |
+| 12 | Terraced rice fields in the northern mountains | planting rice seedlings, carrying baskets on the back, leading a buffalo, weaving, drinking tea, flying a kite, climbing the terraces, resting at a stilt house | stepped rice terraces, misty mountains, stilt houses, waterfall, colorful traditional mountain clothing |
+| 13 | Pottery village | throwing clay on a wheel, painting a vase, firing the kiln, carrying pots on a pole, drying cups, sweeping, packing a cart | blue-and-white vases, brick kiln, stacked pots, red-tile workshop, courtyard |
+| 14 | Conical hat village | stitching a hat on a frame, drying palm leaves, stretching leaves flat, trying on hats, selling hats, carrying a stack of hats, napping under hats | palm leaves, bamboo hat frames, stacks of conical hats, courtyard, red-tile house |
+| 15 | Night by the fire cooking banh chung | stirring the fire, watching the big pot, wrapping cakes, telling stories to little ones, carrying firewood, falling asleep on a grandparent, passing tea | large pot over open fire, firewood, banana leaves, bamboo strips, night sky, stilt house |
+| 16 | Lotus pond | picking lotus, rowing a sampan, making lotus tea, fishing, reading on a boat, chasing a dragonfly, frog watching | large lotus leaves and flowers, seed pods, dragonflies, frogs, narrow wooden boat, conical hats |
+| 17 | Day with the water buffalo | bathing the buffalo, riding with a bamboo flute, napping on its back, flying a kite, collecting grass, feeding ducks, sitting on the dike | water buffalo, rice paddies, egrets, grassy dike, bamboo, simple farm clothes |
+| 18 | Morning village market | selling fruits, weighing goods, haggling, carrying baskets on a pole, buying fish, selling banh mi, plucking a chicken, sipping tea | baskets of mangosteen, dragon fruit, lychee, jackfruit, coconuts, bamboo scales, canopies, chickens |
+| 19 | Street corner with banh mi and iced coffee | slicing baguettes, filling banh mi, dripping coffee with a phin, sipping iced coffee, delivering on a scooter, reading, napping on a plastic stool | banh mi cart, coffee filters (phin), tiny stools, scooter, shop awning, street trees |
+| 20 | Rainy season in the countryside | wearing palm-leaf raincoats, holding banana-leaf umbrellas, splashing in puddles, fishing in a flooded field, catching frogs, sheltering under a conical hat, paddling | banana leaves, palm raincoats, puddles, flooded rice field, bamboo, chickens, small boat |
+| 21 | Betrothal procession (le an hoi) | carrying red trays covered in cloth, parents greeting guests, a bride and groom in traditional dress, drumming, carrying flowers, children following | red lacquered trays, ao dai, traditional turbans, decorated gate, lanterns, wooden house |
+| 22 | Traditional boat race | rowing in sync, steering, drumming the rhythm, cheering from the bank, waving flags, children on shoulders, bailing water | long narrow boats, drum, flags, river bank, crowd, palm trees |
+| 23 | Village festival | wrestling, riding a swing, pulling rope, catching ducks in a pond, smashing a pot blindfolded, selling snacks, drumming | communal house, flags, swing, pond, stalls, banyan tree |
+| 24 | Tet flower market | carrying peach blossom branches, selling kumquat trees, arranging orchids, riding a bicycle full of flowers, tying bouquets, watering, smelling flowers | peach and apricot blossoms, kumquat trees, orchids, bicycles, flower stalls, red-tile shop fronts |
+| 25 | Fishing village on the coast | paddling a round basket boat, mending nets, drying fish on racks, sorting the catch, building a sandcastle, collecting shells, pulling a boat | round basket boats (thung chai), fishing nets, fish drying racks, coconut palms, sea |
+| 26 | Da Lat highlands | picking strawberries, tending a flower farm, riding a bicycle, drinking hot soy milk, walking among pine trees, painting, picnic on a hill | pine trees, strawberry plants, flower terraces, small wooden houses, misty hills |
+| 27 | Ha Long Bay | rowing a junk boat, kayaking, fishing, sunbathing on a deck, cooking on a boat, waving from a cave, feeding seagulls | limestone islands, traditional junk boat with sails, floating houses, sea, caves |
+| 28 | Village school under a banyan | reading, drawing on a blackboard, raising a paw, arriving by bicycle, playing marbles, sleeping at a desk, ringing the school drum | wooden desks, blackboard, banyan tree, bicycles, school bags, tile roof classroom |
+| 29 | Night market with street food | grilling skewers, flipping banh xeo, serving sweet soup (che), selling snails, juggling, sitting on tiny stools, fishing for toys | charcoal grills, banh xeo pans, tiny stools, string lights, stalls, basket vendors |
+| 30 | Countryside kitchen yard | cooking over a firewood stove, steaming sticky rice, hanging corn, feeding chickens, washing vegetables, grinding rice, napping in a hammock | firewood stove, clay pots, hammock, hanging corn, chickens, banana trees, bamboo fence |
 
 ### Mẹo để có tư thế đa dạng
 
