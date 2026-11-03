@@ -113,10 +113,9 @@ def build_cover(cfg, total_pages, art_path, path):
     centered(c, cfg["subtitle"], H - 2.3 * IN, "Sans-Bold", 17, fcx)
     if art_path and Path(art_path).exists():
         art = Image.open(art_path).convert("RGB")
-        box = 6.2 * IN
-        sc = min(box / art.width, box / art.height)
+        sc = min(6.6 * IN / art.width, 6.5 * IN / art.height)
         aw, ah = art.width * sc, art.height * sc
-        c.drawImage(ImageReader(art), fcx - aw / 2, H / 2 - ah / 2 - 0.4 * IN, aw, ah)
+        c.drawImage(ImageReader(art), fcx - aw / 2, H / 2 - ah / 2 - 0.35 * IN, aw, ah)
     c.setFillColor(CREAM)
     centered(c, cfg["tagline"], 1.45 * IN, "Sans-Bold", 15, fcx)
     c.setFillColor(PALETTE[3])
