@@ -38,7 +38,7 @@ Lệnh trên ghi lại toàn bộ file trong `output/`. Cần có `pdftoppm` (g�
 
 ### 1.4 Nhìn lại bằng mắt
 
-Mở `interior_kdp.pdf` và `cover_kdp_fullwrap.pdf` xem từng trang. Nếu muốn chỉnh bìa thêm (đổi màu, thêm chữ), bạn có thể làm bìa trước bằng Canva rồi xuất theo đúng kích thước mà KDP Cover Calculator cho (xem mục 2, bước 6).
+Mở `interior_kdp.pdf` và `cover_kdp_fullwrap.pdf` xem từng trang. Nếu muốn chỉnh bìa thêm (đổi màu, thêm chữ), bạn có thể làm bìa trước bằng Canva rồi xuất theo đúng kích thước mà KDP Cover Calculator cho (xem mục 2, bước 5).
 
 ## 2. Đăng sách giấy lên Amazon KDP
 
