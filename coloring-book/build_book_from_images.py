@@ -98,7 +98,7 @@ def build_interior(cfg, pages, path, kdp=True):
     return n
 
 
-def build_cover(cfg, total_pages, art_path, path):
+def build_cover(cfg, total_pages, art_path, path, back_art=None):
     spine = total_pages * cfg["spine_inches_per_page"] * IN
     bleed = 0.125 * IN
     W = bleed + PAGE_W + spine + PAGE_W + bleed
@@ -129,6 +129,11 @@ def build_cover(cfg, total_pages, art_path, path):
     c.setFillColor(txt)
     centered(c, cfg["title"].upper(), H - 1.5 * IN, "Serif-Bold", 24, bx0 + PAGE_W / 2)
     wrapped(c, cfg["back_blurb"], bx0 + 1.0 * IN, H - 2.3 * IN, PAGE_W - 2.0 * IN, "Sans", 12.5, leading=18)
+    if back_art and Path(back_art).exists():  # ảnh nhỏ ở bìa sau (chừa góc dưới phải cho mã vạch KDP)
+        ba = Image.open(back_art).convert("RGB")
+        sc = min(4.2 * IN / ba.width, 4.6 * IN / ba.height)
+        bw, bh = ba.width * sc, ba.height * sc
+        c.drawImage(ImageReader(ba), bx0 + PAGE_W / 2 - bw / 2, 2.4 * IN, bw, bh)
     if spine >= 0.15 * IN:
         c.saveState()
         c.translate(bleed + PAGE_W + spine / 2, H / 2)
@@ -158,6 +163,7 @@ def main():
     ap.add_argument("--out", default="output/hamster_book")
     ap.add_argument("--threshold", type=int, default=170, help="0-255, cao hơn = nét đậm hơn (mặc định 170)")
     ap.add_argument("--cover-art", default=None, help="ảnh minh họa màu cho bìa trước (không bắt buộc)")
+    ap.add_argument("--back-art", default=None, help="ảnh minh họa màu cho bìa sau (không bắt buộc)")
     args = ap.parse_args()
 
     cfg = json.load(open(HERE / args.config if not Path(args.config).is_absolute() else args.config, encoding="utf-8"))
@@ -183,7 +189,7 @@ def main():
     n = build_interior(cfg, pages, out / "interior_kdp.pdf", kdp=True)
     m = build_interior(cfg, pages, out / "printable_digital.pdf", kdp=False)
     art = args.cover_art
-    spine = build_cover(cfg, n, art, out / "cover_kdp_fullwrap.pdf")
+    spine = build_cover(cfg, n, art, out / "cover_kdp_fullwrap.pdf", args.back_art)
     preview_sheet(pages, out / "preview_sheet.png")
     print(f"interior_kdp.pdf: {n} trang | printable_digital.pdf: {m} trang | gáy {spine:.3f} in")
     print("Ghi vào:", out)
