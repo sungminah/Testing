@@ -81,23 +81,59 @@ Cảnh 1 và 2 bạn đã làm. Các cảnh 3-30 dưới đây mang nét Việt 
 | 11 | Hoi An old town at night | releasing lotus-shaped paper lights on the river, rowing a boat, hanging silk lanterns, a tailor sewing an ao dai, selling lanterns, drinking coffee on a balcony, riding a bicycle | yellow old-town houses, colorful silk lanterns, river with boats, covered bridge, bicycles |
 | 12 | Terraced rice fields in the northern mountains | planting rice seedlings, carrying baskets on the back, leading a buffalo, weaving, drinking tea, flying a kite, climbing the terraces, resting at a stilt house | stepped rice terraces, misty mountains, stilt houses, waterfall, colorful traditional mountain clothing |
 | 13 | Pottery village | throwing clay on a wheel, painting a vase, firing the kiln, carrying pots on a pole, drying cups, sweeping, packing a cart | blue-and-white vases, brick kiln, stacked pots, red-tile workshop, courtyard |
-| 14 | Conical hat village | stitching a hat on a frame, drying palm leaves, stretching leaves flat, trying on hats, selling hats, carrying a stack of hats, napping under hats | palm leaves, bamboo hat frames, stacks of conical hats, courtyard, red-tile house |
-| 15 | Night by the fire cooking banh chung | stirring the fire, watching the big pot, wrapping cakes, telling stories to little ones, carrying firewood, falling asleep on a grandparent, passing tea | large pot over open fire, firewood, banana leaves, bamboo strips, night sky, stilt house |
-| 16 | Lotus pond | picking lotus, rowing a sampan, making lotus tea, fishing, reading on a boat, chasing a dragonfly, frog watching | large lotus leaves and flowers, seed pods, dragonflies, frogs, narrow wooden boat, conical hats |
-| 17 | Day with the water buffalo | bathing the buffalo, riding with a bamboo flute, napping on its back, flying a kite, collecting grass, feeding ducks, sitting on the dike | water buffalo, rice paddies, egrets, grassy dike, bamboo, simple farm clothes |
-| 18 | Morning village market | selling fruits, weighing goods, haggling, carrying baskets on a pole, buying fish, selling banh mi, plucking a chicken, sipping tea | baskets of mangosteen, dragon fruit, lychee, jackfruit, coconuts, bamboo scales, canopies, chickens |
-| 19 | Street corner with banh mi and iced coffee | slicing baguettes, filling banh mi, dripping coffee with a phin, sipping iced coffee, delivering on a scooter, reading, napping on a plastic stool | banh mi cart, coffee filters (phin), tiny stools, scooter, shop awning, street trees |
-| 20 | Rainy season in the countryside | wearing palm-leaf raincoats, holding banana-leaf umbrellas, splashing in puddles, fishing in a flooded field, catching frogs, sheltering under a conical hat, paddling | banana leaves, palm raincoats, puddles, flooded rice field, bamboo, chickens, small boat |
-| 21 | Betrothal procession (le an hoi) | carrying red trays covered in cloth, parents greeting guests, a bride and groom in traditional dress, drumming, carrying flowers, children following | red lacquered trays, ao dai, traditional turbans, decorated gate, lanterns, wooden house |
-| 22 | Traditional boat race | rowing in sync, steering, drumming the rhythm, cheering from the bank, waving flags, children on shoulders, bailing water | long narrow boats, drum, flags, river bank, crowd, palm trees |
-| 23 | Village festival | wrestling, riding a swing, pulling rope, catching ducks in a pond, smashing a pot blindfolded, selling snacks, drumming | communal house, flags, swing, pond, stalls, banyan tree |
-| 24 | Tet flower market | carrying peach blossom branches, selling kumquat trees, arranging orchids, riding a bicycle full of flowers, tying bouquets, watering, smelling flowers | peach and apricot blossoms, kumquat trees, orchids, bicycles, flower stalls, red-tile shop fronts |
-| 25 | Fishing village on the coast | paddling a round basket boat, mending nets, drying fish on racks, sorting the catch, building a sandcastle, collecting shells, pulling a boat | round basket boats (thung chai), fishing nets, fish drying racks, coconut palms, sea |
-| 26 | Da Lat highlands | picking strawberries, tending a flower farm, riding a bicycle, drinking hot soy milk, walking among pine trees, painting, picnic on a hill | pine trees, strawberry plants, flower terraces, small wooden houses, misty hills |
-| 27 | Ha Long Bay | rowing a junk boat, kayaking, fishing, sunbathing on a deck, cooking on a boat, waving from a cave, feeding seagulls | limestone islands, traditional junk boat with sails, floating houses, sea, caves |
-| 28 | Village school under a banyan | reading, drawing on a blackboard, raising a paw, arriving by bicycle, playing marbles, sleeping at a desk, ringing the school drum | wooden desks, blackboard, banyan tree, bicycles, school bags, tile roof classroom |
-| 29 | Night market with street food | grilling skewers, flipping banh xeo, serving sweet soup (che), selling snails, juggling, sitting on tiny stools, fishing for toys | charcoal grills, banh xeo pans, tiny stools, string lights, stalls, basket vendors |
-| 30 | Countryside kitchen yard | cooking over a firewood stove, steaming sticky rice, hanging corn, feeding chickens, washing vegetables, grinding rice, napping in a hammock | firewood stove, clay pots, hammock, hanging corn, chickens, banana trees, bamboo fence |
+
+### Cảnh 14-30 (bản cập nhật, dùng thay các dòng 14-30 cũ)
+
+Bạn đã làm 13 cảnh đầu, nên từ cảnh 14 mình đổi lại toàn bộ để **không lặp** với những trang đã có (bộ ấm trà, hamster ngủ, thả diều, ăn bằng hai tay, đèn lồng tròn đỏ, cây lá tim, leo thang, trải khăn picnic) và **đa dạng vùng miền hơn**. Cảnh nào trùng với cảnh bạn đã làm (đồng lúa, chợ nổi, cầu khỉ, phố cổ, Hội An, ruộng bậc thang, trò chơi dân gian, làng cây đa) đã bị loại. Một số cảnh mới thay vào: rừng tràm, ga tàu, bánh tráng, cảnh kết thúc chuyến đi.
+
+#### Khung prompt chuẩn mới (dùng cho mọi cảnh từ 14)
+
+Thay `{SCENE}`, `{ACTIVITIES}`, `{DETAILS}` bằng cột tương ứng trong bảng bên dưới. Dán **cả khối**, đã bao gồm chú lữ khách, luật chống lặp và nét Việt Nam:
+
+```
+Create an image: black and white coloring book page for adults, portrait 2:3, extremely detailed, pure
+black line art on a pure white background, clean uniform thick outlines, no shading, no gray, no solid
+black fills, no text, no border. Draw water, sky and ground using only thin pure black lines on white,
+never gray tones or filled areas.
+Scene: {SCENE}.
+Characters: thirteen small cute hamsters (chubby round bodies, small round ears, tiny bead eyes), every
+hamster in a DIFFERENT pose and doing a DIFFERENT activity: {ACTIVITIES}. Plus the same traveler hamster
+who appears once in every book scene: a cream hamster with a small backpack, a conical palm-leaf hat,
+a checkered scarf and a tiny notebook, clearly visible. No two hamsters in the same pose.
+Background: {DETAILS}. Dense with small details, every area large enough to color with a marker.
+Outfits: give each hamster a different outfit (ao ba ba, ao dai, work clothes, headband, checkered
+scarf, apron, straw raincoat), not every hamster wears a conical hat.
+Vietnamese setting: authentic Vietnamese countryside or town details. Do NOT use Chinese or Japanese
+architecture, pagodas with stacked roofs, torii gates or kimono. No flags, no text or writing anywhere.
+Do NOT include: a tea set, a hamster sleeping, a kite, round red lanterns, a banyan or heart-leaf tree,
+a hamster on a ladder, a picnic blanket, a hamster eating with both paws.
+```
+
+Mỗi cảnh có một **cây đặc trưng** khác nhau (cột cuối), để các trang không lặp cây lá tim.
+
+#### Bảng 17 cảnh còn lại
+
+| # | Vùng | {SCENE} | {ACTIVITIES} (mỗi con một việc, một tư thế) | {DETAILS} (kèm cây đặc trưng) |
+|---|---|---|---|---|
+| 14 | Trung | Fishing village on the central coast | paddling a round basket boat, mending a net on the sand, hanging fish on drying racks, sorting the catch into baskets, pulling a boat up the beach, building a sand tower, collecting shells, carrying a pole of baskets, gutting fish at a table, rowing a small boat, waving from a rock, pushing a cart of ice, feeding seagulls | round basket boats (thung chai), nets, fish drying racks, sandy beach, thatched huts, **coconut palms** |
+| 15 | Tây Nguyên | Da Lat highlands market garden | picking strawberries, carrying a flower basket on the back, riding a bicycle with hydrangeas, grilling rice paper over charcoal, warming hands with hot soy milk, pruning roses, pushing a flower cart, painting a canvas on an easel, planting seedlings, walking down a pine path, watering a greenhouse bed, holding a bouquet, carrying sacks of vegetables | pine trees, strawberry beds, greenhouses, small wooden villas, hydrangeas and sunflowers, misty hills, **pine trees** |
+| 16 | Bắc | Ha Long Bay floating village | rowing a junk boat, paddling a kayak, fishing with a rod, hauling a net, cooking on a floating house, hanging squid to dry, waving from a cave mouth, climbing a rope ladder onto a boat, feeding seagulls, repairing a sail, carrying baskets on a floating dock, selling snacks from a small boat, jumping into the water | limestone islands, junk boat with sails, floating houses, caves, sea waves drawn with thin lines, **small mangrove bushes** |
+| 17 | Tây Nam Bộ | Lotus pond harvest | picking lotus flowers from a sampan, peeling lotus seeds on a mat, wrapping sticky rice in lotus leaves, rowing, fishing with a bamboo rod, carrying lotus on a shoulder pole, drying lotus petals on trays, catching a dragonfly with a net, arranging blossoms in a basket, standing on a plank over the pond, selling lotus seeds, sketching a flower, bringing lunch in a basket | large lotus leaves and flowers, seed pods, dragonflies, frogs, egrets, narrow wooden boat, **water coconut palms** |
+| 18 | Chung | Night market with street food | pressing sugarcane juice, flipping banh xeo, serving sweet soup (che), grilling skewers over charcoal, selling banh trang tron, pulling stretchy candy, juggling, pushing a snack cart, ordering at a stall, carrying a tray of drinks, fishing for toys, selling balloons, wiping a table | string lights (bulbs, not round red lanterns), charcoal grills, sugarcane press, tiny stools, awnings, **flame trees** |
+| 19 | Trung | Conical hat village | stitching a hat on a bamboo frame, drying palm leaves, ironing leaves flat, stacking finished hats, trying a hat on a friend, selling hats at a stall, carrying a bundle of leaves, weaving a hat rim, painting a poem-free pattern, packing hats in a basket, sweeping leaf scraps, counting hats, loading a cart | palm leaves, bamboo hat frames, tall stacks of hats, courtyard, red-tile roof, **areca palms** |
+| 20 | Chung | Morning village market | weighing fish on a hanging scale, bargaining over eggs, carrying a pole of vegetables, selling banh mi, plucking a chicken, ladling soup, choosing fruit, wrapping goods in banana leaf, carrying a duck under the arm, counting coins, pulling a cart of coconuts, selling flowers, holding a shopping basket | baskets of mangosteen, dragon fruit, lychee, jackfruit, coconuts, bamboo scales, canopies, chickens, **mango tree** |
+| 21 | Chung | Countryside kitchen yard | splitting firewood, cooking over a firewood stove, steaming sticky rice, hanging corn to dry, feeding chickens, washing vegetables at a well, grinding rice on a stone mill, stirring a clay pot, carrying water in buckets on a pole, sitting in a hammock reading a book, sweeping, shelling beans, rolling dough | firewood stove, clay pots, hammock, hanging corn, chickens, bamboo fence, **banana trees** |
+| 22 | Chung | Rainy season in the countryside | wearing straw raincoats, holding banana-leaf umbrellas, splashing in puddles, fishing in a flooded field, catching frogs, sheltering under a big leaf, sailing a paper boat, carrying baskets through the rain, pushing a cart through mud, sweeping water off a porch, holding a duck, jumping over a puddle, peering out from a doorway | banana leaves, straw raincoats (ao toi), puddles, flooded field, bamboo, chickens, small boat, rain drawn with thin lines, **bamboo grove** |
+| 23 | Bắc/Chung | Betrothal procession | carrying red lacquered trays covered with cloth, parents greeting guests, a bride and groom in traditional dress, drumming a small drum, carrying flower baskets, children following with candies, holding an umbrella over the couple, opening a gate, carrying a pole of gifts, playing a flute, clapping, lifting a banner of flowers | red lacquered trays, ao dai and turbans, decorated gate with flowers, wooden house, plain paper decorations, **frangipani trees** |
+| 24 | Chung | Traditional boat race | rowing in sync, steering with a long oar, beating the rhythm on a drum, cheering from the bank, waving a plain ribbon, children on shoulders, bailing water, selling snacks on the bank, holding a megaphone shape cone, counting strokes, jumping with excitement, handing out water | long narrow racing boats, big drum, river bank crowd, palm trees, **coconut palms** |
+| 25 | Chung | Rice paper and noodle village | spreading batter on a steamer cloth, lifting a steamed sheet, laying sheets on bamboo racks, cutting noodles, carrying a stack of racks, grilling rice paper over charcoal, packing noodles in baskets, turning sheets in the sun, stoking the fire, loading a cart, tasting a roll, tying bundles, sweeping flour | racks of drying rice paper (patterned), steamer pots, fire, baskets, courtyard, red-tile roof, **star-fruit trees** |
+| 26 | Bắc/Chung | Village school under a flame tree | reading aloud, drawing on a blackboard, raising a paw to answer, arriving by bicycle, watering a school garden, ringing a school drum, carrying a stack of notebooks, planting a sapling, writing on slates, feeding pigeons, sharpening a pencil, helping a smaller hamster tie shoes, holding a globe | wooden desks, blackboard, bicycles, school bags, tile-roof classroom, a **flame tree (phuong) with flowers** |
+| 27 | Bắc | Village festival | wrestling in a ring, riding a bamboo swing, catching a duck in a pond, smashing a clay pot blindfolded, drumming, selling snacks, performing a folk dance, carrying a festival banner pole, watching from a tree, juggling fruit, tossing rings at a stand, pulling a lantern-less float, clapping | communal house (dinh) with plain curved roof, pond, stalls, swing frame, **mango trees** |
+| 28 | Tây Nam Bộ | Cajuput forest in flood season | paddling a small boat between trees, casting a net, picking water lilies, cooking on a boat, spotting egrets with a telescope, hauling a fish trap, steering a boat with a pole, feeding ducks, collecting duckweed, sitting on a tree root, rowing with a lunch basket, hanging a hammock between trees, pointing at birds | tall cajuput (tram) trees standing in water, floating duckweed, egrets, boats, narrow channels drawn with thin lines, **cajuput trees** |
+| 29 | Chung | Old train station | waving from a train window, loading luggage, selling food through the window, ringing the station bell, holding a ticket, pushing a luggage cart, sweeping the platform, carrying a basket of fruit, checking a pocket watch, reading a timetable board without text, helping a baby hamster aboard, running to catch the train, stamping tickets | old steam-style locomotive, platform, station building with tiled roof, luggage, carts, **tall areca palms** |
+| 30 | Chung | Coming home: the traveler's souvenir table | the traveler showing a photo album, unwrapping a conical hat, arranging pottery and lanterns on a shelf, hanging a woven textile, handing out gifts to children, tasting fruit from a basket, hugging a family member, pinning postcards on a board, helping with a map drawn as decoration only, pouring juice into cups, holding up a basket of souvenirs, opening a wooden chest | wooden house interior, souvenirs from every region (hat, pottery, textile, lantern, basket), window showing the village, **potted bonsai** |
+
+Cảnh 30 là trang kết thúc hành trình. Nếu làm trang bản đồ, chỉ vẽ trang trí (đường đi, biểu tượng), không vẽ biên giới hay tên địa danh.
 
 ### Mẹo để có tư thế đa dạng
 
@@ -145,7 +181,7 @@ conical palm-leaf hat (non la), a checkered scarf and a tiny notebook, clearly v
 
 Các trang bạn đã tạo trước đó chưa có chú lữ khách. Bạn có thể nhờ ChatGPT thêm vào (*"Add one traveler hamster with a small backpack, conical hat and checkered scarf into this scene, keep everything else the same"*), hoặc chỉ bắt đầu từ các trang mới.
 
-### Thứ tự các chương (gợi ý, theo số cảnh trong bảng ở trên)
+### Thứ tự các chương (gợi ý, theo số cảnh cũ; từ cảnh 14 trở đi xem cột Vùng ở bảng cập nhật)
 
 | Chương | Vùng | Cảnh gợi ý |
 |---|---|---|
