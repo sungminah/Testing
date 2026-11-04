@@ -41,15 +41,21 @@ EMOTIONS = [
     ("Hồi hộp", "eyebrows tilted upward; eyes as wide empty circles; mouth a tight small line; two sweat drops and a few shiver lines"),
     ("Nhẹ nhõm", "eyebrows lifted then relaxed; eyes as small empty circles; mouth a smile with a small exhale puff drawn as a cloud outline"),
     ("Quyết tâm", "eyebrows slanted down firmly; eyes as steady empty circles; mouth a firm straight line; a fist raised; small flame-like motion lines"),
+    ("Buồn chán", "flat eyebrows; eyes as small empty circles looking upward with a flat lid line across the top; mouth a flat line with one corner turned down; a small sigh cloud outline"),
+    ("Cười khúc khích", "eyebrows raised; eyes as small empty circles; a wide smile with one hand covering part of the mouth; three short lines above the head"),
+    ("Ghen tị", "one eyebrow lowered; eyes as small empty circles looking sideways at something; a small pout; two short tension lines beside the cheek"),
+    ("Nhút nhát", "eyebrows tilted upward; eyes as small empty circles looking down; a tiny smile; both hands held together in front; a few short lines beside the cheek"),
+    ("Chết lặng", "eyebrows high and flat; eyes as wide empty circles; mouth a small round open shape; one short vertical line above the head"),
+    ("Đau đớn", "eyebrows tilted sharply; eyes as small empty circles; mouth a wavy grimace; a small burst outline (star-shaped) beside the head"),
+    ("Lạnh", "eyebrows tilted; eyes as small empty circles; mouth a wobbly line; shiver lines on both sides and a small breath cloud outline"),
+    ("Nóng", "eyebrows lowered; eyes as small empty circles; mouth open; two sweat drops and three wavy heat lines above the head"),
 ]
 
 # Các cảm xúc đã dùng trong trang ninja/học đường/samurai (để tránh lặp trong các trang sau)
-USED = {"Ngạc nhiên", "Lo lắng", "Cáu kỉnh", "Buồn ngủ", "Tập trung", "Vui sướng", "Tự tin", "Buồn", "Khóc", "Xấu hổ", "Sợ hãi", "Tò mò", "Bối rối", "Nghi ngờ", "Đắc ý", "Thèm ăn", "Mệt mỏi", "Hào hứng", "Mơ màng"}
+USED = {"Ngạc nhiên", "Lo lắng", "Cáu kỉnh", "Buồn ngủ", "Tập trung", "Vui sướng", "Tự tin", "Buồn", "Khóc", "Xấu hổ", "Sợ hãi", "Tò mò", "Bối rối", "Nghi ngờ", "Đắc ý", "Thèm ăn", "Mệt mỏi", "Hào hứng", "Mơ màng", "Tức giận", "Hoảng hốt", "Thanh thản", "Tinh nghịch", "Cảm động", "Ngượng ngùng", "Kiêu hãnh", "Cô đơn", "Hồi hộp", "Nhẹ nhõm", "Quyết tâm"}
 
 SCENES = [
-    (6, "Thi nấu ăn: quán ramen và sân thi nấu"),
-    (7, "Robot: xưởng robot dễ thương"),
-    (8, "Trinh thám: phố đêm, tìm manh mối"),
+        (8, "Trinh thám: phố đêm, tìm manh mối"),
     (9, "Âm nhạc: sân khấu lễ hội mùa hè"),
     (10, "Cắm trại: hồ núi, lều, bếp củi"),
 ]
@@ -58,17 +64,17 @@ SCENES = [
 def main():
     unused = [e for e in EMOTIONS if e[0] not in USED]
     used = [e for e in EMOTIONS if e[0] in USED]
-    pool = unused + used                      # dùng hết cảm xúc chưa dùng trước, rồi mới lặp lại
+    pool = [e for e in unused + used if e[0] != "Buồn ngủ"]                      # dùng hết cảm xúc chưa dùng trước, rồi mới lặp lại
     out = []
-    out.append("# Thư viện 30 biểu cảm hamster\n")
+    out.append("# Thư viện 38 biểu cảm hamster\n")
     out.append("Mỗi con mỗi trang một cảm xúc **khác trang trước**. Công thức đều là **nét đơn, mắt rỗng** để người tô thoải mái. "
                "Chú lữ khách mỗi trang một cảm xúc riêng (ô cuối của mỗi bảng).\n")
-    out.append("## 30 biểu cảm\n")
+    out.append("## 38 biểu cảm\n")
     out.append("| # | Cảm xúc | Công thức vẽ (tiếng Anh, dán vào prompt) |\n|---|---|---|")
     for i, (n, r) in enumerate(EMOTIONS, 1):
         mark = " *(đã dùng)*" if n in USED else ""
         out.append(f"| {i} | {n}{mark} | {r} |")
-    out.append("\n## Phân công cho cảnh 6 đến 10\n")
+    out.append("\n## Phân công cho cảnh 8 đến 10\n")
     out.append(f"Có {len(unused)} cảm xúc chưa dùng. Mỗi trang cần 6 cảm xúc (5 hamster và chú lữ khách), nên từ trang thứ 4 trở đi bắt đầu lặp lại một ít, "
                "nhưng luôn ở con khác và trang khác.\n")
     idx = 0
