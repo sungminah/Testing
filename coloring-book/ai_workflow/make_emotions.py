@@ -11,44 +11,42 @@ HERE = Path(__file__).resolve().parent
 
 # (tên, công thức vẽ khuôn mặt: lông mày, mắt, miệng, dấu phụ) — toàn nét đơn, mắt luôn là vòng rỗng
 EMOTIONS = [
-    ("Vui sướng", "eyebrows relaxed and rounded; eyes as two happy closed arcs; mouth wide open smile; two small sparkle marks"),
+    ("Vui sướng", "eyebrows raised and rounded; eyes as two small empty circles; mouth wide open smile; two small sparkle marks"),
     ("Ngạc nhiên", "eyebrows raised high; eyes as two wide open empty circles; mouth a small open oval; three short burst lines by the head"),
     ("Lo lắng", "eyebrows tilted upward in the middle; eyes as small empty circles looking sideways; mouth a short wavy line; one sweat drop"),
-    ("Cáu kỉnh", "eyebrows slanted down toward the center; eyes as half-closed arcs; mouth a short downward line; small anger mark (four short lines in a cross)"),
-    ("Buồn ngủ", "no eyebrows; eyes as closed downward arcs; small relaxed mouth; one small 'z' mark drawn as a simple zigzag"),
+    ("Cáu kỉnh", "eyebrows slanted down toward the center; eyes as small empty circles under the brows; mouth a short downward line; small anger mark (four short lines in a cross)"),
+    ("Buồn ngủ", "no eyebrows; eyes as closed downward arcs (the only emotion allowed closed eyes); small relaxed mouth; one small 'z' mark drawn as a simple zigzag"),
     ("Tập trung", "eyebrows slightly lowered; eyes as small empty circles looking at the task; tongue sticking out of a small mouth"),
-    ("Tự tin", "one eyebrow raised; eyes as half-moon arcs; a confident smirk drawn as a one-sided curved line; small shine mark"),
+    ("Tự tin", "one eyebrow raised; eyes as small empty circles with a flat lid line across the top; a smirk drawn as a one-sided curved line; small shine mark"),
     ("Buồn", "eyebrows tilted upward in the middle and low at the sides; eyes as small empty circles looking down; mouth a small downward curve; one tear drop"),
-    ("Khóc", "eyebrows tilted upward; eyes as tightly closed arcs; mouth wide open in a wobbly shape; two tear streams"),
-    ("Xấu hổ", "eyebrows tilted; eyes as small circles looking away; mouth a tiny wavy line; three short hatch marks on the cheek drawn as simple lines (no shading)"),
-    ("Sợ hãi", "eyebrows raised and tilted; eyes as wide empty circles with tiny circles inside; mouth a trembling zigzag line; shiver lines on both sides of the head"),
-    ("Tò mò", "one eyebrow raised; eyes as big empty circles looking up; mouth a tiny 'o'; a small question-mark shape drawn as a plain curved line with a dot"),
-    ("Bối rối", "eyebrows uneven; eyes as spirals (outline only); mouth a crooked line; a few small swirl marks"),
-    ("Nghi ngờ", "one eyebrow raised, one lowered; eyes as narrow slits; mouth a flat line shifted to one side"),
-    ("Đắc ý", "eyebrows lifted; eyes as upward arcs; wide grin with a visible tooth line; small shine marks"),
-    ("Thèm ăn", "eyebrows raised; eyes as big empty circles with small star shapes inside; mouth open with a small drool drop"),
-    ("Mệt mỏi", "eyebrows drooping; eyes as half-closed arcs; mouth a long flat wobbly line; one small sweat drop and puff marks"),
+    ("Khóc", "eyebrows tilted upward; eyes as small empty circles; mouth wide open in a wobbly shape; two tear streams running down"),
+    ("Xấu hổ", "eyebrows tilted; eyes as small empty circles looking away; mouth a tiny wavy line; three short lines on the cheek drawn as plain strokes (no shading)"),
+    ("Sợ hãi", "eyebrows raised and tilted; eyes as wide empty circles; mouth a trembling zigzag line; shiver lines on both sides of the head"),
+    ("Tò mò", "one eyebrow raised; eyes as big empty circles looking up; mouth a tiny 'o'; a small question mark drawn as a plain curved line with a dot"),
+    ("Bối rối", "eyebrows uneven; eyes as two empty circles of different sizes; mouth a crooked line; a few small swirl marks beside the head"),
+    ("Nghi ngờ", "one eyebrow raised, one lowered; eyes as small empty circles with a flat lid line across the top; mouth a flat line shifted to one side"),
+    ("Đắc ý", "eyebrows lifted; eyes as small empty circles looking sideways; wide grin with a visible tooth line; small shine marks"),
+    ("Thèm ăn", "eyebrows raised; eyes as big empty circles looking at the food; mouth open with a small tongue licking one corner; two small short lines beside the mouth"),
+    ("Mệt mỏi", "eyebrows drooping; eyes as small empty circles with a heavy flat lid line across the top; mouth a long flat wobbly line; puff marks beside the head"),
     ("Hào hứng", "eyebrows high; eyes as big empty circles; mouth wide open in a shout; small motion lines around the head"),
-    ("Mơ màng", "eyebrows soft; eyes as closed upward arcs; small smile; two small heart outlines floating nearby"),
-    ("Tức giận", "eyebrows slanted sharply down; eyes as narrow slits; mouth a wavy clenched line showing a tooth line; two anger marks"),
+    ("Mơ màng", "eyebrows soft; eyes as small empty circles looking upward; small smile; two small heart outlines floating nearby"),
+    ("Tức giận", "eyebrows slanted sharply down; eyes as small empty circles under the brows; mouth a wavy clenched line showing a tooth line; two anger marks"),
     ("Hoảng hốt", "eyebrows high and tilted; eyes as tiny empty circles; mouth wide open in a wobbly oval; four sweat drops flying outward"),
-    ("Thanh thản", "no eyebrows or soft ones; eyes as closed downward arcs; small calm smile; a small leaf or flower outline nearby"),
-    ("Tinh nghịch", "one eyebrow raised; eyes as one open circle and one wink arc; tongue sticking out; small shine mark"),
-    ("Cảm động", "eyebrows tilted upward; eyes as arcs with wet shapes; mouth a small wobbly smile; two tear drops and two sparkle marks"),
-    ("Ngượng ngùng", "eyebrows tilted; eyes closed arcs; mouth a tiny crooked smile; one sweat drop and a hand scratching the back of the head"),
-    ("Kiêu hãnh", "chin lifted; eyebrows calm; eyes as closed arcs; closed smile; arms crossed; small shine marks"),
+    ("Thanh thản", "soft eyebrows; eyes as small empty ovals with a flat lid line across the top; small calm smile; a small leaf outline floating nearby"),
+    ("Tinh nghịch", "one eyebrow raised; eyes as one small empty circle and one smaller empty circle; tongue sticking out; small shine mark"),
+    ("Cảm động", "eyebrows tilted upward; eyes as small empty circles; mouth a small wobbly smile; two tear drops and two sparkle marks"),
+    ("Ngượng ngùng", "eyebrows tilted; eyes as small empty circles looking down; mouth a tiny crooked smile; one sweat drop; a hand scratching the back of the head"),
+    ("Kiêu hãnh", "chin lifted; eyebrows calm; eyes as small empty circles looking up; closed smile; arms crossed; small shine marks"),
     ("Cô đơn", "eyebrows low; eyes as small empty circles looking to the side; mouth a small flat line; plain empty space around it"),
     ("Hồi hộp", "eyebrows tilted upward; eyes as wide empty circles; mouth a tight small line; two sweat drops and a few shiver lines"),
-    ("Nhẹ nhõm", "eyebrows lifted then relaxed; eyes as closed arcs; mouth a smile with a small exhale puff drawn as a cloud outline"),
+    ("Nhẹ nhõm", "eyebrows lifted then relaxed; eyes as small empty circles; mouth a smile with a small exhale puff drawn as a cloud outline"),
     ("Quyết tâm", "eyebrows slanted down firmly; eyes as steady empty circles; mouth a firm straight line; a fist raised; small flame-like motion lines"),
 ]
 
 # Các cảm xúc đã dùng trong trang ninja/học đường/samurai (để tránh lặp trong các trang sau)
-USED = {"Ngạc nhiên", "Lo lắng", "Cáu kỉnh", "Buồn ngủ", "Tập trung", "Vui sướng", "Tự tin"}
+USED = {"Ngạc nhiên", "Lo lắng", "Cáu kỉnh", "Buồn ngủ", "Tập trung", "Vui sướng", "Tự tin", "Buồn", "Khóc", "Xấu hổ", "Sợ hãi", "Tò mò", "Bối rối", "Nghi ngờ", "Đắc ý", "Thèm ăn", "Mệt mỏi", "Hào hứng", "Mơ màng"}
 
 SCENES = [
-    (4, "Thể thao: giải bóng chuyền trên bãi cát"),
-    (5, "Cô gái phép thuật: biến hình bằng bút thần (nhân vật do bạn đặt)"),
     (6, "Thi nấu ăn: quán ramen và sân thi nấu"),
     (7, "Robot: xưởng robot dễ thương"),
     (8, "Trinh thám: phố đêm, tìm manh mối"),
@@ -70,7 +68,7 @@ def main():
     for i, (n, r) in enumerate(EMOTIONS, 1):
         mark = " *(đã dùng)*" if n in USED else ""
         out.append(f"| {i} | {n}{mark} | {r} |")
-    out.append("\n## Phân công cho cảnh 4 đến 10\n")
+    out.append("\n## Phân công cho cảnh 6 đến 10\n")
     out.append(f"Có {len(unused)} cảm xúc chưa dùng. Mỗi trang cần 6 cảm xúc (5 hamster và chú lữ khách), nên từ trang thứ 4 trở đi bắt đầu lặp lại một ít, "
                "nhưng luôn ở con khác và trang khác.\n")
     idx = 0
