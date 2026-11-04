@@ -1,0 +1,100 @@
+#!/usr/bin/env python3
+"""Tạo EMOTIONS.md: thư viện 30 biểu cảm hamster và bảng xoay vòng để mỗi trang mỗi con một cảm xúc mới.
+
+Chạy:  python3 ai_workflow/make_emotions.py
+"""
+from __future__ import annotations
+
+from pathlib import Path
+
+HERE = Path(__file__).resolve().parent
+
+# (tên, công thức vẽ khuôn mặt: lông mày, mắt, miệng, dấu phụ) — toàn nét đơn, mắt luôn là vòng rỗng
+EMOTIONS = [
+    ("Vui sướng", "eyebrows relaxed and rounded; eyes as two happy closed arcs; mouth wide open smile; two small sparkle marks"),
+    ("Ngạc nhiên", "eyebrows raised high; eyes as two wide open empty circles; mouth a small open oval; three short burst lines by the head"),
+    ("Lo lắng", "eyebrows tilted upward in the middle; eyes as small empty circles looking sideways; mouth a short wavy line; one sweat drop"),
+    ("Cáu kỉnh", "eyebrows slanted down toward the center; eyes as half-closed arcs; mouth a short downward line; small anger mark (four short lines in a cross)"),
+    ("Buồn ngủ", "no eyebrows; eyes as closed downward arcs; small relaxed mouth; one small 'z' mark drawn as a simple zigzag"),
+    ("Tập trung", "eyebrows slightly lowered; eyes as small empty circles looking at the task; tongue sticking out of a small mouth"),
+    ("Tự tin", "one eyebrow raised; eyes as half-moon arcs; a confident smirk drawn as a one-sided curved line; small shine mark"),
+    ("Buồn", "eyebrows tilted upward in the middle and low at the sides; eyes as small empty circles looking down; mouth a small downward curve; one tear drop"),
+    ("Khóc", "eyebrows tilted upward; eyes as tightly closed arcs; mouth wide open in a wobbly shape; two tear streams"),
+    ("Xấu hổ", "eyebrows tilted; eyes as small circles looking away; mouth a tiny wavy line; three short hatch marks on the cheek drawn as simple lines (no shading)"),
+    ("Sợ hãi", "eyebrows raised and tilted; eyes as wide empty circles with tiny circles inside; mouth a trembling zigzag line; shiver lines on both sides of the head"),
+    ("Tò mò", "one eyebrow raised; eyes as big empty circles looking up; mouth a tiny 'o'; a small question-mark shape drawn as a plain curved line with a dot"),
+    ("Bối rối", "eyebrows uneven; eyes as spirals (outline only); mouth a crooked line; a few small swirl marks"),
+    ("Nghi ngờ", "one eyebrow raised, one lowered; eyes as narrow slits; mouth a flat line shifted to one side"),
+    ("Đắc ý", "eyebrows lifted; eyes as upward arcs; wide grin with a visible tooth line; small shine marks"),
+    ("Thèm ăn", "eyebrows raised; eyes as big empty circles with small star shapes inside; mouth open with a small drool drop"),
+    ("Mệt mỏi", "eyebrows drooping; eyes as half-closed arcs; mouth a long flat wobbly line; one small sweat drop and puff marks"),
+    ("Hào hứng", "eyebrows high; eyes as big empty circles; mouth wide open in a shout; small motion lines around the head"),
+    ("Mơ màng", "eyebrows soft; eyes as closed upward arcs; small smile; two small heart outlines floating nearby"),
+    ("Tức giận", "eyebrows slanted sharply down; eyes as narrow slits; mouth a wavy clenched line showing a tooth line; two anger marks"),
+    ("Hoảng hốt", "eyebrows high and tilted; eyes as tiny empty circles; mouth wide open in a wobbly oval; four sweat drops flying outward"),
+    ("Thanh thản", "no eyebrows or soft ones; eyes as closed downward arcs; small calm smile; a small leaf or flower outline nearby"),
+    ("Tinh nghịch", "one eyebrow raised; eyes as one open circle and one wink arc; tongue sticking out; small shine mark"),
+    ("Cảm động", "eyebrows tilted upward; eyes as arcs with wet shapes; mouth a small wobbly smile; two tear drops and two sparkle marks"),
+    ("Ngượng ngùng", "eyebrows tilted; eyes closed arcs; mouth a tiny crooked smile; one sweat drop and a hand scratching the back of the head"),
+    ("Kiêu hãnh", "chin lifted; eyebrows calm; eyes as closed arcs; closed smile; arms crossed; small shine marks"),
+    ("Cô đơn", "eyebrows low; eyes as small empty circles looking to the side; mouth a small flat line; plain empty space around it"),
+    ("Hồi hộp", "eyebrows tilted upward; eyes as wide empty circles; mouth a tight small line; two sweat drops and a few shiver lines"),
+    ("Nhẹ nhõm", "eyebrows lifted then relaxed; eyes as closed arcs; mouth a smile with a small exhale puff drawn as a cloud outline"),
+    ("Quyết tâm", "eyebrows slanted down firmly; eyes as steady empty circles; mouth a firm straight line; a fist raised; small flame-like motion lines"),
+]
+
+# Các cảm xúc đã dùng trong trang ninja/học đường/samurai (để tránh lặp trong các trang sau)
+USED = {"Ngạc nhiên", "Lo lắng", "Cáu kỉnh", "Buồn ngủ", "Tập trung", "Vui sướng", "Tự tin"}
+
+SCENES = [
+    (4, "Thể thao: giải bóng chuyền trên bãi cát"),
+    (5, "Cô gái phép thuật: biến hình bằng bút thần (nhân vật do bạn đặt)"),
+    (6, "Thi nấu ăn: quán ramen và sân thi nấu"),
+    (7, "Robot: xưởng robot dễ thương"),
+    (8, "Trinh thám: phố đêm, tìm manh mối"),
+    (9, "Âm nhạc: sân khấu lễ hội mùa hè"),
+    (10, "Cắm trại: hồ núi, lều, bếp củi"),
+]
+
+
+def main():
+    unused = [e for e in EMOTIONS if e[0] not in USED]
+    used = [e for e in EMOTIONS if e[0] in USED]
+    pool = unused + used                      # dùng hết cảm xúc chưa dùng trước, rồi mới lặp lại
+    out = []
+    out.append("# Thư viện 30 biểu cảm hamster\n")
+    out.append("Mỗi con mỗi trang một cảm xúc **khác trang trước**. Công thức đều là **nét đơn, mắt rỗng** để người tô thoải mái. "
+               "Chú lữ khách mỗi trang một cảm xúc riêng (ô cuối của mỗi bảng).\n")
+    out.append("## 30 biểu cảm\n")
+    out.append("| # | Cảm xúc | Công thức vẽ (tiếng Anh, dán vào prompt) |\n|---|---|---|")
+    for i, (n, r) in enumerate(EMOTIONS, 1):
+        mark = " *(đã dùng)*" if n in USED else ""
+        out.append(f"| {i} | {n}{mark} | {r} |")
+    out.append("\n## Phân công cho cảnh 4 đến 10\n")
+    out.append(f"Có {len(unused)} cảm xúc chưa dùng. Mỗi trang cần 6 cảm xúc (5 hamster và chú lữ khách), nên từ trang thứ 4 trở đi bắt đầu lặp lại một ít, "
+               "nhưng luôn ở con khác và trang khác.\n")
+    idx = 0
+    for sn, title in SCENES:
+        picks = []
+        for _ in range(6):
+            picks.append(pool[idx % len(pool)])
+            idx += 1
+        out.append(f"### Cảnh {sn}: {title}\n")
+        out.append("| Con | Cảm xúc | Công thức |\n|---|---|---|")
+        for k, (n, r) in enumerate(picks):
+            who = "Chú lữ khách" if k == 5 else f"Hamster {k + 1}"
+            out.append(f"| {who} | {n} | {r} |")
+        out.append("\nKhối dán vào prompt (dán sau phần Characters, thay cho mọi mô tả cảm xúc khác):\n")
+        out.append("```")
+        out.append("EMOTIONS: every hamster has a DIFFERENT emotion, one per hamster, and each emotion must clearly differ from the others on this page. "
+                   "Assign them to the hamsters in the way that fits what each one is doing. Keep every face simple: eyes are empty outlines only (never filled black, no pupils, no highlight dots), no blush, no gray.")
+        for k, (n, r) in enumerate(picks):
+            who = "The traveler hamster in front" if k == 5 else f"Hamster {k + 1}"
+            out.append(f"- {who}: {n.upper()}. {r}.")
+        out.append("```\n")
+    (HERE / "EMOTIONS.md").write_text("\n".join(out), encoding="utf-8")
+    print("OK ->", HERE / "EMOTIONS.md", "|", len(unused), "cảm xúc chưa dùng")
+
+
+if __name__ == "__main__":
+    main()
